@@ -54,4 +54,14 @@ class ShiftBackupTest {
             assertTrue(expected.message?.isNotBlank() == true)
         }
     }
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsOverlappingEntriesBeforeRestoreConfirmation() {
+        val day = LocalDate.of(2026, 10, 14)
+        val first = Shift(date = day, kind = ShiftKind.MORNING)
+        val overlapping = Shift(date = day, kind = ShiftKind.CUSTOM,
+            startMinute = 700, endMinute = 950)
+        val unsafeBackup = BackupCodec.encode(listOf(first, overlapping), SalarySettings())
+        BackupCodec.decode(unsafeBackup)
+    }
+
 }
