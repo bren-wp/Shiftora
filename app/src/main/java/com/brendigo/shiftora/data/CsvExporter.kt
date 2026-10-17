@@ -15,12 +15,12 @@ object CsvExporter {
             return "\"" + value.replace("\"", "\"\"") + "\""
         }
         val header = listOf(
-            "Datum", "Vrsta", "Početak", "Kraj", "Pauza (min)",
+            "Datum", "Oznaka", "Vrsta", "Početak", "Kraj", "Pauza (min)",
             "Neplaćena pauza", "Odrađeno", "Prekovremeno", "Bilješka"
         )
         val records = shifts.map { shift ->
             listOf(
-                shift.date.toString(), shift.kind.label,
+                shift.date.toString(), shift.kind.code, shift.kind.label,
                 clock(shift.startMinute), clock(shift.endMinute),
                 shift.breakMinutes.toString(), shift.unpaidBreak.toString(),
                 shift.actual.toString(), shift.overtime.toString(), shift.note
