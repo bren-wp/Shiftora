@@ -65,6 +65,12 @@ jobs:
             adb shell input tap $((WIDTH / 2)) "$NAV_Y"
             sleep 2
             adb exec-out screencap -p > shiftora-${DEVICE}-statistics.png
+            adb shell input tap $((WIDTH * 7 / 10)) "$NAV_Y"
+            sleep 2
+            adb exec-out screencap -p > shiftora-${DEVICE}-salary.png
+            adb shell input tap $((WIDTH * 9 / 10)) "$NAV_Y"
+            sleep 2
+            adb exec-out screencap -p > shiftora-${DEVICE}-more.png
             test -s shiftora-${DEVICE}-home.png
             test -s shiftora-${DEVICE}-calendar.png
       - name: Attach emulator screenshot
