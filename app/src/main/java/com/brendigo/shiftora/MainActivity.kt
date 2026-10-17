@@ -32,9 +32,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(android.graphics.Color.rgb(248, 250, 252), android.graphics.Color.rgb(248, 250, 252)),
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.rgb(11, 31, 59)),
             navigationBarStyle = SystemBarStyle.light(android.graphics.Color.rgb(248, 250, 252), android.graphics.Color.rgb(248, 250, 252))
         )
+        // A navy decor/status backdrop keeps Android's white status icons readable
+        // even when edge-to-edge insets are transparent on older device images.
+        window.decorView.setBackgroundColor(android.graphics.Color.rgb(11, 31, 59))
+        window.statusBarColor = android.graphics.Color.rgb(11, 31, 59)
         setContent {
             val vm: ShiftViewModel = viewModel()
             val shifts by vm.shifts.collectAsState()
@@ -109,7 +113,7 @@ class MainActivity : ComponentActivity() {
             }
             SideEffect {
                 WindowCompat.getInsetsController(window, window.decorView).apply {
-                    isAppearanceLightStatusBars = !darkMode && !onboarding
+                    isAppearanceLightStatusBars = false
                     isAppearanceLightNavigationBars = !darkMode
                 }
             }

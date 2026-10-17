@@ -24,7 +24,6 @@ import com.brendigo.shiftora.R
 import com.brendigo.shiftora.data.Shift
 import com.brendigo.shiftora.data.ShiftKind
 import java.text.NumberFormat
-import java.util.Currency
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -34,9 +33,10 @@ fun LocalDate.dateLabel(): String = format(DateTimeFormatter.ofPattern("d. LLLL 
 fun LocalDate.weekdayLabel(): String = format(DateTimeFormatter.ofPattern("EEEE", hr))
 fun LocalDate.monthLabel(): String = format(DateTimeFormatter.ofPattern("LLLL yyyy.", hr)).replaceFirstChar { it.uppercase(hr) }
 fun minutesLabel(value: Long): String = if (value % 60L == 0L) "${value / 60}h" else "${value / 60}h ${value % 60}min"
-fun euros(cents: Long): String = NumberFormat.getCurrencyInstance(hr).apply {
-    currency = Currency.getInstance("EUR")
-}.format(cents / 100.0)
+fun euros(cents: Long): String = NumberFormat.getNumberInstance(hr).apply {
+    minimumFractionDigits = 2
+    maximumFractionDigits = 2
+}.format(cents / 100.0) + " €"
 fun clock(minutes: Int): String = "%02d:%02d".format(hr, minutes / 60, minutes % 60)
 
 fun shiftColor(kind: ShiftKind): Color = when (kind) {
