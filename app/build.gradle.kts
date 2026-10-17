@@ -5,13 +5,13 @@ plugins {
 }
 android {
     namespace = "com.brendigo.shiftora"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.brendigo.shiftora"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 7
-        versionName = "0.6.0"
+        targetSdk = 36
+        versionCode = 8
+        versionName = "0.7.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
