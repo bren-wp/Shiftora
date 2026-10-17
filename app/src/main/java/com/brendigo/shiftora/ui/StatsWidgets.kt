@@ -85,7 +85,9 @@ fun StatIndicatorCard(
                 modifier = Modifier.weight(1f))
         }
         Spacer(Modifier.height(5.dp))
-        Text(value, color = Palette.Ink, fontSize = 23.sp, lineHeight = 28.sp,
+        Text(value, color = Palette.Ink,
+            fontSize = if (value.length > 10) 17.sp else if (value.contains("/")) 19.sp else 23.sp,
+            lineHeight = 28.sp,
             maxLines = 1, fontWeight = FontWeight.Bold,
             overflow = TextOverflow.Ellipsis)
         Spacer(Modifier.height(3.dp))
@@ -131,7 +133,7 @@ fun ShiftDonutCard(totals: WorkTotals) {
                     }
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(minutesLabel(total), color = Palette.Ink, fontSize = 24.sp,
+                    Text(minutesLabel(total), color = MaterialTheme.colorScheme.onSurface, fontSize = 24.sp,
                         fontWeight = FontWeight.Bold, maxLines = 1)
                     Text("Ukupno", color = Palette.Secondary, fontSize = 12.sp)
                 }
