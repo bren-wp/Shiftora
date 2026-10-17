@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import java.time.LocalDate
+import com.brendigo.shiftora.domain.ShiftScheduleValidator
 
 /** Local-only storage: no internet permission, accounts or analytics. */
 class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", null, 1) {
@@ -68,6 +69,7 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
     }
 
     @Synchronized fun save(shift: Shift): Long {
+        ShiftScheduleValidator.validateInsertion(all(), shift)
         val db = writableDatabase
         if (shift.id == 0L) return db.insertOrThrow("shifts", null, values(shift))
         val count = db.update("shifts", values(shift), "id=?", arrayOf(shift.id.toString()))
@@ -85,6 +87,7 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
      */
     @Synchronized fun replaceAll(shifts: List<Shift>) {
         require(shifts.size <= 20_000)
+        ShiftScheduleValidator.validateAll(shifts)
         val db = writableDatabase
         db.beginTransaction()
         try {
@@ -108,6 +111,7 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
         var inserted = 0
         db.beginTransaction()
         try {
+            val saved = all().toMutableList()
             val existing = mutableSetOf<String>()
             db.rawQuery("SELECT DISTINCT date FROM shifts", null).use { c ->
                 while (c.moveToNext()) existing += c.getString(0)
@@ -116,8 +120,13 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
                 val date = start.plusDays(offset.toLong())
                 if (date.toString() !in existing) {
                     val kind = pattern[offset % pattern.size]
-                    db.insertOrThrow("shifts", null, values(Shift(date = date, kind = kind)))
-                    inserted++
+                    val candidate = Shift(date = date, kind = kind)
+                    if (saved.none { ShiftScheduleValidator.overlaps(it, candidate) }) {
+                        db.insertOrThrow("shifts", null, values(candidate))
+                        saved += candidate
+                        existing += date.toString()
+                        inserted++
+                    }
                 }
             }
             db.setTransactionSuccessful()
