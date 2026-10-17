@@ -119,6 +119,8 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.titleLarge, maxLines = 1)
                             Text(
                                 if (todayShift == null) "Nema unosa za danas"
+                                else if (todayShift.kind == ShiftKind.STANDBY)
+                                    "Pripravnost ${clock(todayShift.startMinute)} – ${clock(todayShift.endMinute)}"
                                 else if (!todayShift.kind.isWork) todayShift.kind.label
                                 else "${clock(todayShift.startMinute)} – ${clock(todayShift.endMinute)}",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
@@ -405,7 +407,9 @@ fun CalendarScreen(
                             }
                             Column(Modifier.weight(1f)) {
                                 Text("${shift.kind.code} · ${shift.kind.label}", style = MaterialTheme.typography.titleMedium)
-                                Text(if (!shift.kind.isWork) shift.kind.label
+                                Text(if (shift.kind == ShiftKind.STANDBY)
+                                        "${clock(shift.startMinute)} – ${clock(shift.endMinute)} (pripravnost)"
+                                    else if (!shift.kind.isWork) shift.kind.label
                                     else "${clock(shift.startMinute)} – ${clock(shift.endMinute)} • ${minutesLabel(WorkCalculator.durationMinutes(shift))}",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, maxLines = 1)
                             }

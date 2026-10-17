@@ -105,7 +105,7 @@ fun ShiftEditorDialog(
                     Spacer(Modifier.width(8.dp))
                     Text(LocalDate.parse(date).dateLabel())
                 }
-                if (kind.isWork) {
+                if (kind.hasTime) {
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                         Column(Modifier.weight(1f)) {
                             Text("Početak", style = MaterialTheme.typography.bodyMedium)
@@ -140,6 +140,7 @@ fun ShiftEditorDialog(
                             }
                         }
                     }
+                    if (kind.isWork) {
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                         OutlinedTextField(value = breakMin, onValueChange = { breakMin = it },
                             label = { Text("Pauza (min)") }, singleLine = true,
@@ -151,6 +152,12 @@ fun ShiftEditorDialog(
                     OptionSwitch("Pauza nije plaćena", unpaid) { unpaid = it }
                     OptionSwitch("Smjena je odrađena", actual) { actual = it }
                     OptionSwitch("Označi kao prekovremeni rad", overtime) { overtime = it }
+                    } else {
+                        Text("Pripravnost se evidentira s vremenom, ali se ne pribraja " +
+                            "odrađenim satima ni procijenjenoj plaći.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
                 OutlinedTextField(value = note, onValueChange = { note = it.take(500) },
                     label = { Text("Bilješka") }, modifier = Modifier.fillMaxWidth(),
