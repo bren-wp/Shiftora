@@ -15,10 +15,8 @@ import java.time.LocalDate
 object WorkCalculator {
     fun durationMinutes(shift: Shift, zone: ZoneId = ZoneId.systemDefault()): Long {
         if (shift.kind == ShiftKind.OFF) return 0L
-        val start = shift.date.atStartOfDay().plusMinutes(shift.startMinute.toLong()).atZone(zone)
-        val endDate = if (shift.overnight) shift.date.plusDays(1) else shift.date
-        val end = endDate.atStartOfDay().plusMinutes(shift.endMinute.toLong()).atZone(zone)
-        return Duration.between(start.toInstant(), end.toInstant()).toMinutes().coerceAtLeast(0)
+        return Duration.between(ShiftTimeline.from(shift, zone), ShiftTimeline.until(shift, zone))
+            .toMinutes().coerceAtLeast(0)
     }
 
     /**
@@ -74,12 +72,15 @@ object WorkCalculator {
             // A shift spans at most two local dates; skip irrelevant periods early.
             if (startInclusive != null && shift.date.isBefore(startInclusive.minusDays(1))) continue
             if (endExclusive != null && !shift.date.isBefore(endExclusive)) continue
-            val start = shift.date.atStartOfDay().plusMinutes(shift.startMinute.toLong()).atZone(zone)
+            val startInstant = ShiftTimeline.from(shift, zone)
             val total = durationMinutes(shift, zone)
             val breakEnd = (shift.breakAfterMinutes.toLong() + shift.breakMinutes).coerceAtMost(total)
+            var cachedDay: LocalDate? = null
+            var cachedSunday = false
+            var cachedHoliday = false
             for (minute in 0 until total) {
                 if (shift.unpaidBreak && minute >= shift.breakAfterMinutes && minute < breakEnd) continue
-                val local = start.toInstant().plusSeconds(minute * 60).atZone(zone)
+                val local = startInstant.plusSeconds(minute * 60).atZone(zone)
                 val date = local.toLocalDate()
                 if (startInclusive != null && date.isBefore(startInclusive)) continue
                 if (endExclusive != null && !date.isBefore(endExclusive)) continue
@@ -87,8 +88,13 @@ object WorkCalculator {
                 paid++
                 if (shift.actual) actual++ else planned++
                 val isNight = isNightHour(hour, settings.nightStartHour, settings.nightEndHour)
-                val isSunday = date.dayOfWeek == DayOfWeek.SUNDAY
-                val isHoliday = CroatianHolidays.isHoliday(date)
+                if (date != cachedDay) {
+                    cachedDay = date
+                    cachedSunday = date.dayOfWeek == DayOfWeek.SUNDAY
+                    cachedHoliday = CroatianHolidays.isHoliday(date)
+                }
+                val isSunday = cachedSunday
+                val isHoliday = cachedHoliday
                 if (shift.overtime) overtime++
                 if (isNight) night++
                 if (isSunday) sunday++
@@ -139,6 +145,6 @@ object WorkCalculator {
     }
 
     fun isNightHour(hour: Int, start: Int, end: Int): Boolean =
-        if (start == end) true else if (start < end) hour in start until end
+        if (start == end) false else if (start < end) hour in start until end
         else hour >= start || hour < end
 }

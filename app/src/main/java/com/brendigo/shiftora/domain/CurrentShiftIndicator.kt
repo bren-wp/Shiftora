@@ -16,11 +16,8 @@ object CurrentShiftIndicator {
         zone: ZoneId = ZoneId.systemDefault()
     ): ActiveShift? {
         return shifts.asSequence().filter { it.kind != ShiftKind.OFF }.mapNotNull { shift ->
-            val from = shift.date.atStartOfDay().plusMinutes(shift.startMinute.toLong())
-                .atZone(zone).toInstant()
-            val endDate = if (shift.overnight) shift.date.plusDays(1) else shift.date
-            val until = endDate.atStartOfDay().plusMinutes(shift.endMinute.toLong())
-                .atZone(zone).toInstant()
+            val from = ShiftTimeline.from(shift, zone)
+            val until = ShiftTimeline.until(shift, zone)
             if (now.isBefore(from) || !now.isBefore(until)) null
             else ActiveShift(shift, (Duration.between(now, until).seconds + 59) / 60)
         }.firstOrNull()

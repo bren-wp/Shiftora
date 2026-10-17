@@ -4,6 +4,10 @@ import java.time.LocalDate
 
 /** National non-working public holidays in Croatia, including movable feasts. */
 object CroatianHolidays {
+    private val fixedDays = setOf(
+        1 to 1, 1 to 6, 5 to 1, 5 to 30, 6 to 22,
+        8 to 5, 8 to 15, 11 to 1, 11 to 18, 12 to 25, 12 to 26
+    )
     fun easter(year: Int): LocalDate {
         val a = year % 19
         val b = year / 100
@@ -23,12 +27,8 @@ object CroatianHolidays {
     }
 
     fun isHoliday(date: LocalDate): Boolean {
-        val fixed = setOf(
-            1 to 1, 1 to 6, 5 to 1, 5 to 30, 6 to 22,
-            8 to 5, 8 to 15, 11 to 1, 11 to 18, 12 to 25, 12 to 26
-        )
         val easter = easter(date.year)
-        return (date.monthValue to date.dayOfMonth) in fixed ||
+        return (date.monthValue to date.dayOfMonth) in fixedDays ||
             date == easter || date == easter.plusDays(1) || date == easter.plusDays(60)
     }
 }

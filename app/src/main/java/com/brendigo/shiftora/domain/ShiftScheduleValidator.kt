@@ -14,9 +14,8 @@ object ShiftScheduleValidator {
     private data class Interval(val from: Instant, val to: Instant)
 
     private fun interval(shift: Shift, zone: ZoneId): Interval {
-        val start = shift.date.atStartOfDay().plusMinutes(shift.startMinute.toLong()).atZone(zone).toInstant()
-        val endDate = if (shift.overnight) shift.date.plusDays(1) else shift.date
-        val end = endDate.atStartOfDay().plusMinutes(shift.endMinute.toLong()).atZone(zone).toInstant()
+        val start = ShiftTimeline.from(shift, zone)
+        val end = ShiftTimeline.until(shift, zone)
         require(end.isAfter(start)) { "Završetak smjene mora biti nakon početka." }
         return Interval(start, end)
     }
