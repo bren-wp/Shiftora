@@ -13,18 +13,24 @@ class Preferences(context: Context) {
         get() = store.getBoolean("dark_mode", false)
         set(value) { store.edit().putBoolean("dark_mode", value).apply() }
 
-    private fun number(key: String, fallback: Double): Double =
-        store.getString(key, null)?.toDoubleOrNull() ?: fallback
+    /** Corrupt, non-finite or out-of-range saved values must never crash startup. */
+    private fun number(key: String, fallback: Double, upper: Double): Double =
+        store.getString(key, null)?.toDoubleOrNull()
+            ?.takeIf { it.isFinite() && it in 0.0..upper } ?: fallback
 
-    fun salarySettings(): SalarySettings = SalarySettings(
-        hourlyGross = number("hourly", 8.0).coerceAtLeast(0.0),
-        nightPercent = number("night", 30.0).coerceIn(0.0, 300.0),
-        sundayPercent = number("sunday", 50.0).coerceIn(0.0, 300.0),
-        holidayPercent = number("holiday", 50.0).coerceIn(0.0, 300.0),
-        overtimePercent = number("overtime", 50.0).coerceIn(0.0, 300.0),
-        nightStartHour = store.getInt("night_start_hour", 22).coerceIn(0, 23),
-        nightEndHour = store.getInt("night_end_hour", 6).coerceIn(0, 23)
-    )
+    fun salarySettings(): SalarySettings {
+        val from = store.getInt("night_start_hour", 22).takeIf { it in 0..23 } ?: 22
+        val until = store.getInt("night_end_hour", 6).takeIf { it in 0..23 } ?: 6
+        return SalarySettings(
+            hourlyGross = number("hourly", 8.0, 1_000_000.0),
+            nightPercent = number("night", 30.0, 300.0),
+            sundayPercent = number("sunday", 50.0, 300.0),
+            holidayPercent = number("holiday", 50.0, 300.0),
+            overtimePercent = number("overtime", 50.0, 300.0),
+            nightStartHour = if (from == until) 22 else from,
+            nightEndHour = if (from == until) 6 else until
+        )
+    }
 
     fun saveSalary(settings: SalarySettings) {
         store.edit()
