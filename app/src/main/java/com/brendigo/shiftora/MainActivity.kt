@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
             }
             SideEffect {
                 WindowCompat.getInsetsController(window, window.decorView).apply {
-                    isAppearanceLightStatusBars = !darkMode && (tab == 0 || onboarding)
+                    isAppearanceLightStatusBars = !darkMode && tab == 0 && !onboarding
                     isAppearanceLightNavigationBars = !darkMode
                 }
             }

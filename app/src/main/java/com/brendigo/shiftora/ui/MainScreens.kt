@@ -335,10 +335,10 @@ private fun DetailTile(label: String, value: String, modifier: Modifier = Modifi
 fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () -> Unit) {
     var shown by remember { mutableStateOf(YearMonth.now()) }
     var period by remember { mutableIntStateOf(1) }
+    var weekAnchor by remember { mutableStateOf(LocalDate.now().with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))) }
     val filtered = when (period) {
         0 -> {
-            val monday = LocalDate.now().with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-            shifts.filter { !it.date.isBefore(monday) && it.date.isBefore(monday.plusDays(7)) }
+            shifts.filter { !it.date.isBefore(weekAnchor) && it.date.isBefore(weekAnchor.plusDays(7)) }
         }
         2 -> shifts.filter { it.date.year == shown.year }
         else -> monthly(shifts, shown)
@@ -367,16 +367,15 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
             }
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { shown = shown.minusMonths(if (period == 2) 12 else 1) }) {
+                    IconButton(onClick = { if (period == 0) weekAnchor = weekAnchor.minusWeeks(1) else shown = shown.minusMonths(if (period == 2) 12 else 1) }) {
                         Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodno razdoblje")
                     }
                     Text(if (period == 2) shown.year.toString()
-                        else if (period == 0) "Ovaj tjedan"
+                        else if (period == 0) "${weekAnchor.dateLabel()} – ${weekAnchor.plusDays(6).dateLabel()}"
                         else shown.atDay(1).monthLabel(),
                         modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleMedium)
-                    IconButton(onClick = { shown = shown.plusMonths(if (period == 2) 12 else 1) },
-                        enabled = period != 0) {
+                    IconButton(onClick = { if (period == 0) weekAnchor = weekAnchor.plusWeeks(1) else shown = shown.plusMonths(if (period == 2) 12 else 1) }) {
                         Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeće razdoblje")
                     }
                 }
@@ -434,7 +433,7 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     MetricCard("Noćni rad", minutesLabel(totals.nightMinutes), Icons.Default.NightsStay,
                         Palette.PurpleLight, Palette.Purple, Modifier.weight(1f))
-                    MetricCard("Nedjelje / blagdani", minutesLabel(totals.sundayMinutes + totals.holidayMinutes),
+                    MetricCard("Nedjelje / blagdani", minutesLabel(totals.sundayMinutes) + " / " + minutesLabel(totals.holidayMinutes),
                         Icons.Default.Event, Palette.CoralLight, Palette.Coral, Modifier.weight(1f),
                         "Kategorije se mogu preklapati")
                 }
