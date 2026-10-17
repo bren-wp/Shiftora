@@ -2,14 +2,21 @@ name: Android UI smoke test
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/android-ui.yml'
+      - 'app/src/main/java/com/brendigo/shiftora/ui/**'
+      - 'app/src/main/java/com/brendigo/shiftora/MainActivity.kt'
 permissions:
   contents: read
 jobs:
   emulator:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [pixel_2, pixel_4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -28,7 +35,7 @@ jobs:
         with:
           api-level: 30
           arch: x86_64
-          profile: pixel_4
+          profile: ${{ matrix.profile }}
           disable-animations: true
           script: |
             gradle --no-daemon :app:connectedDebugAndroidTest
@@ -40,22 +47,30 @@ jobs:
             sleep 5
             adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | grep 'com.brendigo.shiftora'
             # Collect real emulator screenshots for design QA (no generated mockups).
-            adb exec-out screencap -p > shiftora-onboarding-emulator.png
-            adb shell input tap 900 240
-            sleep 3
-            adb exec-out screencap -p > shiftora-home-emulator.png
-            adb shell input tap 320 2080
+            DEVICE=${{ matrix.profile }}
+            SIZE=$(adb shell wm size | grep -m1 'Physical size' | awk '{print $3}' | tr -d '\r')
+            WIDTH=${SIZE%x*}
+            HEIGHT=${SIZE#*x}
+            NAV_Y=$((HEIGHT - 180))
+            adb exec-out screencap -p > shiftora-${DEVICE}-onboarding.png
+            adb shell uiautomator dump /sdcard/shiftora-uia.xml >/dev/null 2>&1 || true
+            if adb shell cat /sdcard/shiftora-uia.xml 2>/dev/null | grep -q 'Preskoči'; then
+              adb shell input tap $((WIDTH - 160)) 240
+              sleep 3
+            fi
+            adb exec-out screencap -p > shiftora-${DEVICE}-home.png
+            adb shell input tap $((WIDTH * 3 / 10)) "$NAV_Y"
             sleep 2
-            adb exec-out screencap -p > shiftora-calendar-emulator.png
-            adb shell input tap 545 2080
+            adb exec-out screencap -p > shiftora-${DEVICE}-calendar.png
+            adb shell input tap $((WIDTH / 2)) "$NAV_Y"
             sleep 2
-            adb exec-out screencap -p > shiftora-statistics-emulator.png
-            test -s shiftora-home-emulator.png
-            test -s shiftora-calendar-emulator.png
+            adb exec-out screencap -p > shiftora-${DEVICE}-statistics.png
+            test -s shiftora-${DEVICE}-home.png
+            test -s shiftora-${DEVICE}-calendar.png
       - name: Attach emulator screenshot
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: shiftora-ui-screenshot
-          path: shiftora-*-emulator.png
+          name: shiftora-${{ matrix.profile }}-screenshots
+          path: shiftora-${{ matrix.profile }}-*.png
           if-no-files-found: ignore
