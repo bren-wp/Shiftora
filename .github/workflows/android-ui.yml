@@ -32,9 +32,15 @@ jobs:
           disable-animations: true
           script: |
             gradle --no-daemon :app:connectedDebugAndroidTest
-            adb shell am start -n com.brendigo.shiftora/.MainActivity
-            sleep 3
+            # Instrumentation teardown may leave the launcher in the foreground.
+            # Reinstall and explicitly launch the application before capturing.
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb shell am force-stop com.brendigo.shiftora || true
+            adb shell am start -W -n com.brendigo.shiftora/.MainActivity
+            sleep 5
+            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | grep 'com.brendigo.shiftora'
             adb exec-out screencap -p > shiftora-home-emulator.png
+            test -s shiftora-home-emulator.png
       - name: Attach emulator screenshot
         if: always()
         uses: actions/upload-artifact@v4
