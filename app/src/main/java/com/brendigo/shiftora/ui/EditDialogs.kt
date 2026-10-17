@@ -375,35 +375,76 @@ fun OnboardingScreen(onComplete: () -> Unit) {
     )
     val icons = listOf(Icons.Default.CalendarMonth, Icons.Default.Schedule, Icons.Default.BarChart)
     Column(
-        Modifier.fillMaxSize().background(Palette.DeepNavy)
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             .statusBarsPadding().navigationBarsPadding().padding(26.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = onComplete) { Text("Preskoči", color = Color.White) }
+            TextButton(onClick = onComplete) { Text("Preskoči", color = Palette.Blue) }
         }
         Spacer(Modifier.weight(.6f))
-        BrandMark(Modifier.size(112.dp), darkSurface = true)
+        BrandMark(Modifier.size(74.dp), darkSurface = true)
         Spacer(Modifier.height(17.dp))
-        Text("Shiftora", color = Color.White, style = MaterialTheme.typography.headlineLarge)
-        Text("Moje smjene. Moji sati.", color = Color(0xFFB8CEE9))
+        Text("Shiftora", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineLarge)
+        Text("Moje smjene. Moji sati.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.weight(.65f))
-        Box(Modifier.size(130.dp).background(Palette.Blue.copy(alpha = .14f),
-            RoundedCornerShape(36.dp)), contentAlignment = Alignment.Center) {
-            Icon(icons[step], contentDescription = null, tint = Color(0xFF5EEAD4),
-                modifier = Modifier.size(74.dp))
+        Column(
+            Modifier.fillMaxWidth().height(188.dp)
+                .background(Palette.BlueLight, RoundedCornerShape(24.dp))
+                .padding(14.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (step == 0) {
+                Text("Moj kalendar", color = Palette.Navy, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT,
+                        ShiftKind.OFF, ShiftKind.MORNING).forEachIndexed { i, kind ->
+                        Column(Modifier.weight(1f).height(62.dp)
+                            .background(shiftBg(kind), RoundedCornerShape(11.dp)),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center) {
+                            Text((i + 12).toString(), color = Palette.Navy, fontWeight = FontWeight.Bold)
+                            Icon(shiftIcon(kind), contentDescription = null,
+                                tint = shiftColor(kind), modifier = Modifier.size(19.dp))
+                        }
+                    }
+                }
+            } else if (step == 1) {
+                listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT).forEach { kind ->
+                    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)
+                        .background(Color.White, RoundedCornerShape(12.dp))
+                        .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(shiftIcon(kind), contentDescription = null, tint = shiftColor(kind))
+                        Spacer(Modifier.width(9.dp))
+                        Text(kind.label, color = Palette.Navy, modifier = Modifier.weight(1f))
+                        Text(clock(kind.start) + " – " + clock(kind.end), color = Palette.Secondary,
+                            style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            } else {
+                Text("Procjena bruto plaće", color = Palette.Navy, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(14.dp))
+                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    listOf(30, 43, 59, 78, 96).forEachIndexed { i, h ->
+                        Box(Modifier.weight(1f).height(h.dp)
+                            .background(if (i < 3) Palette.Blue else Palette.Mint,
+                                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)))
+                    }
+                }
+            }
         }
         Spacer(Modifier.height(28.dp))
-        Text(titles[step], color = Color.White, style = MaterialTheme.typography.headlineMedium)
+        Text(titles[step], color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(12.dp))
         Text(descriptions[step], textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            color = Color(0xFFB8CEE9), modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.weight(.9f))
         Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             repeat(3) { i ->
                 Box(Modifier.size(if (step == i) 18.dp else 7.dp, 7.dp)
-                    .background(if (step == i) Palette.Blue else Color(0xFF60718C),
+                    .background(if (step == i) Palette.Blue else Color(0xFFCBD5E1),
                         RoundedCornerShape(6.dp)))
             }
         }
@@ -412,7 +453,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
             { if (step == 2) onComplete() else step++ }, Modifier.fillMaxWidth(),
             Icons.Default.ArrowForward)
         Spacer(Modifier.height(15.dp))
-        Text("Bez prijave i bez interneta", color = Color(0xFFB8CEE9),
+        Text("Bez prijave i bez interneta", color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall)
     }
 }
