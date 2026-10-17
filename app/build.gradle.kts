@@ -1,3 +1,12 @@
+// Production signing is enabled only by explicitly supplied CI/local environment secrets.
+// Default GitHub preview bundles stay unsigned; never commit keystore files.
+val uploadKeystoreFile = System.getenv("SHIFTORA_UPLOAD_KEYSTORE_FILE")
+val uploadKeystorePassword = System.getenv("SHIFTORA_UPLOAD_KEYSTORE_PASSWORD")
+val uploadKeyAlias = System.getenv("SHIFTORA_UPLOAD_KEY_ALIAS")
+val uploadKeyPassword = System.getenv("SHIFTORA_UPLOAD_KEY_PASSWORD")
+val usePlayUploadKey = listOf(uploadKeystoreFile, uploadKeystorePassword, uploadKeyAlias, uploadKeyPassword)
+    .all { !it.isNullOrBlank() }
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -14,8 +23,21 @@ android {
         versionName = "0.7.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        if (usePlayUploadKey) {
+            create("playUpload") {
+                val filePath = file(uploadKeystoreFile!!)
+                require(filePath.isFile) { "Upload keystore path is invalid." }
+                storeFile = filePath
+                storePassword = uploadKeystorePassword!!
+                keyAlias = uploadKeyAlias!!
+                keyPassword = uploadKeyPassword!!
+            }
+        }
+    }
     buildTypes {
         release {
+            if (usePlayUploadKey) signingConfig = signingConfigs.getByName("playUpload")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
