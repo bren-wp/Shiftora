@@ -39,12 +39,23 @@ jobs:
             adb shell am start -W -n com.brendigo.shiftora/.MainActivity
             sleep 5
             adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | grep 'com.brendigo.shiftora'
+            # Collect real emulator screenshots for design QA (no generated mockups).
+            adb exec-out screencap -p > shiftora-onboarding-emulator.png
+            adb shell input tap 900 240
+            sleep 3
             adb exec-out screencap -p > shiftora-home-emulator.png
+            adb shell input tap 320 2080
+            sleep 2
+            adb exec-out screencap -p > shiftora-calendar-emulator.png
+            adb shell input tap 545 2080
+            sleep 2
+            adb exec-out screencap -p > shiftora-statistics-emulator.png
             test -s shiftora-home-emulator.png
+            test -s shiftora-calendar-emulator.png
       - name: Attach emulator screenshot
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: shiftora-ui-screenshot
-          path: shiftora-home-emulator.png
+          path: shiftora-*-emulator.png
           if-no-files-found: ignore
