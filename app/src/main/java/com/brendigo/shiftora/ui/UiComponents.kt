@@ -89,12 +89,12 @@ fun BrandedHeader(
     val fg = if (dark) Color.White else MaterialTheme.colorScheme.onBackground
     Column(
         Modifier.fillMaxWidth().background(background)
-            .padding(start = 20.dp, end = 16.dp, top = 15.dp, bottom = if (title == null) 16.dp else 22.dp)
+            .padding(start = 18.dp, end = 16.dp, top = 10.dp, bottom = if (title == null) 12.dp else 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            BrandMark(Modifier.size(43.dp), darkSurface = true)
+            BrandMark(Modifier.size(38.dp), darkSurface = true)
             Spacer(Modifier.width(10.dp))
-            Text("Shiftora", color = fg, fontWeight = FontWeight.Bold, fontSize = 25.sp)
+            Text("Shiftora", color = fg, fontWeight = FontWeight.Bold, fontSize = 23.sp)
             Spacer(Modifier.weight(1f))
             if (showSettings) {
                 IconButton(onClick = onSettings) {
@@ -103,11 +103,11 @@ fun BrandedHeader(
             }
         }
         if (title != null) {
-            Spacer(Modifier.height(18.dp))
-            Text(title, style = MaterialTheme.typography.headlineLarge, color = fg)
+            Spacer(Modifier.height(9.dp))
+            Text(title, fontSize = 27.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold, color = fg)
             if (subtitle != null) {
-                Spacer(Modifier.height(5.dp))
-                Text(subtitle, fontSize = 15.sp, color = if (dark) Color(0xFFB8CEE9) else Palette.Secondary)
+                Spacer(Modifier.height(3.dp))
+                Text(subtitle, fontSize = 13.sp, color = if (dark) Color(0xFFB8CEE9) else Palette.Secondary)
             }
         }
     }
@@ -178,12 +178,15 @@ fun ShiftRow(shift: Shift, onClick: () -> Unit, showDate: Boolean = true) {
 
 @Composable
 fun MetricCard(label: String, value: String, icon: ImageVector, bg: Color, accent: Color, modifier: Modifier = Modifier, sub: String? = null) {
-    SurfaceCard(modifier = modifier, color = bg) {
-        Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(26.dp))
-        Spacer(Modifier.height(7.dp))
-        Text(label, color = Palette.Ink, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-        Text(value, color = Palette.Ink, fontWeight = FontWeight.Bold, fontSize = 26.sp)
-        if (sub != null) Text(sub, color = Palette.Secondary, fontSize = 11.sp)
+    Column(modifier = modifier.clip(RoundedCornerShape(19.dp)).background(bg).padding(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(21.dp))
+            Text(label, color = Palette.Ink, fontWeight = FontWeight.SemiBold,
+                fontSize = 12.sp, lineHeight = 15.sp, maxLines = 2)
+        }
+        Spacer(Modifier.height(5.dp))
+        Text(value, color = Palette.Ink, fontWeight = FontWeight.Bold, fontSize = 23.sp)
+        if (sub != null) Text(sub, color = Palette.Secondary, fontSize = 10.sp, lineHeight = 12.sp)
     }
 }
 
