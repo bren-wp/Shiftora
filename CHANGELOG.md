@@ -1,5 +1,18 @@
 # Povijest izdanja
 
+## 0.8.0 — 18. 10. 2026. | Smjene, boje i mjesečni fond sati
+
+- Nove oznake u kalendaru: D (dnevna), N (noćna), J (jutarnja), P (popodnevna), PR (pripravnost), GO (godišnji), BO (bolovanje), SD (slobodni dan), PD (plaćeni dopust) te X (prilagođena).
+- Pločični mjesečni pregled koristi cijelu obojenu ćeliju i veliko slovo/kod, uz označen odabrani datum.
+- Korisničke boje za svaku oznaku zasebno: 15 ponuđenih boja ili vlastiti HEX kod; izmjene ostaju spremljene.
+- Mjesečni fond sati: standardni izračun za 8 h po radnom danu bez vikenda i hrvatskih blagdana, uz vlastiti fond za svaki mjesec.
+- Razdvojeni odrađeni sati, ukupna evidencija, evidentirani izostanci GO/BO/PD i preostali fond.
+- PR može imati vrijeme početka i završetka, ali se ne pribraja automatski odrađenom radu niti plaći.
+- GO/BO/SD/PD ne povećavaju obračunate sate ili bruto procjenu. Krediti izostanka za fond nisu zakonski obračun plaće.
+- JSON sigurnosne kopije v2 čuvaju boje i mjesečne fondove; stare v1 kopije mogu se učitati bez gubitka novih kategorija.
+- Prošireni regresijski testovi za fond sati, dane izostanka, prilagođene boje, stare JSON kopije i nove UI kontrole.
+- CSV izvoz sada sadrži i skraćenu oznaku svake smjene.
+
 ## 0.7.0 — 18. 10. 2026. | Android 16 & Google Play hardening
 
 - `targetSdk` / `compileSdk` 36 (Android 16), odgovarajući Android Gradle Plugin i Gradle wrapper.

@@ -34,10 +34,20 @@
 <sub>Stvarne snimke Android aplikacije na emulatoru, s demonstracijskim smjenama. Prikaz može odstupati ovisno o uređaju.</sub>
 </div>
 
+## Kalendar s vlastitim oznakama
+
+**D** dnevna · **N** noćna · **J** jutarnja · **P** popodnevna · **PR** pripravnost · **GO** godišnji odmor · **BO** bolovanje · **SD** slobodan dan · **PD** plaćeni dopust · **X** prilagođena smjena.
+
+Svaka oznaka može imati **svoju boju**: odaberi gotovu paletu ili upiši vlastitu HEX boju pod **Više → Boje smjena i izostanaka**. Zaslon kalendara prikazuje oznaku preko pune obojene ćelije datuma, s jasno istaknutim odabirom.
+
+**Fond sati po mjesecu** nalazi se ispod kalendara. Uredi ga zasebno za svaki mjesec ili koristi informativni fond: 8 h po radnom danu, bez vikenda i hrvatskih blagdana. Evidencija GO, BO i PD vodi se odvojeno od stvarno odrađenih sati; PR ne ulazi u obračun rada bez zasebne radne smjene. Fond nije službeni obračun prava ili naknada.
+
+CSV sadrži kodove, a JSON sigurnosna kopija v2 čuva i boje i posebne mjesečne fondove. Stare kopije v1 ostaju podržane.
+
 ## Pametne mogućnosti
 
 <table>
-<tr><td width="64"><img src="assets/icons/calendar.svg" width="44" alt=""/></td><td><strong>Kalendar koji razumije smjene</strong><br/>Jutarnja, popodnevna, noćna, slobodno i prilagođena smjena. Vlastiti ciklusi i automatsko ponavljanje rasporeda.</td></tr>
+<tr><td width="64"><img src="assets/icons/calendar.svg" width="44" alt=""/></td><td><strong>Kalendar koji razumije smjene</strong><br/>D, N, J, P, PR, GO, BO, SD i PD uz X prilagođenu smjenu. Boja svake oznake po izboru, veliki kodovi u kalendaru i automatske rotacije.</td></tr>
 <tr><td><img src="assets/icons/clock.svg" width="44" alt=""/></td><td><strong>Precizna evidencija sati</strong><br/>Planirani i odrađeni sati, plaćene i neplaćene pauze, noćni i prekovremeni rad te prelazak preko ponoći.</td></tr>
 <tr><td><img src="assets/icons/chart.svg" width="44" alt=""/></td><td><strong>Statistika koja ima smisla</strong><br/>Pregled po tjednima, mjesecima i godinama, uključujući nedjelje i hrvatske blagdane.</td></tr>
 <tr><td><img src="assets/icons/wallet.svg" width="44" alt=""/></td><td><strong>Procjena bruto plaće</strong><br/>Unesi vlastitu bruto satnicu i postotke dodataka. Prikaži osnovicu i dodatke zasebno.</td></tr>
