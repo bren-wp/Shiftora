@@ -24,7 +24,7 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Mjesec").assertExists()
         compose.onNodeWithText("Statistika").performClick()
         compose.onNodeWithText("Statistika i plaća").assertExists()
-        compose.onNodeWithText("Plaća", useUnmergedTree = true).performClick()
+        compose.onNodeWithText("Plaća").performClick()
         compose.onNodeWithText("Pregled radnih sati i dodataka.").assertExists()
         compose.onNodeWithText("Više").performClick()
         compose.onNodeWithText("Alati").assertExists()
