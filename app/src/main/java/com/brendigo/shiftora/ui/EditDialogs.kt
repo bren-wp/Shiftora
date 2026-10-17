@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.brendigo.shiftora.data.SalarySettings
 import com.brendigo.shiftora.data.Shift
 import com.brendigo.shiftora.data.ShiftKind
+import com.brendigo.shiftora.domain.ShiftScheduleValidator
 import java.time.LocalDate
 
 private fun parseClock(value: String): Int? {
@@ -58,10 +59,12 @@ fun ShiftEditorDialog(
         val pause = breakMin.toIntOrNull() ?: kotlin.error("Pauza mora biti broj minuta.")
         val after = breakAfter.toIntOrNull() ?: kotlin.error("Početak pauze mora biti broj minuta.")
         if (pause !in 0..240 || after !in 0..1440) kotlin.error("Provjeri trajanje pauze.")
-        entry.copy(date = parsedDate, kind = kind,
+        val result = entry.copy(date = parsedDate, kind = kind,
             startMinute = startMinutes, endMinute = endMinutes,
             breakMinutes = pause, breakAfterMinutes = after,
             unpaidBreak = unpaid, actual = actual, overtime = overtime, note = note.take(500))
+        ShiftScheduleValidator.validateBreak(result)
+        result
     }
 
     AlertDialog(

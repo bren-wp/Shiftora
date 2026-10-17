@@ -28,13 +28,23 @@ object ShiftScheduleValidator {
         return left.from.isBefore(right.to) && right.from.isBefore(left.to)
     }
 
+    fun validateBreak(shift: Shift, zone: ZoneId = ZoneId.systemDefault()) {
+        if (shift.kind == ShiftKind.OFF || shift.breakMinutes == 0) return
+        val elapsed = WorkCalculator.durationMinutes(shift, zone)
+        require(shift.breakAfterMinutes.toLong() + shift.breakMinutes <= elapsed) {
+            "Pauza mora završiti prije završetka smjene."
+        }
+    }
+
     fun validateInsertion(existing: List<Shift>, candidate: Shift, zone: ZoneId = ZoneId.systemDefault()) {
+        validateBreak(candidate, zone)
         require(existing.none { it.id != candidate.id && overlaps(it, candidate, zone) }) {
             "Smjena se preklapa s postojećom smjenom. Provjeri početak i završetak."
         }
     }
 
     fun validateAll(entries: List<Shift>, zone: ZoneId = ZoneId.systemDefault()) {
+        entries.forEach { validateBreak(it, zone) }
         val intervals = entries.filter { it.kind != ShiftKind.OFF }.map { interval(it, zone) }.sortedBy { it.from }
         for (index in 1 until intervals.size) {
             require(!intervals[index].from.isBefore(intervals[index - 1].to)) {

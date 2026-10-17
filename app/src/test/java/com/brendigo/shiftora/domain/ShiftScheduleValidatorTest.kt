@@ -49,4 +49,21 @@ class ShiftScheduleValidatorTest {
         val existing = Shift(id = 55, date = day, kind = ShiftKind.MORNING)
         ShiftScheduleValidator.validateInsertion(listOf(existing), existing.copy(note = "Promjena"), zagreb)
     }
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsBreakLongerThanShift() {
+        val entry = Shift(date = LocalDate.of(2026, 10, 17), kind = ShiftKind.MORNING,
+            breakAfterMinutes = 470, breakMinutes = 30)
+        ShiftScheduleValidator.validateBreak(entry, zagreb)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsEqualStartAndEnd() {
+        Shift(date = LocalDate.of(2026, 10, 17), kind = ShiftKind.CUSTOM,
+            startMinute = 480, endMinute = 480)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsNightPremiumSpanningIdenticalHours() {
+        com.brendigo.shiftora.data.SalarySettings(nightStartHour = 22, nightEndHour = 22)
+    }
 }
