@@ -1,5 +1,16 @@
 # Povijest izdanja
 
+## 0.5.0 — 18. 10. 2026.
+
+- Kalendar: kompaktniji raspored dana, manji razmaci i jasnije istaknut odabrani dan na manjim telefonima.
+- Gumbi za uređivanje i dodavanje smjena prikazani su jedan uz drugi, kao na vizualnim referencama.
+- Više smjena u jednom danu dobiva zasebne vizualne oznake.
+- Početna: smanjene kartice i razmaci kako bi nadolazeće smjene bile bolje vidljive.
+- Uvodni ekrani: svijetli premium izgled s prikazima kalendara, smjena i obračuna.
+- Uređivanje smjena: pogreške preklapanja sada su vidljive prije spremanja podataka.
+- Spriječen istovremeni unos slobodnog dana i radne smjene na isti datum.
+- Prošireni regresijski testovi za konflikte rasporeda.
+
 ## 0.4.0 — 18. 10. 2026.
 
 - Novi premium vizualni identitet i pregledan marketinški README s ikonama, bannerom i stvarnim snimkama Android aplikacije
