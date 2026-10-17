@@ -28,16 +28,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_ID: ${{ github.event.workflow_run.id }}
-        run: |
-          set -euo pipefail
-          grep -q 'versionName = "0.3.0"' app/build.gradle.kts
-          if gh release view v0.3.0 --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            echo "Preview release already exists"
-            exit 0
-          fi
-          mkdir -p dist/apk dist/aab
-          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" -n shiftora-debug-apk -D dist/apk
-          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" -n shiftora-unsigned-aab -D dist/aab
-          mv dist/apk/app-debug.apk dist/shiftora-0.3.0-debug.apk
-          mv dist/aab/app-release.aab dist/shiftora-0.3.0-unsigned.aab
-          gh release create v0.3.0             --repo "$GITHUB_REPOSITORY"             --target "${{ github.event.workflow_run.head_sha }}"             --title "Shiftora 0.3.0 – Development Preview"             --notes "Development preview of Shiftora Android. Includes debug-signed APK for device testing and UNSIGNED release AAB. The AAB is not ready for Google Play until securely signed with the app owner's production key. Device coverage, exact 1:1 design parity and complete payroll compliance are not yet certified."             --prerelease             dist/shiftora-0.3.0-debug.apk dist/shiftora-0.3.0-unsigned.aab
+        run: bash scripts/publish-preview.sh "$RUN_ID" "${{ github.event.workflow_run.head_sha }}"

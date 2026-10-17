@@ -1,5 +1,11 @@
 # Shiftora – povijest razvoja
 
+## 0.3.1 (2026-10-17) – hotfix i verifikacija
+- Na svim podržanim Android verzijama prikazuje se simbol € umjesto starog HRK ili ISO EUR
+- Tamna brendirana statusna traka s čitljivim sistemskim ikonama
+- Snapshot testovi svih glavnih ekrana na dva profila emulatora
+- Potpuno novo preview izdanje s novim versionCode 4
+
 ## 0.3.0 (2026-10-17) – stabilizacija i QA
 - Sprječavanje preklapajućih smjena i dvostrukog uračunavanja sati
 - Ograničenja trajanja pauze, zero-duration smjena i noćnog intervala
