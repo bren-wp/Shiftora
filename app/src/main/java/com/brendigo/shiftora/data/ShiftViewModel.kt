@@ -89,15 +89,23 @@ class ShiftViewModel(application: Application) : AndroidViewModel(application) {
     /** User-initiated local export, no server upload. */
     fun exportCsv(): String = CsvExporter.encode(shifts.value)
 
-    fun exportBackup(): String = BackupCodec.encode(shifts.value, salary.value)
+    fun exportBackup(): String = BackupCodec.encode(
+        shifts.value, salary.value, shiftColors.value, monthlyFunds.value
+    )
 
     /** Import only after explicit preview and confirmation by the user. */
     fun restoreBackup(backup: ShiftBackup) = viewModelScope.launch(Dispatchers.IO) {
         runCatching {
             store.replaceAll(backup.shifts)
             preferences.saveSalary(backup.salary)
+            if (backup.version >= 2) {
+                preferences.replaceShiftColors(backup.colors)
+                preferences.replaceMonthlyFunds(backup.monthlyFunds)
+            }
             _shifts.value = store.all()
             _salary.value = backup.salary
+            _shiftColors.value = preferences.shiftColors()
+            _monthlyFunds.value = preferences.monthlyFundOverrides()
         }.onSuccess {
             _message.value = "Sigurnosna kopija vraćena: ${backup.shifts.size} smjena."
         }.onFailure {

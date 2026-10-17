@@ -34,7 +34,7 @@ class ShiftBackupTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun rejectsUnsupportedSchema() {
-        BackupCodec.decode("""{"format":"shiftora-backup","version":2,"salary":{},"shifts":[]}""")
+        BackupCodec.decode("""{"format":"shiftora-backup","version":3,"salary":{},"shifts":[]}""")
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -62,6 +62,26 @@ class ShiftBackupTest {
             startMinute = 700, endMinute = 950)
         val unsafeBackup = BackupCodec.encode(listOf(first, overlapping), SalarySettings())
         BackupCodec.decode(unsafeBackup)
+    }
+
+    @Test fun roundTripPreservesColorsAndMonthlyFunds() {
+        val shifts = listOf(Shift(date = LocalDate.of(2026, 10, 19), kind = ShiftKind.ANNUAL))
+        val colors = mapOf(ShiftKind.DAY to 0xFF123456.toInt(),
+            ShiftKind.PAID_LEAVE to 0xFF77AA33.toInt())
+        val funds = mapOf("2026-10" to 9600, "2026-11" to 8400)
+        val decoded = BackupCodec.decode(BackupCodec.encode(shifts, SalarySettings(), colors, funds))
+        assertEquals(2, decoded.version)
+        assertEquals(colors, decoded.colors)
+        assertEquals(funds, decoded.monthlyFunds)
+        assertEquals(ShiftKind.ANNUAL, decoded.shifts.single().kind)
+    }
+
+    @Test fun oldVersionOneBackupStillDecodes() {
+        val newBackup = BackupCodec.encode(emptyList(), SalarySettings())
+        val oldBackup = newBackup.replace("\"version\": 2", "\"version\": 1")
+        val decoded = BackupCodec.decode(oldBackup)
+        assertEquals(1, decoded.version)
+        assertTrue(decoded.colors.isEmpty())
     }
 
 }

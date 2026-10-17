@@ -50,6 +50,15 @@ class Preferences(context: Context) {
         }.apply()
     }
 
+    fun replaceShiftColors(colors: Map<ShiftKind, Int>) {
+        store.edit().apply {
+            ShiftKind.entries.forEach { remove("color_${it.name}") }
+            colors.forEach { (kind, argb) ->
+                putInt("color_${kind.name}", argb or 0xFF000000.toInt())
+            }
+        }.commit()
+    }
+
     /** Per-month optional custom fund in minutes (0..744 hours). */
     fun monthlyFundOverrides(): Map<String, Int> =
         store.all.mapNotNull { (key, value) ->
@@ -59,6 +68,13 @@ class Preferences(context: Context) {
                 if (runCatching { YearMonth.parse(month) }.isSuccess) month to value else null
             }
         }.toMap()
+
+    fun replaceMonthlyFunds(funds: Map<String, Int>) {
+        store.edit().apply {
+            store.all.keys.filter { it.startsWith("fund_") }.forEach { remove(it) }
+            funds.forEach { (month, value) -> putInt("fund_$month", value) }
+        }.commit()
+    }
 
     fun saveMonthlyFund(month: YearMonth, minutes: Int?) {
         require(minutes == null || minutes in 0..44640)
