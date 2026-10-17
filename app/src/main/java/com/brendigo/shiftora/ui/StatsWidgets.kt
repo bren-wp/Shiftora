@@ -9,9 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.ChevronDown
-import androidx.compose.material.icons.filled.ChevronUp
-import androidx.compose.material.icons.filled.InfoOutline
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.TrendingFlat
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -165,7 +165,7 @@ fun SalaryStatsCard(totals: WorkTotals, previous: WorkTotals) {
         .background(Palette.MintLight).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            Icon(Icons.Default.InfoOutline, contentDescription = null, tint = Color(0xFF087C74),
+            Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF087C74),
                 modifier = Modifier.size(19.dp))
             Text("Procijenjena bruto plaća", color = Palette.Navy, fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp)
@@ -189,11 +189,11 @@ fun StatsExplanation() {
         .background(MaterialTheme.colorScheme.surface)
         .clickable { expanded = !expanded }.padding(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.InfoOutline, contentDescription = null, tint = Palette.Amber)
+            Icon(Icons.Default.Info, contentDescription = null, tint = Palette.Amber)
             Spacer(Modifier.width(8.dp))
             Text("Kako se računaju sati i dodaci?", fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f), fontSize = 13.sp)
-            Icon(if (expanded) Icons.Default.ChevronUp else Icons.Default.ChevronDown,
+            Icon(if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                 contentDescription = if (expanded) "Sažmi" else "Proširi")
         }
         if (expanded) {
