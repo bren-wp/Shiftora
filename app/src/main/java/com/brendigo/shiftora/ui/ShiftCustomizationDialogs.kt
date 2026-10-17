@@ -1,0 +1,169 @@
+package com.brendigo.shiftora.ui
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.brendigo.shiftora.data.ShiftKind
+import com.brendigo.shiftora.domain.MonthlyFund
+import java.time.YearMonth
+
+private val swatches = listOf(
+    0xFF2563EB.toInt(), 0xFF0EA5E9.toInt(), 0xFF0891B2.toInt(),
+    0xFF10B981.toInt(), 0xFF65A30D.toInt(), 0xFFF59E0B.toInt(),
+    0xFFEA580C.toInt(), 0xFFEF4444.toInt(), 0xFFDB2777.toInt(),
+    0xFF9333EA.toInt(), 0xFF6D43E9.toInt(), 0xFF64748B.toInt(),
+    0xFF334155.toInt(), 0xFF0F766E.toInt(), 0xFF854D0E.toInt()
+)
+
+/** Allows changing every shift code color without modifying historical shifts. */
+@Composable
+fun ShiftColorSettingsDialog(
+    colors: Map<ShiftKind, Int>,
+    onChange: (ShiftKind, Int?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var selected by remember { mutableStateOf(ShiftKind.DAY) }
+    var hex by remember(selected) { mutableStateOf("") }
+    val parsed = remember(hex) {
+        val raw = hex.trim().removePrefix("#")
+        if (raw.matches(Regex("[a-fA-F0-9]{6}"))) raw.toLongOrNull(16)
+            ?.let { (it or 0xFF000000L).toInt() }
+        else null
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Boje i oznake smjena") },
+        text = {
+            Column(Modifier.fillMaxWidth().heightIn(max = 460.dp)
+                .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("Odaberi oznaku. Boja se odmah primjenjuje na cijeli kalendar.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                ShiftKind.calendarOrder.chunked(2).forEach { kinds ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        kinds.forEach { kind ->
+                            val active = selected == kind
+                            val color = colors[kind]?.let(::Color) ?: shiftColor(kind)
+                            Row(
+                                Modifier.weight(1f)
+                                    .clip(RoundedCornerShape(13.dp))
+                                    .background(if (active) MaterialTheme.colorScheme.primaryContainer
+                                        else MaterialTheme.colorScheme.surfaceVariant)
+                                    .clickable { selected = kind }
+                                    .padding(horizontal = 9.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(Modifier.size(19.dp).clip(CircleShape).background(color))
+                                Spacer(Modifier.width(7.dp))
+                                Text(kind.code, fontWeight = FontWeight.Bold)
+                                Spacer(Modifier.width(5.dp))
+                                Text(kind.label, fontSize = 10.sp, maxLines = 1)
+                            }
+                        }
+                        if (kinds.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
+                Text("Nova boja za ${selected.code} — ${selected.label}",
+                    fontWeight = FontWeight.SemiBold)
+                swatches.chunked(5).forEach { group ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        group.forEach { value ->
+                            Box(Modifier.size(42.dp).clip(CircleShape)
+                                .background(Color(value))
+                                .border(2.dp,
+                                    if (colors[selected] == value) MaterialTheme.colorScheme.onSurface
+                                    else Color.Transparent, CircleShape)
+                                .clickable { onChange(selected, value) })
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    value = hex,
+                    onValueChange = { hex = it.take(7) },
+                    label = { Text("Vlastita HEX boja (#RRGGBB)") },
+                    singleLine = true, modifier = Modifier.fillMaxWidth(),
+                    supportingText = {
+                        Text("Možeš unijeti bilo koju šestereroznamenkastu RGB boju.")
+                    }
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { onChange(selected, null); hex = "" },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Vrati zadanu") }
+                    Button(
+                        enabled = parsed != null,
+                        onClick = { parsed?.let { onChange(selected, it) } },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("Primijeni HEX") }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Gotovo") }
+        }
+    )
+}
+
+@Composable
+fun MonthlyFundEditor(
+    month: YearMonth,
+    overrideMinutes: Int?,
+    onSave: (Int?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val standard = MonthlyFund.standardMinutes(month)
+    var text by remember(month, overrideMinutes) {
+        mutableStateOf(((overrideMinutes ?: standard) / 60).toString())
+    }
+    val hours = text.toIntOrNull()?.takeIf { it in 0..744 }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Fond sati — ${month.atDay(1).monthLabel()}") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
+                Text("Standardni fond: ${standard / 60} h. Računa se 8 sati po radnom danu, " +
+                    "bez vikenda i hrvatskih blagdana. Fond po ugovoru može biti drukčiji.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it.filter(Char::isDigit).take(3) },
+                    label = { Text("Fond sati u ovom mjesecu") },
+                    suffix = { Text("h") },
+                    singleLine = true,
+                    isError = hours == null,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text("Godišnji, bolovanje i plaćeni dopust evidentiraju se odvojeno " +
+                    "od odrađenih sati. Ovaj fond nije službeni obračun plaće.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                hours?.let { onSave(it * 60); onDismiss() }
+            }, enabled = hours != null) { Text("Spremi") }
+        },
+        dismissButton = {
+            TextButton(onClick = { onSave(null); onDismiss() }) {
+                Text("Zadani fond")
+            }
+        }
+    )
+}
