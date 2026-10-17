@@ -398,131 +398,114 @@ private fun DetailTile(label: String, value: String, modifier: Modifier = Modifi
 fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () -> Unit) {
     var shown by remember { mutableStateOf(YearMonth.now()) }
     var period by remember { mutableIntStateOf(1) }
-    var weekAnchor by remember { mutableStateOf(LocalDate.now().with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))) }
-    val totals = remember(shifts, settings, period, shown, weekAnchor) {
-        when (period) {
-            0 -> WorkCalculator.calculatePeriod(shifts, settings, weekAnchor, weekAnchor.plusDays(7))
-            2 -> WorkCalculator.calculatePeriod(shifts, settings, LocalDate.of(shown.year, 1, 1), LocalDate.of(shown.year + 1, 1, 1))
-            else -> WorkCalculator.calculatePeriod(shifts, settings, shown.atDay(1), shown.plusMonths(1).atDay(1))
-        }
+    var weekAnchor by remember {
+        mutableStateOf(LocalDate.now().with(
+            TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)
+        ))
     }
-    val byType = listOf(
-        Triple("Jutarnja", totals.morningMinutes, Palette.Amber),
-        Triple("Popodnevna", totals.afternoonMinutes, Palette.Blue),
-        Triple("Noćna", totals.nightShiftMinutes, Palette.Purple),
-        Triple("Ostale", (totals.paidMinutes - totals.morningMinutes - totals.afternoonMinutes - totals.nightShiftMinutes).coerceAtLeast(0), Palette.Coral)
-    )
-
+    val rangeStart = when (period) {
+        0 -> weekAnchor
+        2 -> LocalDate.of(shown.year, 1, 1)
+        else -> shown.atDay(1)
+    }
+    val rangeEnd = when (period) {
+        0 -> rangeStart.plusWeeks(1)
+        2 -> rangeStart.plusYears(1)
+        else -> rangeStart.plusMonths(1)
+    }
+    val priorStart = when (period) {
+        0 -> rangeStart.minusWeeks(1)
+        2 -> rangeStart.minusYears(1)
+        else -> rangeStart.minusMonths(1)
+    }
+    val totals = remember(shifts, settings, rangeStart, rangeEnd) {
+        WorkCalculator.calculatePeriod(shifts, settings, rangeStart, rangeEnd)
+    }
+    val previous = remember(shifts, settings, priorStart, rangeStart) {
+        WorkCalculator.calculatePeriod(shifts, settings, priorStart, rangeStart)
+    }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        BrandedHeader("Statistika i plaća", "Tvoj rad u brojkama. Veća kontrola.", dark = true, onSettings = onSettings)
-        LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        BrandedHeader("Statistika i plaća", "Tvoj rad u brojkama. Veća kontrola.",
+            dark = true, onSettings = onSettings)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 13.dp, vertical = 11.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             item {
-                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Palette.BlueLight)) {
-                    listOf("Tjedan", "Mjesec", "Godina").forEachIndexed { index, name ->
+                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(17.dp))
+                    .background(Palette.BlueLight).padding(3.dp)) {
+                    listOf("Tjedan", "Mjesec", "Godina").forEachIndexed { index, title ->
+                        val selected = period == index
                         Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
-                            .background(if (period == index) Color(0xFFD0E2FF) else Color.Transparent)
-                            .clickable { period = index }.padding(12.dp), contentAlignment = Alignment.Center) {
-                            Text(name, color = Palette.Navy, fontWeight = if (period == index) FontWeight.Bold else FontWeight.Normal)
+                            .background(if (selected) Color(0xFFD0E2FF) else Color.Transparent)
+                            .clickable { period = index }.padding(vertical = 9.dp),
+                            contentAlignment = Alignment.Center) {
+                            Text(title, color = if (selected) Palette.Blue else Palette.Navy,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 14.sp)
                         }
                     }
                 }
             }
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { if (period == 0) weekAnchor = weekAnchor.minusWeeks(1) else shown = shown.minusMonths(if (period == 2) 12 else 1) }) {
+                    IconButton(onClick = {
+                        if (period == 0) weekAnchor = weekAnchor.minusWeeks(1)
+                        else shown = shown.minusMonths(if (period == 2) 12 else 1)
+                    }) {
                         Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodno razdoblje")
                     }
-                    Text(if (period == 2) shown.year.toString()
-                        else if (period == 0) "${weekAnchor.dateLabel()} – ${weekAnchor.plusDays(6).dateLabel()}"
-                        else shown.atDay(1).monthLabel(),
-                        modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium)
-                    IconButton(onClick = { if (period == 0) weekAnchor = weekAnchor.plusWeeks(1) else shown = shown.plusMonths(if (period == 2) 12 else 1) }) {
+                    val name = when (period) {
+                        0 -> weekAnchor.dateLabel() + " – " + weekAnchor.plusDays(6).dateLabel()
+                        2 -> shown.year.toString()
+                        else -> shown.atDay(1).monthLabel()
+                    }
+                    Text(name, modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleMedium, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis)
+                    IconButton(onClick = {
+                        if (period == 0) weekAnchor = weekAnchor.plusWeeks(1)
+                        else shown = shown.plusMonths(if (period == 2) 12 else 1)
+                    }) {
                         Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeće razdoblje")
                     }
                 }
             }
+            item { ShiftDonutCard(totals) }
             item {
-                Column(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
-                        .background(MaterialTheme.colorScheme.surface).padding(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Box(Modifier.size(126.dp), contentAlignment = Alignment.Center) {
-                            Canvas(Modifier.fillMaxSize()) {
-                                val arcWidth = 22.dp.toPx()
-                                val all = totals.paidMinutes.toFloat()
-                                if (all <= 0f) drawArc(Palette.BlueLight, 0f, 360f,
-                                    useCenter = false, style = Stroke(arcWidth))
-                                else {
-                                    var start = -90f
-                                    byType.forEach { (_, n, color) ->
-                                        if (n > 0) {
-                                            val sweep = n / all * 360f
-                                            drawArc(color, start, sweep,
-                                                useCenter = false, style = Stroke(arcWidth, cap = StrokeCap.Butt))
-                                            start += sweep
-                                        }
-                                    }
-                                }
-                            }
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(minutesLabel(totals.paidMinutes), fontSize = 25.sp, fontWeight = FontWeight.Bold)
-                                Text("Ukupno", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                            }
-                        }
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            byType.forEach { (name, minutes, color) ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Box(Modifier.size(9.dp).clip(CircleShape).background(color))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(name, fontSize = 11.sp, modifier = Modifier.weight(1f), maxLines = 1)
-                                    Text(minutesLabel(minutes), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    MetricCard("Odrađeni sati", minutesLabel(totals.actualMinutes), Icons.Default.Schedule,
-                        Palette.BlueLight, Palette.Blue, Modifier.weight(1f))
-                    MetricCard("Prekovremeni", minutesLabel(totals.overtimeMinutes), Icons.Default.AddCircle,
-                        Palette.AmberLight, Palette.Amber, Modifier.weight(1f))
-                }
-            }
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    MetricCard("Noćni rad", minutesLabel(totals.nightMinutes), Icons.Default.NightsStay,
-                        Palette.PurpleLight, Palette.Purple, Modifier.weight(1f))
-                    MetricCard("Nedjelje / blagdani", minutesLabel(totals.sundayMinutes) + " / " + minutesLabel(totals.holidayMinutes),
-                        Icons.Default.Event, Palette.CoralLight, Palette.Coral, Modifier.weight(1f),
-                        "Kategorije se mogu preklapati")
-                }
-            }
-            item {
-                SurfaceCard(Modifier.fillMaxWidth(), color = Palette.MintLight) {
-                    Text("Procijenjena bruto plaća", color = Palette.Navy, fontWeight = FontWeight.SemiBold)
-                    Text(euros(totals.grossCents), color = Palette.Navy, fontSize = 29.sp, fontWeight = FontWeight.Bold)
-                    Text("Osnovica ${euros(totals.baseCents)} + dodaci ${euros(totals.premiumCents)}",
-                        color = Palette.Secondary, fontSize = 12.sp)
-                }
-            }
-            item {
-                SurfaceCard(Modifier.fillMaxWidth()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Info, contentDescription = null, tint = Palette.Amber)
-                        Spacer(Modifier.width(9.dp))
-                        Text("Kako se računaju sati?", fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        "Graf prikazuje vrste smjena. Noćni rad, nedjelje, blagdani i prekovremeni sati dodatne su kategorije koje se mogu preklapati. Ne pribrajaju se ponovno ukupnim radnim satima.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    StatIndicatorCard(
+                        "Odrađeni sati", minutesLabel(totals.actualMinutes),
+                        Icons.Default.Schedule, Palette.BlueLight, Palette.Blue,
+                        totals.actualMinutes, previous.actualMinutes, Modifier.weight(1f),
+                        "Planirano: " + minutesLabel(totals.plannedMinutes)
+                    )
+                    StatIndicatorCard(
+                        "Prekovremeni", minutesLabel(totals.overtimeMinutes),
+                        Icons.Default.AddCircle, Palette.AmberLight, Palette.Amber,
+                        totals.overtimeMinutes, previous.overtimeMinutes, Modifier.weight(1f)
                     )
                 }
             }
+            item {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    StatIndicatorCard(
+                        "Noćni rad", minutesLabel(totals.nightMinutes),
+                        Icons.Default.NightsStay, Palette.PurpleLight, Palette.Purple,
+                        totals.nightMinutes, previous.nightMinutes, Modifier.weight(1f)
+                    )
+                    StatIndicatorCard(
+                        "Nedjelje / blagdani",
+                        minutesLabel(totals.sundayMinutes) + " / " + minutesLabel(totals.holidayMinutes),
+                        Icons.Default.Event, Palette.CoralLight, Palette.Coral,
+                        totals.specialMinutes, previous.specialMinutes, Modifier.weight(1f),
+                        "Dvije zasebne kategorije"
+                    )
+                }
+            }
+            item { SalaryStatsCard(totals, previous) }
+            item { StatsExplanation() }
         }
     }
 }
