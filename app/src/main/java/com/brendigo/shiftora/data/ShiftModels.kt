@@ -8,7 +8,8 @@ import java.time.LocalDate
  */
 enum class ShiftKind(
     val label: String, val code: String, val start: Int, val end: Int,
-    val isWork: Boolean = true, val isAbsence: Boolean = false
+    val isWork: Boolean = true, val isAbsence: Boolean = false,
+    val hasTime: Boolean = isWork
 ) {
     MORNING("Jutarnja", "J", 360, 840),
     AFTERNOON("Popodnevna", "P", 840, 1320),
@@ -16,7 +17,7 @@ enum class ShiftKind(
     CUSTOM("Prilagođena", "X", 480, 960),
     OFF("Slobodan dan", "SD", 0, 0, isWork = false),
     DAY("Dnevna", "D", 420, 1140),
-    STANDBY("Pripravnost", "PR", 0, 0, isWork = false),
+    STANDBY("Pripravnost", "PR", 480, 960, isWork = false, hasTime = true),
     ANNUAL("Godišnji odmor", "GO", 0, 0, isWork = false, isAbsence = true),
     SICK("Bolovanje", "BO", 0, 0, isWork = false, isAbsence = true),
     PAID_LEAVE("Plaćeni dopust", "PD", 0, 0, isWork = false, isAbsence = true);
@@ -45,12 +46,12 @@ data class Shift(
         require(startMinute in 0..1439 && endMinute in 0..1439)
         require(breakMinutes in 0..240)
         require(breakAfterMinutes in 0..1440)
-        require(!kind.isWork || startMinute != endMinute) {
+        require(!kind.hasTime || startMinute != endMinute) {
             "Početak i završetak smjene ne mogu biti jednaki."
         }
     }
 
-    val overnight: Boolean get() = kind.isWork && endMinute <= startMinute
+    val overnight: Boolean get() = kind.hasTime && endMinute <= startMinute
 }
 
 data class SalarySettings(
