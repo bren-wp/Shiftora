@@ -128,13 +128,13 @@ class MainActivity : ComponentActivity() {
                         ShiftEditorDialog(
                             entry = item,
                             onDismiss = { editing = null },
-                            onSave = vm::save,
-                            onDelete = vm::delete
+                            onSave = { vm.save(it) },
+                            onDelete = { vm.delete(it) }
                         )
                     }
                     if (rotationOpen) RotationDialog(
                         onDismiss = { rotationOpen = false },
-                        onGenerate = vm::rotation
+                        onGenerate = { start, pattern, days -> vm.rotation(start, pattern, days) }
                     )
                     if (salaryOpen) SalarySettingsDialog(
                         current = salary,

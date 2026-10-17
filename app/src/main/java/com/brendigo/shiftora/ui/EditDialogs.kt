@@ -48,11 +48,11 @@ fun ShiftEditorDialog(
     var confirmDelete by remember { mutableStateOf(false) }
     val valid = runCatching {
         val parsedDate = LocalDate.parse(date)
-        val startMinutes = parseClock(start) ?: error("Početak mora biti HH:mm.")
-        val endMinutes = parseClock(end) ?: error("Završetak mora biti HH:mm.")
-        val pause = breakMin.toIntOrNull() ?: error("Pauza mora biti broj minuta.")
-        val after = breakAfter.toIntOrNull() ?: error("Početak pauze mora biti broj minuta.")
-        if (pause !in 0..240 || after !in 0..1440) error("Provjeri trajanje pauze.")
+        val startMinutes = parseClock(start) ?: kotlin.error("Početak mora biti HH:mm.")
+        val endMinutes = parseClock(end) ?: kotlin.error("Završetak mora biti HH:mm.")
+        val pause = breakMin.toIntOrNull() ?: kotlin.error("Pauza mora biti broj minuta.")
+        val after = breakAfter.toIntOrNull() ?: kotlin.error("Početak pauze mora biti broj minuta.")
+        if (pause !in 0..240 || after !in 0..1440) kotlin.error("Provjeri trajanje pauze.")
         entry.copy(date = parsedDate, kind = kind,
             startMinute = startMinutes, endMinute = endMinutes,
             breakMinutes = pause, breakAfterMinutes = after,
@@ -213,11 +213,11 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
     fun number(text: String) = text.replace(',', '.').toDoubleOrNull()
     val parsed = runCatching {
         SalarySettings(
-            hourlyGross = number(hourly) ?: error("Satnica"),
-            nightPercent = number(night) ?: error("Noćni"),
-            sundayPercent = number(sunday) ?: error("Nedjelje"),
-            holidayPercent = number(holiday) ?: error("Blagdani"),
-            overtimePercent = number(overtime) ?: error("Prekovremeni")
+            hourlyGross = number(hourly) ?: kotlin.error("Satnica"),
+            nightPercent = number(night) ?: kotlin.error("Noćni"),
+            sundayPercent = number(sunday) ?: kotlin.error("Nedjelje"),
+            holidayPercent = number(holiday) ?: kotlin.error("Blagdani"),
+            overtimePercent = number(overtime) ?: kotlin.error("Prekovremeni")
         )
     }.getOrNull()
     AlertDialog(
