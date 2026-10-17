@@ -38,41 +38,8 @@ jobs:
           profile: ${{ matrix.profile }}
           disable-animations: true
           script: |
-            gradle --no-daemon :app:connectedDebugAndroidTest
-            # Instrumentation teardown may leave the launcher in the foreground.
-            # Reinstall and explicitly launch the application before capturing.
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
-            adb shell am force-stop com.brendigo.shiftora || true
-            adb shell am start -W -n com.brendigo.shiftora/.MainActivity
-            sleep 5
-            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | grep 'com.brendigo.shiftora'
-            # Collect real emulator screenshots for design QA (no generated mockups).
-            DEVICE=${{ matrix.profile }}
-            SIZE=$(adb shell wm size | grep -m1 'Physical size' | awk '{print $3}' | tr -d '\r')
-            WIDTH=${SIZE%x*}
-            HEIGHT=${SIZE#*x}
-            NAV_Y=$((HEIGHT - 180))
-            adb exec-out screencap -p > shiftora-${DEVICE}-onboarding.png
-            adb shell uiautomator dump /sdcard/shiftora-uia.xml >/dev/null 2>&1 || true
-            if adb shell cat /sdcard/shiftora-uia.xml 2>/dev/null | grep -q 'Preskoči'; then
-              adb shell input tap $((WIDTH - 160)) 240
-              sleep 3
-            fi
-            adb exec-out screencap -p > shiftora-${DEVICE}-home.png
-            adb shell input tap $((WIDTH * 3 / 10)) "$NAV_Y"
-            sleep 2
-            adb exec-out screencap -p > shiftora-${DEVICE}-calendar.png
-            adb shell input tap $((WIDTH / 2)) "$NAV_Y"
-            sleep 2
-            adb exec-out screencap -p > shiftora-${DEVICE}-statistics.png
-            adb shell input tap $((WIDTH * 7 / 10)) "$NAV_Y"
-            sleep 2
-            adb exec-out screencap -p > shiftora-${DEVICE}-salary.png
-            adb shell input tap $((WIDTH * 9 / 10)) "$NAV_Y"
-            sleep 2
-            adb exec-out screencap -p > shiftora-${DEVICE}-more.png
-            test -s shiftora-${DEVICE}-home.png
-            test -s shiftora-${DEVICE}-calendar.png
+            ./gradlew --no-daemon :app:connectedDebugAndroidTest
+            bash scripts/capture-emulator.sh ${{ matrix.profile }}
       - name: Attach emulator screenshot
         if: always()
         uses: actions/upload-artifact@v4
