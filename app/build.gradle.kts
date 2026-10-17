@@ -1,3 +1,8 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+}
 // Production signing is enabled only by explicitly supplied CI/local environment secrets.
 // Default GitHub preview bundles stay unsigned; never commit keystore files.
 val uploadKeystoreFile = System.getenv("SHIFTORA_UPLOAD_KEYSTORE_FILE")
@@ -7,11 +12,6 @@ val uploadKeyPassword = System.getenv("SHIFTORA_UPLOAD_KEY_PASSWORD")
 val usePlayUploadKey = listOf(uploadKeystoreFile, uploadKeystorePassword, uploadKeyAlias, uploadKeyPassword)
     .all { !it.isNullOrBlank() }
 
-plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-}
 android {
     namespace = "com.brendigo.shiftora"
     compileSdk = 36
