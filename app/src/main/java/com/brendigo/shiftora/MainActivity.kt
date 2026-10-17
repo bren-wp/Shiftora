@@ -120,11 +120,11 @@ class MainActivity : ComponentActivity() {
                     OnboardingScreen(onComplete = vm::finishOnboarding)
                 } else {
                     val sections = listOf(
-                        Triple("Početna", Icons.Default.Home, Icons.Default.Home),
-                        Triple("Kalendar", Icons.Default.CalendarMonth, Icons.Default.CalendarMonth),
-                        Triple("Statistika", Icons.Default.BarChart, Icons.Default.BarChart),
-                        Triple("Plaća", Icons.Default.AccountBalanceWallet, Icons.Default.AccountBalanceWallet),
-                        Triple("Više", Icons.Default.MoreHoriz, Icons.Default.MoreHoriz)
+                        "Početna" to Icons.Default.Home,
+                        "Kalendar" to Icons.Default.CalendarMonth,
+                        "Statistika" to Icons.Default.BarChart,
+                        "Plaća" to Icons.Default.AccountBalanceWallet,
+                        "Više" to Icons.Default.MoreHoriz
                     )
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbars) },
@@ -167,7 +167,7 @@ class MainActivity : ComponentActivity() {
                                     onCsv = { exportLauncher.launch("Shiftora-smjene-${LocalDate.now()}.csv") },
                                     onBackup = { backupLauncher.launch("Shiftora-kopija-${LocalDate.now()}.json") },
                                     onRestore = { restoreLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
-                                    onEditSalary = { salaryOpen = true }, onSettings = goSettings
+                                    onEditSalary = { salaryOpen = true }
                                 )
                             }
                         }

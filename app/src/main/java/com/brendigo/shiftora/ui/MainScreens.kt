@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.Canvas
+import com.brendigo.shiftora.BuildConfig
 import com.brendigo.shiftora.data.SalarySettings
 import com.brendigo.shiftora.data.Shift
 import com.brendigo.shiftora.data.ShiftKind
@@ -539,10 +540,10 @@ fun SalaryScreen(
 fun MoreScreen(
     darkMode: Boolean, onDark: (Boolean) -> Unit,
     onRotation: () -> Unit, onCsv: () -> Unit,
-    onBackup: () -> Unit, onRestore: () -> Unit, onEditSalary: () -> Unit, onSettings: () -> Unit
+    onBackup: () -> Unit, onRestore: () -> Unit, onEditSalary: () -> Unit
 ) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        BrandedHeader("Više", "Postavke i tvoji podaci.", dark = true, onSettings = onSettings)
+        BrandedHeader("Više", "Postavke i tvoji podaci.", dark = true, showSettings = false)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SurfaceCard(Modifier.fillMaxWidth()) {
@@ -569,7 +570,7 @@ fun MoreScreen(
             SurfaceCard(Modifier.fillMaxWidth()) {
                 Text("Shiftora • Brendigo", fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(7.dp))
-                Text("Verzija 0.1.0 • Tvoji se podaci pohranjuju lokalno na uređaju. Aplikacija ne zahtijeva prijavu niti internetsku vezu.",
+                Text("Verzija ${BuildConfig.VERSION_NAME} • Tvoji se podaci pohranjuju lokalno na uređaju. Aplikacija ne zahtijeva prijavu niti internetsku vezu.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
             }
         }
