@@ -53,4 +53,45 @@ class WorkCalculatorTest {
         assertEquals(LocalDate.of(2026, 4, 5), CroatianHolidays.easter(2026))
         assertTrue(CroatianHolidays.isHoliday(LocalDate.of(2026, 6, 4)))
     }
+
+    @Test fun nightShiftIsSplitCorrectlyAcrossMonthlyBoundary() {
+        val entry = Shift(date = LocalDate.of(2026, 10, 31), kind = ShiftKind.NIGHT)
+        val settings = SalarySettings(
+            hourlyGross = 10.0, nightPercent = 0.0,
+            sundayPercent = 50.0, holidayPercent = 30.0, overtimePercent = 0.0
+        )
+        val all = listOf(entry)
+        val october = WorkCalculator.calculatePeriod(
+            all, settings, LocalDate.of(2026, 10, 1), LocalDate.of(2026, 11, 1), zagreb
+        )
+        val november = WorkCalculator.calculatePeriod(
+            all, settings, LocalDate.of(2026, 11, 1), LocalDate.of(2026, 12, 1), zagreb
+        )
+        assertEquals(120L, october.paidMinutes)
+        assertEquals(720L, october.sundayMinutes + november.sundayMinutes + november.holidayMinutes)
+        assertEquals(0L, october.holidayMinutes)
+        assertEquals(360L, november.paidMinutes)
+        assertEquals(360L, november.sundayMinutes)
+        assertEquals(360L, november.holidayMinutes)
+        assertEquals(2000L, october.grossCents)
+        assertEquals(6000L + 3000L + 1800L, november.grossCents)
+        assertEquals(480L, october.paidMinutes + november.paidMinutes)
+    }
+
+    @Test fun priorDayShiftIsIncludedWhenWeekStarts() {
+        val sunday = Shift(date = LocalDate.of(2026, 10, 18), kind = ShiftKind.NIGHT)
+        val monday = LocalDate.of(2026, 10, 19)
+        val week = WorkCalculator.calculatePeriod(
+            listOf(sunday), SalarySettings(hourlyGross = 10.0, nightPercent = 0.0,
+                sundayPercent = 0.0, holidayPercent = 0.0, overtimePercent = 0.0),
+            monday, monday.plusDays(7), zagreb
+        )
+        assertEquals(360L, week.paidMinutes)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsReversedReportingRange() {
+        WorkCalculator.calculatePeriod(emptyList(), SalarySettings(),
+            LocalDate.of(2026, 11, 1), LocalDate.of(2026, 10, 1), zagreb)
+    }
 }

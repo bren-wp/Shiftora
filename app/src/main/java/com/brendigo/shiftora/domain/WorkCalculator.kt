@@ -9,6 +9,7 @@ import java.math.RoundingMode
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.ZoneId
+import java.time.LocalDate
 
 /** One-minute accounting avoids rounding error, handles local DST and overlapping premiums. */
 object WorkCalculator {
@@ -20,10 +21,38 @@ object WorkCalculator {
         return Duration.between(start.toInstant(), end.toInstant()).toMinutes().coerceAtLeast(0)
     }
 
+    /**
+     * Aggregate all stored time, regardless of calendar boundary.
+     * The report-specific overload below must be used for month/week/year summaries.
+     */
     fun calculate(
         shifts: List<Shift>,
         settings: SalarySettings,
         zone: ZoneId = ZoneId.systemDefault()
+    ): WorkTotals = calculateInternal(shifts, settings, zone, null, null)
+
+    /**
+     * Allocates every actual worked minute to the LOCAL calendar day on which it occurred.
+     * This prevents a night shift on the last day of a month from being paid entirely
+     * in the old month. Input must contain ALL shifts, including the prior day's shift.
+     */
+    fun calculatePeriod(
+        shifts: List<Shift>,
+        settings: SalarySettings,
+        startInclusive: LocalDate,
+        endExclusive: LocalDate,
+        zone: ZoneId = ZoneId.systemDefault()
+    ): WorkTotals {
+        require(endExclusive.isAfter(startInclusive)) { "Empty or reversed reporting period" }
+        return calculateInternal(shifts, settings, zone, startInclusive, endExclusive)
+    }
+
+    private fun calculateInternal(
+        shifts: List<Shift>,
+        settings: SalarySettings,
+        zone: ZoneId,
+        startInclusive: LocalDate?,
+        endExclusive: LocalDate?
     ): WorkTotals {
         var paid = 0L
         var actual = 0L
@@ -44,6 +73,8 @@ object WorkCalculator {
                 if (shift.unpaidBreak && minute >= shift.breakAfterMinutes && minute < breakEnd) continue
                 val local = start.toInstant().plusSeconds(minute * 60).atZone(zone)
                 val date = local.toLocalDate()
+                if (startInclusive != null && date.isBefore(startInclusive)) continue
+                if (endExclusive != null && !date.isBefore(endExclusive)) continue
                 val hour = local.hour
                 paid++
                 if (shift.actual) actual++ else planned++

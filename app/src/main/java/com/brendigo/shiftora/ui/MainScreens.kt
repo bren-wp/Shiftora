@@ -47,8 +47,8 @@ fun HomeScreen(
     val today = remember { LocalDate.now() }
     val weekStart = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
     val thisWeek = shifts.filter { !it.date.isBefore(weekStart) && it.date.isBefore(weekStart.plusDays(7)) }
-    val weekTotal = WorkCalculator.calculate(thisWeek, salary)
-    val monthTotal = WorkCalculator.calculate(monthly(shifts, YearMonth.from(today)), salary)
+    val weekTotal = WorkCalculator.calculatePeriod(shifts, salary, weekStart, weekStart.plusDays(7))
+    val monthTotal = WorkCalculator.calculatePeriod(shifts, salary, YearMonth.from(today).atDay(1), YearMonth.from(today).plusMonths(1).atDay(1))
     val todayShift = shifts.firstOrNull { it.date == today }
     val upcoming = shifts.filter { !it.date.isBefore(today.plusDays(1)) }
         .sortedWith(compareBy<Shift> { it.date }.thenBy { it.startMinute }).take(5)
@@ -112,7 +112,7 @@ fun HomeScreen(
                         Spacer(Modifier.height(6.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
                             repeat(7) { day ->
-                                val t = WorkCalculator.calculate(thisWeek.filter { it.date == weekStart.plusDays(day.toLong()) }, salary)
+                                val t = WorkCalculator.calculatePeriod(shifts, salary, weekStart.plusDays(day.toLong()), weekStart.plusDays(day.toLong() + 1))
                                 val ratio = (t.paidMinutes / 600f).coerceIn(.08f, 1f)
                                 Box(Modifier.weight(1f).height((38f * ratio).dp)
                                     .clip(RoundedCornerShape(4.dp)).background(if (t.paidMinutes > 0) Palette.Blue else Color(0xFFBED1EF)))
@@ -343,7 +343,11 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
         2 -> shifts.filter { it.date.year == shown.year }
         else -> monthly(shifts, shown)
     }
-    val totals = WorkCalculator.calculate(filtered, settings)
+    val totals = when (period) {
+        0 -> WorkCalculator.calculatePeriod(shifts, settings, weekAnchor, weekAnchor.plusDays(7))
+        2 -> WorkCalculator.calculatePeriod(shifts, settings, LocalDate.of(shown.year, 1, 1), LocalDate.of(shown.year + 1, 1, 1))
+        else -> WorkCalculator.calculatePeriod(shifts, settings, shown.atDay(1), shown.plusMonths(1).atDay(1))
+    }
     val byType = listOf(
         Triple("Jutarnja", totals.morningMinutes, Palette.Amber),
         Triple("Popodnevna", totals.afternoonMinutes, Palette.Blue),
@@ -470,7 +474,7 @@ fun SalaryScreen(
     onEditSalary: () -> Unit, onSettings: () -> Unit
 ) {
     var month by remember { mutableStateOf(YearMonth.now()) }
-    val totals = WorkCalculator.calculate(monthly(shifts, month), settings)
+    val totals = WorkCalculator.calculatePeriod(shifts, settings, month.atDay(1), month.plusMonths(1).atDay(1))
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader("Plaća", "Pregled radnih sati i dodataka.", dark = true, onSettings = onSettings)
         LazyColumn(contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
