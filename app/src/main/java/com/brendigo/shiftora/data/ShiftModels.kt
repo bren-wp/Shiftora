@@ -2,12 +2,30 @@ package com.brendigo.shiftora.data
 
 import java.time.LocalDate
 
-enum class ShiftKind(val label: String, val start: Int, val end: Int) {
-    MORNING("Jutarnja", 360, 840),
-    AFTERNOON("Popodnevna", 840, 1320),
-    NIGHT("Noćna", 1320, 360),
-    CUSTOM("Ostala", 480, 960),
-    OFF("Slobodno", 0, 0)
+/**
+ * Persisted by enum name: retain legacy names for existing installations and JSON backups.
+ * Non-working statuses never contribute minutes to worked-time or gross-pay estimates.
+ */
+enum class ShiftKind(
+    val label: String, val code: String, val start: Int, val end: Int,
+    val isWork: Boolean = true, val isAbsence: Boolean = false
+) {
+    MORNING("Jutarnja", "J", 360, 840),
+    AFTERNOON("Popodnevna", "P", 840, 1320),
+    NIGHT("Noćna", "N", 1320, 360),
+    CUSTOM("Prilagođena", "X", 480, 960),
+    OFF("Slobodan dan", "SD", 0, 0, isWork = false),
+    DAY("Dnevna", "D", 420, 1140),
+    STANDBY("Pripravnost", "PR", 0, 0, isWork = false),
+    ANNUAL("Godišnji odmor", "GO", 0, 0, isWork = false, isAbsence = true),
+    SICK("Bolovanje", "BO", 0, 0, isWork = false, isAbsence = true),
+    PAID_LEAVE("Plaćeni dopust", "PD", 0, 0, isWork = false, isAbsence = true);
+
+    companion object {
+        /** UI order is deliberately independent from persisted enum values. */
+        val calendarOrder = listOf(DAY, NIGHT, MORNING, AFTERNOON, STANDBY,
+            ANNUAL, SICK, OFF, PAID_LEAVE, CUSTOM)
+    }
 }
 
 data class Shift(
@@ -27,12 +45,12 @@ data class Shift(
         require(startMinute in 0..1439 && endMinute in 0..1439)
         require(breakMinutes in 0..240)
         require(breakAfterMinutes in 0..1440)
-        require(kind == ShiftKind.OFF || startMinute != endMinute) {
+        require(!kind.isWork || startMinute != endMinute) {
             "Početak i završetak smjene ne mogu biti jednaki."
         }
     }
 
-    val overnight: Boolean get() = kind != ShiftKind.OFF && endMinute <= startMinute
+    val overnight: Boolean get() = kind.isWork && endMinute <= startMinute
 }
 
 data class SalarySettings(
