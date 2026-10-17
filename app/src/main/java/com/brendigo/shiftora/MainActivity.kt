@@ -25,32 +25,14 @@ import java.io.ByteArrayOutputStream
 import com.brendigo.shiftora.data.ShiftKind
 import com.brendigo.shiftora.data.ShiftViewModel
 import com.brendigo.shiftora.ui.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (BuildConfig.DEBUG && intent.getBooleanExtra("shiftora_qa_seed", false)) {
-            // Screenshot fixtures are available in debug builds only, never in Play bundles.
-            com.brendigo.shiftora.data.ShiftStore(this).use { store ->
-                val month = java.time.YearMonth.now()
-                store.addRotation(
-                    month.atDay(1),
-                    listOf(
-                        ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF,
-                        ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF
-                    ),
-                    month.lengthOfMonth()
-                )
-                // Demonstration only: show planned and actually worked time in real screenshots.
-                store.all().filter { it.date.isBefore(java.time.LocalDate.now()) &&
-                    it.kind != ShiftKind.OFF
-                }.forEach { sample ->
-                    store.save(sample.copy(actual = true, overtime = sample.date.dayOfMonth % 11 == 0))
-                }
-            }
-        }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.rgb(11, 31, 59)),
             navigationBarStyle = SystemBarStyle.light(android.graphics.Color.rgb(248, 250, 252), android.graphics.Color.rgb(248, 250, 252))
@@ -73,62 +55,70 @@ class MainActivity : ComponentActivity() {
             var editing by remember { mutableStateOf<Shift?>(null) }
             var rotationOpen by remember { mutableStateOf(false) }
             var salaryOpen by remember { mutableStateOf(false) }
+            // SAF file operations and JSON validation must not block Compose rendering.
             val exportLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.CreateDocument("text/csv")
             ) { uri ->
-                if (uri != null) {
-                    runCatching {
-                        context.contentResolver.openOutputStream(uri)?.bufferedWriter(Charsets.UTF_8)?.use {
-                            it.write(vm.exportCsv())
-                        } ?: error("Nije moguće otvoriti datoteku.")
-                    }.onSuccess {
-                        scope.launch { snackbars.showSnackbar("CSV je uspješno izvezen.") }
-                    }.onFailure {
-                        scope.launch { snackbars.showSnackbar("Izvoz nije uspio: ${it.message}") }
+                if (uri != null) scope.launch {
+                    val result = runCatching {
+                        withContext(Dispatchers.IO) {
+                            context.contentResolver.openOutputStream(uri)
+                                ?.bufferedWriter(Charsets.UTF_8)?.use { it.write(vm.exportCsv()) }
+                                ?: error("Datoteku nije moguće otvoriti.")
+                        }
                     }
+                    snackbars.showSnackbar(result.fold(
+                        onSuccess = { "CSV je uspješno izvezen." },
+                        onFailure = { "Izvoz nije uspio: ${it.message}" }
+                    ))
                 }
             }
             var pendingRestore by remember { mutableStateOf<ShiftBackup?>(null) }
             val backupLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.CreateDocument("application/json")
             ) { uri ->
-                if (uri != null) {
-                    runCatching {
-                        context.contentResolver.openOutputStream(uri)?.bufferedWriter(Charsets.UTF_8)?.use {
-                            it.write(vm.exportBackup())
-                        } ?: error("Datoteka se nije mogla otvoriti.")
-                    }.onSuccess {
-                        scope.launch { snackbars.showSnackbar("Sigurnosna kopija je spremljena.") }
-                    }.onFailure {
-                        scope.launch { snackbars.showSnackbar("Neuspješno spremanje: ${it.message}") }
+                if (uri != null) scope.launch {
+                    val result = runCatching {
+                        withContext(Dispatchers.IO) {
+                            context.contentResolver.openOutputStream(uri)
+                                ?.bufferedWriter(Charsets.UTF_8)?.use { it.write(vm.exportBackup()) }
+                                ?: error("Datoteku nije moguće otvoriti.")
+                        }
                     }
+                    snackbars.showSnackbar(result.fold(
+                        onSuccess = { "Sigurnosna kopija je spremljena." },
+                        onFailure = { "Neuspješno spremanje: ${it.message}" }
+                    ))
                 }
             }
             val restoreLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.OpenDocument()
             ) { uri ->
-                if (uri != null) {
-                    runCatching {
-                        val content = context.contentResolver.openInputStream(uri) ?: error("Datoteka nije dostupna.")
-                        val bytes = content.use { input ->
-                            val result = ByteArrayOutputStream()
-                            val buffer = ByteArray(8192)
-                            var count = 0
-                            while (true) {
-                                val size = input.read(buffer)
-                                if (size < 0) break
-                                count += size
-                                require(count <= BackupCodec.MAX_BYTES) { "Datoteka je veća od 4 MB." }
-                                result.write(buffer, 0, size)
+                if (uri != null) scope.launch {
+                    val result = runCatching {
+                        withContext(Dispatchers.IO) {
+                            val input = context.contentResolver.openInputStream(uri)
+                                ?: error("Datoteka nije dostupna.")
+                            val bytes = input.use { stream ->
+                                val buffer = ByteArray(8192)
+                                val output = ByteArrayOutputStream()
+                                var total = 0L
+                                while (true) {
+                                    val count = stream.read(buffer)
+                                    if (count < 0) break
+                                    total += count
+                                    require(total <= BackupCodec.MAX_BYTES) { "Datoteka je veća od 4 MB." }
+                                    output.write(buffer, 0, count)
+                                }
+                                output.toByteArray()
                             }
-                            result.toByteArray()
+                            BackupCodec.decode(bytes.toString(Charsets.UTF_8))
                         }
-                        BackupCodec.decode(bytes.toString(Charsets.UTF_8))
-                    }.onSuccess {
-                        pendingRestore = it
-                    }.onFailure {
-                        scope.launch { snackbars.showSnackbar("Neispravna kopija: ${it.message}") }
                     }
+                    result.onSuccess { pendingRestore = it }
+                        .onFailure {
+                            snackbars.showSnackbar("Neispravna kopija: ${it.message}")
+                        }
                 }
             }
             SideEffect {
