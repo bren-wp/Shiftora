@@ -3,6 +3,8 @@ package com.brendigo.shiftora
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,7 +41,7 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
             val snackbars = remember { SnackbarHostState() }
-            var tab by remember { mutableIntStateOf(0) }
+            var tab by rememberSaveable { mutableIntStateOf(0) }
             var editing by remember { mutableStateOf<Shift?>(null) }
             var rotationOpen by remember { mutableStateOf(false) }
             var salaryOpen by remember { mutableStateOf(false) }
@@ -119,6 +121,9 @@ class MainActivity : ComponentActivity() {
                 if (onboarding) {
                     OnboardingScreen(onComplete = vm::finishOnboarding)
                 } else {
+                    BackHandler(enabled = tab != 0 && editing == null && !rotationOpen && !salaryOpen && pendingRestore == null) {
+                        tab = 0
+                    }
                     val sections = listOf(
                         "Početna" to Icons.Default.Home,
                         "Kalendar" to Icons.Default.CalendarMonth,
@@ -155,9 +160,14 @@ class MainActivity : ComponentActivity() {
                                 editing = Shift(date = date, kind = ShiftKind.MORNING)
                             }
                             val edit: (Shift) -> Unit = { entry -> editing = entry }
+                            val track: (LocalDate) -> Unit = { date ->
+                                editing = shifts.firstOrNull { it.date == date && it.kind != ShiftKind.OFF }
+                                    ?.copy(actual = true)
+                                    ?: Shift(date = date, kind = ShiftKind.MORNING, actual = true)
+                            }
                             val goSettings: () -> Unit = { tab = 4 }
                             when (tab) {
-                                0 -> HomeScreen(shifts, salary, add, edit, { tab = it }, goSettings)
+                                0 -> HomeScreen(shifts, salary, add, edit, track, { tab = it }, goSettings)
                                 1 -> CalendarScreen(shifts, add, edit, { rotationOpen = true }, goSettings)
                                 2 -> StatsScreen(shifts, salary, goSettings)
                                 3 -> SalaryScreen(shifts, salary, { salaryOpen = true }, goSettings)

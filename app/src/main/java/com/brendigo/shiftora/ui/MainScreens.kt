@@ -39,6 +39,7 @@ fun HomeScreen(
     salary: SalarySettings,
     onAdd: (LocalDate) -> Unit,
     onEdit: (Shift) -> Unit,
+    onTrack: (LocalDate) -> Unit,
     onTab: (Int) -> Unit,
     onSettings: () -> Unit
 ) {
@@ -128,27 +129,41 @@ fun HomeScreen(
             }
             item {
                 SectionTitle("Brze akcije")
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    BlueAction("Dodaj smjenu", { onAdd(today) }, Modifier.weight(1.05f))
-                    OutlinedButton(
-                        onClick = { onAdd(today) },
-                        shape = RoundedCornerShape(14.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp),
-                        modifier = Modifier.weight(1f).height(54.dp)
-                    ) {
-                        Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(17.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Sati", fontSize = 13.sp)
-                    }
-                    OutlinedButton(
-                        onClick = { onTab(3) },
-                        shape = RoundedCornerShape(14.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp),
-                        modifier = Modifier.weight(1f).height(54.dp)
-                    ) {
-                        Icon(Icons.Default.Calculate, contentDescription = null, modifier = Modifier.size(17.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Plaća", fontSize = 13.sp)
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    if (maxWidth < 370.dp) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            BlueAction("Dodaj smjenu", { onAdd(today) }, Modifier.fillMaxWidth())
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedButton(onClick = { onTrack(today) }, modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(14.dp)) {
+                                    Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Evidentiraj sate", maxLines = 2)
+                                }
+                                OutlinedButton(onClick = { onTab(3) }, modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(14.dp)) {
+                                    Icon(Icons.Default.Calculate, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Izračunaj plaću", maxLines = 2)
+                                }
+                            }
+                        }
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                            BlueAction("Dodaj smjenu", { onAdd(today) }, Modifier.weight(1f))
+                            OutlinedButton(onClick = { onTrack(today) }, modifier = Modifier.weight(1f).heightIn(min = 54.dp),
+                                shape = RoundedCornerShape(14.dp), contentPadding = PaddingValues(horizontal = 7.dp)) {
+                                Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("Evidentiraj sate", fontSize = 12.sp, maxLines = 2)
+                            }
+                            OutlinedButton(onClick = { onTab(3) }, modifier = Modifier.weight(1f).heightIn(min = 54.dp),
+                                shape = RoundedCornerShape(14.dp), contentPadding = PaddingValues(horizontal = 7.dp)) {
+                                Icon(Icons.Default.Calculate, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("Izračunaj plaću", fontSize = 12.sp, maxLines = 2)
+                            }
+                        }
                     }
                 }
             }
@@ -258,11 +273,30 @@ fun CalendarScreen(
                 }
             }
             Spacer(Modifier.height(12.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF).forEach { kind ->
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Box(Modifier.size(9.dp).clip(CircleShape).background(shiftColor(kind)))
-                        Text(kind.label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val kinds = listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF)
+                if (maxWidth < 350.dp) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        kinds.chunked(2).forEach { pair ->
+                            Row(Modifier.fillMaxWidth()) {
+                                pair.forEach { kind ->
+                                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Box(Modifier.size(9.dp).clip(CircleShape).background(shiftColor(kind)))
+                                        Text(kind.label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        kinds.forEach { kind ->
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Box(Modifier.size(9.dp).clip(CircleShape).background(shiftColor(kind)))
+                                Text(kind.label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
                     }
                 }
             }
