@@ -94,4 +94,46 @@ class WorkCalculatorTest {
         WorkCalculator.calculatePeriod(emptyList(), SalarySettings(),
             LocalDate.of(2026, 11, 1), LocalDate.of(2026, 10, 1), zagreb)
     }
+    @Test fun chartIsExclusiveEvenWhenPremiumsOverlap() {
+        val shift = Shift(date = LocalDate.of(2026, 10, 18), kind = ShiftKind.NIGHT,
+            actual = true, overtime = false)
+        val totals = WorkCalculator.calculate(listOf(shift),
+            SalarySettings(hourlyGross = 10.0), zagreb)
+        assertEquals(480L, totals.paidMinutes)
+        assertEquals(480L, totals.nightMinutes)
+        assertEquals(120L, totals.sundayMinutes)
+        assertEquals(120L, totals.chartSpecialMinutes)
+        assertEquals(360L, totals.chartNightMinutes)
+        assertEquals(0L, totals.chartRegularMinutes)
+        assertEquals(totals.paidMinutes,
+            totals.chartRegularMinutes + totals.chartOvertimeMinutes +
+                totals.chartNightMinutes + totals.chartSpecialMinutes)
+    }
+
+    @Test fun overtimeHasPriorityInDonutButNightPremiumStillApplies() {
+        val shift = Shift(date = LocalDate.of(2026, 10, 18), kind = ShiftKind.NIGHT,
+            overtime = true)
+        val totals = WorkCalculator.calculate(listOf(shift), SalarySettings(), zagreb)
+        assertEquals(480L, totals.chartOvertimeMinutes)
+        assertEquals(0L, totals.chartNightMinutes)
+        assertEquals(480L, totals.nightMinutes)
+        assertEquals(120L, totals.sundayMinutes)
+    }
+
+    @Test fun regularWeekdayIsAllRegularInDonut() {
+        val summary = WorkCalculator.calculate(
+            listOf(Shift(date = LocalDate.of(2026, 10, 14), kind = ShiftKind.MORNING)),
+            SalarySettings(), zagreb)
+        assertEquals(480L, summary.chartRegularMinutes)
+        assertEquals(0L, summary.chartOvertimeMinutes + summary.chartNightMinutes + summary.chartSpecialMinutes)
+    }
+
+    @Test fun chartRespectsUnpaidBreaks() {
+        val shift = Shift(date = LocalDate.of(2026, 10, 14), kind = ShiftKind.MORNING,
+            breakMinutes = 30, unpaidBreak = true)
+        val totals = WorkCalculator.calculate(listOf(shift), SalarySettings(), zagreb)
+        assertEquals(450L, totals.chartRegularMinutes)
+        assertEquals(totals.paidMinutes, totals.chartRegularMinutes)
+    }
+
 }

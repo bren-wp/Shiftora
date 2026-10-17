@@ -64,6 +64,10 @@ object WorkCalculator {
         var morning = 0L
         var afternoon = 0L
         var nightShifts = 0L
+        var chartRegular = 0L
+        var chartOvertime = 0L
+        var chartNight = 0L
+        var chartSpecial = 0L
         for (shift in shifts) {
             if (shift.kind == ShiftKind.OFF) continue
             // A shift spans at most two local dates; skip irrelevant periods early.
@@ -81,10 +85,21 @@ object WorkCalculator {
                 val hour = local.hour
                 paid++
                 if (shift.actual) actual++ else planned++
+                val isNight = isNightHour(hour, settings.nightStartHour, settings.nightEndHour)
+                val isSunday = date.dayOfWeek == DayOfWeek.SUNDAY
+                val isHoliday = CroatianHolidays.isHoliday(date)
                 if (shift.overtime) overtime++
-                if (isNightHour(hour, settings.nightStartHour, settings.nightEndHour)) night++
-                if (date.dayOfWeek == DayOfWeek.SUNDAY) sunday++
-                if (CroatianHolidays.isHoliday(date)) holiday++
+                if (isNight) night++
+                if (isSunday) sunday++
+                if (isHoliday) holiday++
+                // Each paid minute appears in exactly one donut segment.
+                // Actual premium counters above intentionally overlap when legally applicable.
+                when {
+                    shift.overtime -> chartOvertime++
+                    isSunday || isHoliday -> chartSpecial++
+                    isNight -> chartNight++
+                    else -> chartRegular++
+                }
                 when (shift.kind) {
                     ShiftKind.MORNING -> morning++
                     ShiftKind.AFTERNOON -> afternoon++
@@ -113,6 +128,10 @@ object WorkCalculator {
             sundayMinutes = sunday, holidayMinutes = holiday,
             morningMinutes = morning, afternoonMinutes = afternoon,
             nightShiftMinutes = nightShifts,
+            chartRegularMinutes = chartRegular,
+            chartOvertimeMinutes = chartOvertime,
+            chartNightMinutes = chartNight,
+            chartSpecialMinutes = chartSpecial,
             grossCents = base + premiums, baseCents = base, premiumCents = premiums
         )
     }

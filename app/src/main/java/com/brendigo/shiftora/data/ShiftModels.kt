@@ -62,6 +62,11 @@ data class WorkTotals(
     val morningMinutes: Long = 0,
     val afternoonMinutes: Long = 0,
     val nightShiftMinutes: Long = 0,
+    /** Exclusive visual categories: add up to paidMinutes without double-counting overlapping premiums. */
+    val chartRegularMinutes: Long = 0,
+    val chartOvertimeMinutes: Long = 0,
+    val chartNightMinutes: Long = 0,
+    val chartSpecialMinutes: Long = 0,
     val grossCents: Long = 0,
     val baseCents: Long = 0,
     val premiumCents: Long = 0
