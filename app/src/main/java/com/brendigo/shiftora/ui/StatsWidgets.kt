@@ -76,7 +76,7 @@ fun StatIndicatorCard(
     extra: String? = null
 ) {
     Column(modifier.clip(RoundedCornerShape(19.dp)).background(surface)
-        .padding(horizontal = 12.dp, vertical = 11.dp)) {
+        .padding(horizontal = 11.dp, vertical = 9.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
@@ -84,13 +84,13 @@ fun StatIndicatorCard(
                 fontWeight = FontWeight.SemiBold, maxLines = 2,
                 modifier = Modifier.weight(1f))
         }
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(3.dp))
         Text(value, color = Palette.Ink,
             fontSize = if (value.length > 10) 17.sp else if (value.contains("/")) 19.sp else 23.sp,
-            lineHeight = 28.sp,
+            lineHeight = 25.sp,
             maxLines = 1, fontWeight = FontWeight.Bold,
             overflow = TextOverflow.Ellipsis)
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(2.dp))
         TrendIndicator(currentMinutes, previousMinutes)
         if (extra != null) {
             Text(extra, color = Palette.Secondary, fontSize = 10.sp, lineHeight = 12.sp,
@@ -110,11 +110,11 @@ fun ShiftDonutCard(totals: WorkTotals) {
     )
     Column(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp))
-            .background(MaterialTheme.colorScheme.surface).padding(14.dp)
+            .background(MaterialTheme.colorScheme.surface).padding(12.dp)
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Box(Modifier.size(135.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(120.dp), contentAlignment = Alignment.Center) {
                 Canvas(Modifier.fillMaxSize().padding(9.dp)) {
                     val width = 21.dp.toPx()
                     if (total <= 0L) {
@@ -140,20 +140,18 @@ fun ShiftDonutCard(totals: WorkTotals) {
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 sections.forEach { (name, amount, color) ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.size(10.dp).clip(CircleShape).background(color))
-                        Spacer(Modifier.width(6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Box(Modifier.size(9.dp).clip(CircleShape).background(color))
                         Text(name, color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 11.sp, maxLines = 1,
+                            fontSize = 10.sp, maxLines = 1,
                             overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                        Spacer(Modifier.width(4.dp))
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(minutesLabel(amount), color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                            Text(if (total == 0L) "0%" else
-                                ((amount * 100.0 / total).roundToInt()).toString() + "%",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp)
-                        }
+                        Text(minutesLabel(amount), color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                        Text(if (total == 0L) "0%" else
+                            ((amount * 100.0 / total).roundToInt()).toString() + "%",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 10.sp, maxLines = 1)
                     }
                 }
             }
