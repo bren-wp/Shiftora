@@ -303,6 +303,8 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
     var sunday by remember(current) { mutableStateOf(current.sundayPercent.toString()) }
     var holiday by remember(current) { mutableStateOf(current.holidayPercent.toString()) }
     var overtime by remember(current) { mutableStateOf(current.overtimePercent.toString()) }
+    var nightFrom by remember(current) { mutableStateOf(current.nightStartHour.toString()) }
+    var nightUntil by remember(current) { mutableStateOf(current.nightEndHour.toString()) }
     fun number(text: String) = text.replace(',', '.').toDoubleOrNull()
     val parsed = runCatching {
         SalarySettings(
@@ -310,7 +312,9 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
             nightPercent = number(night) ?: kotlin.error("Noćni"),
             sundayPercent = number(sunday) ?: kotlin.error("Nedjelje"),
             holidayPercent = number(holiday) ?: kotlin.error("Blagdani"),
-            overtimePercent = number(overtime) ?: kotlin.error("Prekovremeni")
+            overtimePercent = number(overtime) ?: kotlin.error("Prekovremeni"),
+            nightStartHour = nightFrom.toIntOrNull() ?: kotlin.error("Početak noći"),
+            nightEndHour = nightUntil.toIntOrNull() ?: kotlin.error("Kraj noći")
         )
     }.getOrNull()
     AlertDialog(
@@ -332,6 +336,15 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
                     label = { Text("Dodatak za blagdane (%)") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(overtime, onValueChange = { overtime = it },
                     label = { Text("Dodatak za prekovremeni rad (%)") }, modifier = Modifier.fillMaxWidth())
+                Text("Razdoblje noćnog rada (24-satni format)", style = MaterialTheme.typography.titleSmall)
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(nightFrom, onValueChange = { nightFrom = it },
+                        label = { Text("Od sata") }, singleLine = true, modifier = Modifier.weight(1f))
+                    OutlinedTextField(nightUntil, onValueChange = { nightUntil = it },
+                        label = { Text("Do sata") }, singleLine = true, modifier = Modifier.weight(1f))
+                }
+                Text("Primjer: od 22 do 6. Satnica i dodaci nisu službeni obračun.",
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         },
         confirmButton = {

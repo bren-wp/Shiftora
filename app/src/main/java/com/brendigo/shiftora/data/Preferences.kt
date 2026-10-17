@@ -21,7 +21,9 @@ class Preferences(context: Context) {
         nightPercent = number("night", 30.0).coerceIn(0.0, 300.0),
         sundayPercent = number("sunday", 50.0).coerceIn(0.0, 300.0),
         holidayPercent = number("holiday", 50.0).coerceIn(0.0, 300.0),
-        overtimePercent = number("overtime", 50.0).coerceIn(0.0, 300.0)
+        overtimePercent = number("overtime", 50.0).coerceIn(0.0, 300.0),
+        nightStartHour = store.getInt("night_start_hour", 22).coerceIn(0, 23),
+        nightEndHour = store.getInt("night_end_hour", 6).coerceIn(0, 23)
     )
 
     fun saveSalary(settings: SalarySettings) {
@@ -31,6 +33,8 @@ class Preferences(context: Context) {
             .putString("sunday", settings.sundayPercent.toString())
             .putString("holiday", settings.holidayPercent.toString())
             .putString("overtime", settings.overtimePercent.toString())
+            .putInt("night_start_hour", settings.nightStartHour)
+            .putInt("night_end_hour", settings.nightEndHour)
             .apply()
     }
 }
