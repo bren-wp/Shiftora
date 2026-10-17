@@ -250,7 +250,7 @@ fun CalendarScreen(
                         else if (entry != null) shiftBg(entry.kind)
                         else Color.Transparent
                         Column(
-                            Modifier.weight(1f).padding(2.dp).height(52.dp)
+                            Modifier.weight(1f).padding(2.dp).height(43.dp)
                                 .clip(RoundedCornerShape(13.dp)).background(bg)
                                 .clickable {
                                     selected = date
