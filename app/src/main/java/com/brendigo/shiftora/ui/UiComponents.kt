@@ -82,6 +82,7 @@ fun BrandedHeader(
     subtitle: String? = null,
     dark: Boolean = false,
     showSettings: Boolean = true,
+    showStatsDecor: Boolean = false,
     onSettings: () -> Unit = {}
 ) {
     val background = if (dark) Brush.linearGradient(listOf(Palette.Navy, Palette.DeepNavy))
@@ -104,10 +105,32 @@ fun BrandedHeader(
         }
         if (title != null) {
             Spacer(Modifier.height(9.dp))
-            Text(title, fontSize = 27.sp, lineHeight = 32.sp, fontWeight = FontWeight.Bold, color = fg)
-            if (subtitle != null) {
-                Spacer(Modifier.height(3.dp))
-                Text(subtitle, fontSize = 13.sp, color = if (dark) Color(0xFFB8CEE9) else Palette.Secondary)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                Column(Modifier.weight(1f)) {
+                    Text(title, fontSize = 27.sp, lineHeight = 32.sp,
+                        fontWeight = FontWeight.Bold, color = fg)
+                    if (subtitle != null) {
+                        Spacer(Modifier.height(3.dp))
+                        Text(subtitle, fontSize = 13.sp,
+                            color = if (dark) Color(0xFFB8CEE9) else Palette.Secondary)
+                    }
+                }
+                if (showStatsDecor) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.TrendingUp, contentDescription = null,
+                            tint = Color(0xFF32D5BD), modifier = Modifier.size(27.dp))
+                        Spacer(Modifier.height(5.dp))
+                        Row(verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            listOf(13, 20, 27, 35).forEach { h ->
+                                Box(Modifier.width(10.dp).height(h.dp)
+                                    .background(Palette.Blue, RoundedCornerShape(
+                                        topStart = 3.dp, topEnd = 3.dp)))
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -462,7 +462,7 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
     }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader("Statistika i plaća", "Tvoj rad u brojkama. Veća kontrola.",
-            dark = true, onSettings = onSettings)
+            dark = true, showStatsDecor = true, onSettings = onSettings)
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 13.dp, vertical = 11.dp),
