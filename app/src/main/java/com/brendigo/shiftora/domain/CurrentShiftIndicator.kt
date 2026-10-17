@@ -15,7 +15,7 @@ object CurrentShiftIndicator {
         now: Instant,
         zone: ZoneId = ZoneId.systemDefault()
     ): ActiveShift? {
-        return shifts.asSequence().filter { it.kind != ShiftKind.OFF }.mapNotNull { shift ->
+        return shifts.asSequence().filter { it.kind.isWork }.mapNotNull { shift ->
             val from = ShiftTimeline.from(shift, zone)
             val until = ShiftTimeline.until(shift, zone)
             if (now.isBefore(from) || !now.isBefore(until)) null

@@ -14,7 +14,7 @@ import java.time.LocalDate
 /** One-minute accounting avoids rounding error, handles local DST and overlapping premiums. */
 object WorkCalculator {
     fun durationMinutes(shift: Shift, zone: ZoneId = ZoneId.systemDefault()): Long {
-        if (shift.kind == ShiftKind.OFF) return 0L
+        if (!shift.kind.isWork) return 0L
         return Duration.between(ShiftTimeline.from(shift, zone), ShiftTimeline.until(shift, zone))
             .toMinutes().coerceAtLeast(0)
     }
@@ -68,7 +68,7 @@ object WorkCalculator {
         var chartNight = 0L
         var chartSpecial = 0L
         for (shift in shifts) {
-            if (shift.kind == ShiftKind.OFF) continue
+            if (!shift.kind.isWork) continue
             // A shift spans at most two local dates; skip irrelevant periods early.
             if (startInclusive != null && shift.date.isBefore(startInclusive.minusDays(1))) continue
             if (endExclusive != null && !shift.date.isBefore(endExclusive)) continue
