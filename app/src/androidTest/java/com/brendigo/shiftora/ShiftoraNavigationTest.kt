@@ -3,6 +3,7 @@ package com.brendigo.shiftora
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.brendigo.shiftora.data.ShiftKind
@@ -25,6 +26,11 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Početna").assertExists()
         compose.onNodeWithText("Kalendar").performClick()
         compose.onNodeWithText("Mjesec").assertExists()
+        compose.onNodeWithText("GO").assertExists()
+        compose.onNodeWithText("BO").assertExists()
+        compose.onNodeWithContentDescription("Uredi fond sati").performClick()
+        compose.onNodeWithText("Fond sati u ovom mjesecu").assertExists()
+        compose.onNodeWithText("Zadani fond").performClick()
         compose.onNodeWithText("Statistika").performClick()
         compose.onNodeWithText("Statistika i plaća").assertExists()
         compose.onNodeWithText("Redovni sati").assertExists()
@@ -36,6 +42,9 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Pregled radnih sati i dodataka.").assertExists()
         compose.onNodeWithText("Više").performClick()
         compose.onNodeWithText("Alati").assertExists()
+        compose.onNodeWithText("Boje smjena i izostanaka").performClick()
+        compose.onNodeWithText("Boje i oznake smjena").assertExists()
+        compose.onNodeWithText("Gotovo").performClick()
         // Emulator-only sample data used by screenshot QA. Never included in production.
         val store = ShiftStore(compose.activity.applicationContext)
         try {

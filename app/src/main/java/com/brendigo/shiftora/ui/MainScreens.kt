@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -309,6 +310,7 @@ fun CalendarScreen(
                         // Selection remains a border so it never hides the chosen shift color.
                         val tileColor = if (entry != null) shiftColor(entry.kind)
                             else if (chosen) Palette.BlueLight else Color.Transparent
+                        val tileText = if (tileColor.luminance() > .48f) Palette.Navy else Color.White
                         Box(
                             Modifier.weight(1f).padding(2.dp).height(dayHeight)
                                 .clip(RoundedCornerShape(11.dp))
@@ -324,18 +326,18 @@ fun CalendarScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center) {
                                 Text(date.dayOfMonth.toString(),
-                                    color = if (entry != null) Color.White.copy(alpha = .85f)
+                                    color = if (entry != null) tileText.copy(alpha = .86f)
                                         else if (inMonth) MaterialTheme.colorScheme.onSurface
                                         else Palette.Secondary.copy(alpha = .5f),
                                     fontWeight = FontWeight.Medium, fontSize = 10.sp,
                                     lineHeight = 13.sp)
                                 if (entry != null) {
-                                    Text(entry.kind.code, color = Color.White,
+                                    Text(entry.kind.code, color = tileText,
                                         fontSize = if (entry.kind.code.length > 1) 16.sp else 24.sp,
                                         lineHeight = 26.sp, fontWeight = FontWeight.ExtraBold,
                                         maxLines = 1)
                                     if (entries.size > 1) {
-                                        Text("+${entries.size - 1}", color = Color.White,
+                                        Text("+${entries.size - 1}", color = tileText,
                                             fontSize = 9.sp, lineHeight = 10.sp)
                                     }
                                 } else {
