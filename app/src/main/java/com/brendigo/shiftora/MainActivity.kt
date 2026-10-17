@@ -16,6 +16,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brendigo.shiftora.data.Shift
+import com.brendigo.shiftora.data.ShiftBackup
+import com.brendigo.shiftora.data.BackupCodec
+import java.io.ByteArrayOutputStream
 import com.brendigo.shiftora.data.ShiftKind
 import com.brendigo.shiftora.data.ShiftViewModel
 import com.brendigo.shiftora.ui.*
@@ -52,6 +55,49 @@ class MainActivity : ComponentActivity() {
                         scope.launch { snackbars.showSnackbar("CSV je uspješno izvezen.") }
                     }.onFailure {
                         scope.launch { snackbars.showSnackbar("Izvoz nije uspio: ${it.message}") }
+                    }
+                }
+            }
+            var pendingRestore by remember { mutableStateOf<ShiftBackup?>(null) }
+            val backupLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.CreateDocument("application/json")
+            ) { uri ->
+                if (uri != null) {
+                    runCatching {
+                        context.contentResolver.openOutputStream(uri)?.bufferedWriter(Charsets.UTF_8)?.use {
+                            it.write(vm.exportBackup())
+                        } ?: error("Datoteka se nije mogla otvoriti.")
+                    }.onSuccess {
+                        scope.launch { snackbars.showSnackbar("Sigurnosna kopija je spremljena.") }
+                    }.onFailure {
+                        scope.launch { snackbars.showSnackbar("Neuspješno spremanje: ${it.message}") }
+                    }
+                }
+            }
+            val restoreLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.OpenDocument()
+            ) { uri ->
+                if (uri != null) {
+                    runCatching {
+                        val content = context.contentResolver.openInputStream(uri) ?: error("Datoteka nije dostupna.")
+                        val bytes = content.use { input ->
+                            val result = ByteArrayOutputStream()
+                            val buffer = ByteArray(8192)
+                            var count = 0
+                            while (true) {
+                                val size = input.read(buffer)
+                                if (size < 0) break
+                                count += size
+                                require(count <= BackupCodec.MAX_BYTES) { "Datoteka je veća od 4 MB." }
+                                result.write(buffer, 0, size)
+                            }
+                            result.toByteArray()
+                        }
+                        BackupCodec.decode(bytes.toString(Charsets.UTF_8))
+                    }.onSuccess {
+                        pendingRestore = it
+                    }.onFailure {
+                        scope.launch { snackbars.showSnackbar("Neispravna kopija: ${it.message}") }
                     }
                 }
             }
@@ -119,10 +165,30 @@ class MainActivity : ComponentActivity() {
                                     darkMode = darkMode, onDark = vm::setDarkMode,
                                     onRotation = { rotationOpen = true },
                                     onCsv = { exportLauncher.launch("Shiftora-smjene-${LocalDate.now()}.csv") },
+                                    onBackup = { backupLauncher.launch("Shiftora-kopija-${LocalDate.now()}.json") },
+                                    onRestore = { restoreLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
                                     onEditSalary = { salaryOpen = true }, onSettings = goSettings
                                 )
                             }
                         }
+                    }
+                    pendingRestore?.let { backup ->
+                        AlertDialog(
+                            onDismissRequest = { pendingRestore = null },
+                            title = { Text("Vratiti sigurnosnu kopiju?") },
+                            text = {
+                                Text("Kopija sadrži ${backup.shifts.size} smjena. Postojeće smjene i postavke satnice bit će ZAMIJENJENE. Ovo se ne može poništiti. Želiš li nastaviti?")
+                            },
+                            confirmButton = {
+                                Button(onClick = {
+                                    vm.restoreBackup(backup)
+                                    pendingRestore = null
+                                }) { Text("Zamijeni podatke") }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { pendingRestore = null }) { Text("Odustani") }
+                            }
+                        )
                     }
                     editing?.let { item ->
                         ShiftEditorDialog(

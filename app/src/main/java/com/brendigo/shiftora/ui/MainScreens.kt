@@ -549,7 +549,8 @@ fun SalaryScreen(
 @Composable
 fun MoreScreen(
     darkMode: Boolean, onDark: (Boolean) -> Unit,
-    onRotation: () -> Unit, onCsv: () -> Unit, onEditSalary: () -> Unit, onSettings: () -> Unit
+    onRotation: () -> Unit, onCsv: () -> Unit,
+    onBackup: () -> Unit, onRestore: () -> Unit, onEditSalary: () -> Unit, onSettings: () -> Unit
 ) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader("Više", "Postavke i tvoji podaci.", dark = true, onSettings = onSettings)
@@ -562,6 +563,10 @@ fun MoreScreen(
                 ListAction("Postavke plaće", "Satnica i dodaci", Icons.Default.Calculate, onEditSalary)
                 HorizontalDivider()
                 ListAction("Izvoz CSV", "Izvezi smjene i evidenciju sati", Icons.Default.FileDownload, onCsv)
+                HorizontalDivider()
+                ListAction("Sigurnosna kopija", "Spremi sve smjene i satnicu u JSON", Icons.Default.SaveAlt, onBackup)
+                HorizontalDivider()
+                ListAction("Vrati podatke", "Provjeri kopiju prije zamjene postojećih podataka", Icons.Default.Restore, onRestore)
             }
             SurfaceCard(Modifier.fillMaxWidth()) {
                 SectionTitle("Izgled")

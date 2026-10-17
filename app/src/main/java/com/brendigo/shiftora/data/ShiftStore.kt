@@ -80,6 +80,25 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
     }
 
     /**
+     * Transactional replacement. The original schedule remains intact when a row is invalid
+     * or the database encounters an error before the transaction is committed.
+     */
+    @Synchronized fun replaceAll(shifts: List<Shift>) {
+        require(shifts.size <= 20_000)
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete("shifts", null, null)
+            shifts.forEach { shift ->
+                db.insertOrThrow("shifts", null, values(shift))
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    /**
      * Add an entire rotation atomically, but preserve days where the user already entered data.
      * No silent overwrite of manual work is allowed.
      */
