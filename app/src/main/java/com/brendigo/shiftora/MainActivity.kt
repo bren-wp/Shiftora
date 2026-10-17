@@ -196,7 +196,7 @@ class MainActivity : ComponentActivity() {
                             val goSettings: () -> Unit = { tab = 4 }
                             when (tab) {
                                 0 -> HomeScreen(shifts, salary, add, edit, track, { tab = it }, goSettings)
-                                1 -> CalendarScreen(shifts, add, edit, { rotationOpen = true }, goSettings)
+                                1 -> CalendarScreen(shifts, add, edit, goSettings)
                                 2 -> StatsScreen(shifts, salary, goSettings)
                                 3 -> SalaryScreen(shifts, salary, { salaryOpen = true }, goSettings)
                                 else -> MoreScreen(

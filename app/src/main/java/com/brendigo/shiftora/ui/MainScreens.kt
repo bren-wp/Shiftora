@@ -196,8 +196,7 @@ fun HomeScreen(
 @Composable
 fun CalendarScreen(
     shifts: List<Shift>, onAdd: (LocalDate) -> Unit,
-    onEdit: (Shift) -> Unit, onRotation: () -> Unit,
-    onSettings: () -> Unit
+    onEdit: (Shift) -> Unit, onSettings: () -> Unit
 ) {
     var shown by remember { mutableStateOf(YearMonth.now()) }
     var selected by remember { mutableStateOf(LocalDate.now()) }
@@ -210,26 +209,31 @@ fun CalendarScreen(
         val monday = selected.minusDays((selected.dayOfWeek.value - 1).toLong())
         listOf((0..6).map { monday.plusDays(it.toLong()) })
     } else calendarDays.chunked(7)
-    val dayShifts = shifts.filter { it.date == selected }
+    val shiftsByDate = remember(shifts) { shifts.groupBy { it.date } }
+    val dayShifts = shiftsByDate[selected].orEmpty()
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader(dark = true, onSettings = onSettings)
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+        val compact = maxHeight < 715.dp
+        val dayHeight = if (compact) 34.dp else 43.dp
+        val spacing = if (compact) 6.dp else 10.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 24.dp)) {
+            .padding(start = 12.dp, end = 12.dp, top = 7.dp, bottom = 12.dp)) {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
                 .background(Palette.BlueLight).padding(3.dp)) {
                 listOf("Mjesec", "Tjedan").forEachIndexed { index, label ->
                     val isSelected = weekOnly == (index == 1)
                     Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
                         .background(if (isSelected) Color.White else Color.Transparent)
-                        .clickable { weekOnly = index == 1 }.padding(11.dp),
+                        .clickable { weekOnly = index == 1 }.padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center) {
                         Text(label, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) Palette.Blue else Palette.Navy)
                     }
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(spacing))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = {
                     shown = shown.minusMonths(1)
@@ -242,25 +246,26 @@ fun CalendarScreen(
                     selected = shown.atDay(1)
                 }) { Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeći mjesec") }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth()) {
                 listOf("Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned").forEach {
                     Text(it, Modifier.weight(1f), textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(7.dp))
             rows.forEach { dates ->
                 Row(Modifier.fillMaxWidth()) {
                     dates.forEach { date ->
                         val chosen = selected == date
-                        val entry = shifts.firstOrNull { it.date == date }
+                        val entries = shiftsByDate[date].orEmpty()
+                        val entry = entries.firstOrNull()
                         val inMonth = YearMonth.from(date) == shown
                         val bg = if (chosen) Palette.Blue
                         else if (entry != null) shiftBg(entry.kind)
                         else Color.Transparent
                         Column(
-                            Modifier.weight(1f).padding(2.dp).height(43.dp)
+                            Modifier.weight(1f).padding(2.dp).height(dayHeight)
                                 .clip(RoundedCornerShape(13.dp)).background(bg)
                                 .clickable {
                                     selected = date
@@ -272,17 +277,22 @@ fun CalendarScreen(
                             Text(date.dayOfMonth.toString(),
                                 color = if (chosen) Color.White else if (inMonth) MaterialTheme.colorScheme.onSurface else Palette.Secondary.copy(alpha = .45f),
                                 fontWeight = if (chosen || date == LocalDate.now()) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 15.sp)
-                            Spacer(Modifier.height(3.dp))
+                                fontSize = if (compact) 13.sp else 15.sp,
+                                lineHeight = if (compact) 16.sp else 18.sp)
                             if (entry != null) {
-                                Box(Modifier.size(7.dp).clip(CircleShape)
-                                    .background(if (chosen) Color.White else shiftColor(entry.kind)))
-                            } else Spacer(Modifier.height(7.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    entries.take(3).forEach { item ->
+                                        Box(Modifier.size(if (compact) 5.dp else 7.dp)
+                                            .clip(CircleShape)
+                                            .background(if (chosen) Color.White else shiftColor(item.kind)))
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(spacing))
             BoxWithConstraints(Modifier.fillMaxWidth()) {
                 val kinds = listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF)
                 if (maxWidth < 350.dp) {
@@ -310,30 +320,35 @@ fun CalendarScreen(
                     }
                 }
             }
-            Spacer(Modifier.height(14.dp))
-            SurfaceCard(Modifier.fillMaxWidth()) {
+            Spacer(Modifier.height(spacing))
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(21.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(if (compact) 11.dp else 15.dp)
+            ) {
                 Text(selected.dateLabel(), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(6.dp))
                 if (dayShifts.isEmpty()) {
                     Text("Za ovaj dan nema spremljene smjene.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     dayShifts.forEach { shift ->
                         Row(verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                            Box(Modifier.size(58.dp).clip(RoundedCornerShape(14.dp))
+                            Box(Modifier.size(if (compact) 44.dp else 52.dp).clip(RoundedCornerShape(14.dp))
                                 .background(shiftBg(shift.kind)), contentAlignment = Alignment.Center) {
                                 Icon(shiftIcon(shift.kind), contentDescription = null,
-                                    tint = shiftColor(shift.kind), modifier = Modifier.size(31.dp))
+                                    tint = shiftColor(shift.kind), modifier = Modifier.size(27.dp))
                             }
                             Column(Modifier.weight(1f)) {
                                 Text("${shift.kind.label} smjena", style = MaterialTheme.typography.titleMedium)
                                 Text(if (shift.kind == ShiftKind.OFF) "Slobodan dan"
                                     else "${clock(shift.startMinute)} – ${clock(shift.endMinute)} • ${minutesLabel(WorkCalculator.durationMinutes(shift))}",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, maxLines = 1)
                             }
-                            Text(if (shift.actual) "Odrađeno" else "Planirano", color = Palette.Blue, fontSize = 12.sp)
+                            Text(if (shift.actual) "Odrađeno" else "Planirano",
+                                color = if (shift.actual) Palette.Mint else Palette.Blue, fontSize = 11.sp)
                         }
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(7.dp))
                         if (shift.kind != ShiftKind.OFF) {
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 DetailTile("Radno vrijeme", "${clock(shift.startMinute)}–${clock(shift.endMinute)}", Modifier.weight(1f))
@@ -341,23 +356,21 @@ fun CalendarScreen(
                                 DetailTile("Bilješka", shift.note.ifBlank { "—" }, Modifier.weight(1f))
                             }
                         }
-                        Spacer(Modifier.height(10.dp))
-                        OutlinedButton(onClick = { onEdit(shift) }, modifier = Modifier.fillMaxWidth()) {
+                        Spacer(Modifier.height(7.dp))
+                        OutlinedButton(onClick = { onEdit(shift) },
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 5.dp),
+                            shape = RoundedCornerShape(13.dp)) {
                             Icon(Icons.Default.Edit, contentDescription = null)
                             Spacer(Modifier.width(7.dp))
                             Text("Uredi smjenu")
                         }
                     }
                 }
-                Spacer(Modifier.height(9.dp))
+                Spacer(Modifier.height(7.dp))
                 BlueAction("Dodaj smjenu", { onAdd(selected) }, Modifier.fillMaxWidth())
             }
-            Spacer(Modifier.height(10.dp))
-            OutlinedButton(onClick = onRotation, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.AutoMode, contentDescription = null)
-                Spacer(Modifier.width(7.dp))
-                Text("Automatski ponovi raspored")
-            }
+        }
         }
     }
 }
