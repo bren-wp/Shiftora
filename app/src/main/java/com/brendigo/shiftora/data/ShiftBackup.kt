@@ -3,6 +3,7 @@ package com.brendigo.shiftora.data
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
+import com.brendigo.shiftora.domain.ShiftScheduleValidator
 
 /** Explicit user-controlled portable backup. No cloud transfer or implicit restore. */
 data class ShiftBackup(val shifts: List<Shift>, val salary: SalarySettings)
@@ -94,6 +95,8 @@ object BackupCodec {
                 note = note
             )
         }
+        // Reject overlapping entries before asking for destructive restore approval.
+        ShiftScheduleValidator.validateAll(shifts)
         return ShiftBackup(shifts, salary)
     }
 }
