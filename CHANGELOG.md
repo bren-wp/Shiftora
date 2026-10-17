@@ -1,5 +1,15 @@
 # Shiftora – povijest razvoja
 
+## 0.3.0 (2026-10-17) – stabilizacija i QA
+- Sprječavanje preklapajućih smjena i dvostrukog uračunavanja sati
+- Ograničenja trajanja pauze, zero-duration smjena i noćnog intervala
+- Podesivo razdoblje noćnog rada, dodatna testna pokrivenost
+- Ispravna valuta EUR čak i na starijim Android uređajima s HRK lokalizacijom
+- Tamne statusne ikone na svijetloj podlozi, responzivnije akcije i kalendar
+- Uveden standardni Gradle wrapper 8.10.2 i reproducibilne CI provjere
+- Snimke stvarnih ekrana s emulatora, umjesto ilustrativnih mockupova
+- Android lint, debug APK i nepotpisani release AAB u CI-u
+
 ## 0.2.0 (2026-10-17) – razvojno izdanje
 - Validirano JSON sigurnosno kopiranje i atomsko vraćanje rasporeda
 - Prihod i radni sati pravilno podijeljeni između mjeseci i tjedana za noćne smjene

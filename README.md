@@ -4,7 +4,7 @@
 
 Nativna Android aplikacija na hrvatskom jeziku inspirirana vizualnim referencama premium brenda Shiftora. Nema prijave, pozadinskog servera, analitike ni dopuštenja za internet.
 
-## Značajke (razvoj 0.2.0)
+## Značajke (razvoj 0.3.0)
 
 - Početna nadzorna ploča s današnjom i nadolazećim smjenama te pregledom tjednih sati
 - Mjesečni i tjedni kalendar, više smjena na dan, unos, uređivanje i brisanje
@@ -31,7 +31,7 @@ Kotlin 2.0.21, Jetpack Compose + Material 3, Android SDK 35 (minSdk 26), SQLite 
 3. GitHub Actions / **Android CI** pokreće JVM testove, provjerava kompilaciju UI testova i izrađuje debug APK koji je dostupan kao workflow artifact nakon uspješnog builda.
 4. Dodatni **Android UI smoke test** workflow pokreće emulator pri ručnom pokretanju preko GitHub Actions i sprema stvarnu snimku zaslona (ne generiranu sliku).
 
-Za CLI koristi Gradle 8.10.2: `gradle :app:testDebugUnitTest :app:assembleDebug`. Projekt trenutno nema uključen Gradle wrapper; Android Studio može koristiti lokalnu podržanu distribuciju. Produkcijski APK/AAB zahtijeva vlastito sigurno potpisivanje.
+Za CLI koristi uključeni službeni Gradle wrapper 8.10.2: `./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:bundleRelease`. GitHub Actions objavljuje razvojni APK i nepotpisani AAB kao artefakte. Za produkcijsko izdanje potrebni su vlastiti ključevi za potpisivanje i dodatni QA.
 
 ## Obračun
 
