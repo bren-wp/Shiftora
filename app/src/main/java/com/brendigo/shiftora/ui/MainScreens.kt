@@ -66,10 +66,10 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             item {
-                Spacer(Modifier.height(3.dp))
+                Spacer(Modifier.height(2.dp))
                 Text("Danas je", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp)
                 Text(today.dateLabel(), style = MaterialTheme.typography.headlineLarge)
                 Text(today.weekdayLabel().replaceFirstChar { it.uppercase(Locale("hr", "HR")) },
@@ -81,7 +81,7 @@ fun HomeScreen(
                 }) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Box(
-                            Modifier.size(66.dp).clip(RoundedCornerShape(18.dp))
+                            Modifier.size(55.dp).clip(RoundedCornerShape(17.dp))
                                 .background(if (todayShift != null) shiftBg(todayShift.kind) else Palette.BlueLight),
                             contentAlignment = Alignment.Center
                         ) {
@@ -89,7 +89,7 @@ fun HomeScreen(
                                 if (todayShift != null) shiftIcon(todayShift.kind) else Icons.Default.Today,
                                 contentDescription = null,
                                 tint = if (todayShift != null) shiftColor(todayShift.kind) else Palette.Blue,
-                                modifier = Modifier.size(35.dp)
+                                modifier = Modifier.size(29.dp)
                             )
                         }
                         Column(Modifier.weight(1f)) {
@@ -114,7 +114,7 @@ fun HomeScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                     SurfaceCard(Modifier.weight(1f).clickable { onTab(2) }, color = Palette.BlueLight) {
                         Text("Ovaj tjedan", color = Palette.Ink, fontWeight = FontWeight.SemiBold)
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(7.dp))
                         Text(minutesLabel(weekTotal.paidMinutes), fontSize = 29.sp, color = Palette.Ink, fontWeight = FontWeight.Bold)
                         Text("Planirano i odrađeno", color = Palette.Secondary, fontSize = 11.sp)
                         Spacer(Modifier.height(6.dp))
@@ -122,15 +122,15 @@ fun HomeScreen(
                             repeat(7) { day ->
                                 val t = dailyTotals[day]
                                 val ratio = (t.paidMinutes / 600f).coerceIn(.08f, 1f)
-                                Box(Modifier.weight(1f).height((38f * ratio).dp)
+                                Box(Modifier.weight(1f).height((30f * ratio).dp)
                                     .clip(RoundedCornerShape(4.dp)).background(if (t.paidMinutes > 0) Palette.Blue else Color(0xFFBED1EF)))
                             }
                         }
                     }
                     SurfaceCard(Modifier.weight(1f).clickable { onTab(3) }, color = Palette.MintLight) {
                         Text("Procjena bruto plaće", color = Palette.Ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                        Spacer(Modifier.height(13.dp))
-                        Icon(Icons.Default.BarChart, contentDescription = null, tint = Palette.Mint, modifier = Modifier.size(27.dp))
+                        Spacer(Modifier.height(8.dp))
+                        Icon(Icons.Default.BarChart, contentDescription = null, tint = Palette.Mint, modifier = Modifier.size(23.dp))
                         Text(euros(monthTotal.grossCents), fontWeight = FontWeight.Bold, color = Palette.Ink,
                             fontSize = 21.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text(YearMonth.from(today).atDay(1).monthLabel(), color = Palette.Secondary, fontSize = 11.sp)

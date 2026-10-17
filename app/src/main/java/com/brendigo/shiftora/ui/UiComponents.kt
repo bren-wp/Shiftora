@@ -123,7 +123,7 @@ fun SurfaceCard(
         modifier = modifier
             .shadow(4.dp, RoundedCornerShape(22.dp), ambientColor = Palette.Navy.copy(alpha = .05f))
             .background(color, RoundedCornerShape(22.dp))
-            .padding(16.dp),
+            .padding(13.dp),
         content = content
     )
 }
