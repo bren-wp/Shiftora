@@ -38,6 +38,12 @@ object ShiftScheduleValidator {
 
     fun validateInsertion(existing: List<Shift>, candidate: Shift, zone: ZoneId = ZoneId.systemDefault()) {
         validateBreak(candidate, zone)
+        require(existing.none {
+            it.id != candidate.id && it.date == candidate.date &&
+                (it.kind == ShiftKind.OFF || candidate.kind == ShiftKind.OFF)
+        }) {
+            "Slobodan dan ne može se kombinirati s drugom smjenom. Uredi postojeći unos."
+        }
         require(existing.none { it.id != candidate.id && overlaps(it, candidate, zone) }) {
             "Smjena se preklapa s postojećom smjenom. Provjeri početak i završetak."
         }
@@ -45,6 +51,10 @@ object ShiftScheduleValidator {
 
     fun validateAll(entries: List<Shift>, zone: ZoneId = ZoneId.systemDefault()) {
         entries.forEach { validateBreak(it, zone) }
+        val grouped = entries.groupBy { it.date }
+        require(grouped.values.none { day -> day.size > 1 && day.any { it.kind == ShiftKind.OFF } }) {
+            "Slobodan dan i radne smjene ne smiju biti uneseni na isti datum."
+        }
         val intervals = entries.filter { it.kind != ShiftKind.OFF }.map { interval(it, zone) }.sortedBy { it.from }
         for (index in 1 until intervals.size) {
             require(!intervals[index].from.isBefore(intervals[index - 1].to)) {

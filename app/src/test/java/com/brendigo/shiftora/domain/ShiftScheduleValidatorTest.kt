@@ -66,4 +66,20 @@ class ShiftScheduleValidatorTest {
     fun rejectsNightPremiumSpanningIdenticalHours() {
         com.brendigo.shiftora.data.SalarySettings(nightStartHour = 22, nightEndHour = 22)
     }
+    @Test(expected = IllegalArgumentException::class)
+    fun forbidsDayOffAndWorkingShiftOnSameDate() {
+        val day = LocalDate.of(2026, 10, 19)
+        val off = Shift(id = 1, date = day, kind = ShiftKind.OFF)
+        val working = Shift(date = day, kind = ShiftKind.MORNING)
+        ShiftScheduleValidator.validateInsertion(listOf(off), working, zagreb)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun forbidsConflictingDayOffDuringBackupRestore() {
+        val day = LocalDate.of(2026, 10, 19)
+        ShiftScheduleValidator.validateAll(listOf(
+            Shift(date = day, kind = ShiftKind.OFF),
+            Shift(date = day, kind = ShiftKind.AFTERNOON)
+        ), zagreb)
+    }
 }
