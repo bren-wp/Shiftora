@@ -27,6 +27,9 @@ data class Shift(
         require(startMinute in 0..1439 && endMinute in 0..1439)
         require(breakMinutes in 0..240)
         require(breakAfterMinutes in 0..1440)
+        require(kind == ShiftKind.OFF || startMinute != endMinute) {
+            "Početak i završetak smjene ne mogu biti jednaki."
+        }
     }
 
     val overnight: Boolean get() = kind != ShiftKind.OFF && endMinute <= startMinute
@@ -44,7 +47,7 @@ data class SalarySettings(
     init {
         require(hourlyGross.isFinite() && hourlyGross in 0.0..1_000_000.0)
         require(listOf(nightPercent, sundayPercent, holidayPercent, overtimePercent).all { it in 0.0..300.0 })
-        require(nightStartHour in 0..23 && nightEndHour in 0..23)
+        require(nightStartHour in 0..23 && nightEndHour in 0..23 && nightStartHour != nightEndHour)
     }
 }
 
