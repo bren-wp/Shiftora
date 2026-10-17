@@ -533,10 +533,11 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                     )
                     StatIndicatorCard(
                         "Nedjelje / blagdani",
-                        minutesLabel(totals.sundayMinutes) + " / " + minutesLabel(totals.holidayMinutes),
+                        minutesLabel(totals.specialMinutes),
                         Icons.Default.Event, Palette.CoralLight, Palette.Coral,
                         totals.specialMinutes, previous.specialMinutes, Modifier.weight(1f),
-                        "Dvije zasebne kategorije"
+                        "Ned: " + minutesLabel(totals.sundayMinutes) +
+                            " · Blag: " + minutesLabel(totals.holidayMinutes)
                     )
                 }
             }
