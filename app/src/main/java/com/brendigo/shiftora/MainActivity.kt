@@ -31,6 +31,20 @@ import java.time.LocalDate
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (BuildConfig.DEBUG && intent.getBooleanExtra("shiftora_qa_seed", false)) {
+            // Screenshot fixtures are available in debug builds only, never in Play bundles.
+            com.brendigo.shiftora.data.ShiftStore(this).use { store ->
+                val month = java.time.YearMonth.now()
+                store.addRotation(
+                    month.atDay(1),
+                    listOf(
+                        ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF,
+                        ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF
+                    ),
+                    month.lengthOfMonth()
+                )
+            }
+        }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.rgb(11, 31, 59)),
             navigationBarStyle = SystemBarStyle.light(android.graphics.Color.rgb(248, 250, 252), android.graphics.Color.rgb(248, 250, 252))

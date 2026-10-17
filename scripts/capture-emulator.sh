@@ -6,7 +6,7 @@ apk="app/build/outputs/apk/debug/app-debug.apk"
 test -s "$apk"
 adb install -r "$apk"
 adb shell am force-stop "$package" || true
-adb shell am start -W -n "$package/.MainActivity"
+adb shell am start -W -n "$package/.MainActivity" --ez shiftora_qa_seed true
 sleep 4
 adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | grep "$package"
 size="$(adb shell wm size | grep -m1 'Physical size' | awk '{print $3}' | tr -d '\r')"
