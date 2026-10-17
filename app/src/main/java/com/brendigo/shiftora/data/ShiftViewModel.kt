@@ -70,23 +70,8 @@ class ShiftViewModel(application: Application) : AndroidViewModel(application) {
 
     fun consumeMessage() { _message.value = null }
 
-    /** Spreadsheet-safe CSV; no cloud or server upload. */
-    fun exportCsv(): String {
-        fun cell(value: String): String {
-            val safe = if (value.firstOrNull() in listOf('=', '+', '-', '@', '\t', '\r')) "'$value" else value
-            return "\"" + safe.replace("\"", "\"\"") + "\""
-        }
-        val header = "Datum,Vrsta,Početak,Kraj,Pauza min,Neplaćena pauza,Odrađeno,Prekovremeno,Bilješka"
-        val rows = shifts.value.map { s ->
-            fun clock(minutes: Int) = "%02d:%02d".format(minutes / 60, minutes % 60)
-            listOf(
-                s.date.toString(), s.kind.label, clock(s.startMinute), clock(s.endMinute),
-                s.breakMinutes.toString(), s.unpaidBreak.toString(), s.actual.toString(),
-                s.overtime.toString(), s.note
-            ).joinToString(",") { cell(it) }
-        }
-        return (listOf(header) + rows).joinToString("\r\n") + "\r\n"
-    }
+    /** User-initiated local export, no server upload. */
+    fun exportCsv(): String = CsvExporter.encode(shifts.value)
 
     fun exportBackup(): String = BackupCodec.encode(shifts.value, salary.value)
 
