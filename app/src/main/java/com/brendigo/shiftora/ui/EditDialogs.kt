@@ -203,6 +203,9 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
         "Noćna + 2 slobodna" to listOf(ShiftKind.NIGHT, ShiftKind.OFF, ShiftKind.OFF)
     )
     var selection by remember { mutableIntStateOf(0) }
+    val customPattern = remember {
+        mutableStateListOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF)
+    }
     var start by remember { mutableStateOf(LocalDate.now().toString()) }
     var days by remember { mutableStateOf("90") }
     val parsedStart = runCatching { LocalDate.parse(start) }.getOrNull()
@@ -222,6 +225,52 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
                         Text(pair.first)
                     }
                 }
+                Row(Modifier.fillMaxWidth().clickable { selection = presets.size },
+                    verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = selection == presets.size,
+                        onClick = { selection = presets.size })
+                    Text("Moj prilagođeni ciklus")
+                }
+                if (selection == presets.size) {
+                    Text("Dodirni vrstu smjene za promjenu. Redoslijed se ponavlja od početka.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        items(customPattern.size) { index ->
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                InputChip(
+                                    selected = true,
+                                    onClick = {
+                                        val kind = customPattern[index]
+                                        customPattern[index] =
+                                            ShiftKind.entries[(ShiftKind.entries.indexOf(kind) + 1) % ShiftKind.entries.size]
+                                    },
+                                    label = { Text("${index + 1}. ${customPattern[index].label}") },
+                                    leadingIcon = {
+                                        Icon(shiftIcon(customPattern[index]), contentDescription = null,
+                                            modifier = Modifier.size(15.dp))
+                                    }
+                                )
+                                if (customPattern.size > 1) {
+                                    IconButton(onClick = { customPattern.removeAt(index) },
+                                        modifier = Modifier.size(32.dp)) {
+                                        Icon(Icons.Default.Close, contentDescription = "Ukloni ${index + 1}. dan",
+                                            modifier = Modifier.size(15.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    OutlinedButton(
+                        onClick = { customPattern.add(ShiftKind.MORNING) },
+                        enabled = customPattern.size < 28,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(Modifier.width(6.dp))
+                        Text("Dodaj dan u ciklus (${customPattern.size}/28)")
+                    }
+                }
                 OutlinedTextField(start, onValueChange = { start = it },
                     label = { Text("Od datuma (GGGG-MM-DD)") }, singleLine = true,
                     modifier = Modifier.fillMaxWidth())
@@ -237,7 +286,7 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
             Button(
                 onClick = {
                     if (parsedStart != null && parsedDays != null) {
-                        onGenerate(parsedStart, presets[selection].second, parsedDays)
+                        onGenerate(parsedStart, if (selection == presets.size) customPattern.toList() else presets[selection].second, parsedDays)
                         onDismiss()
                     }
                 }, enabled = parsedStart != null && parsedDays != null && parsedDays in 1..366
