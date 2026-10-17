@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
             var editing by remember { mutableStateOf<Shift?>(null) }
             var rotationOpen by remember { mutableStateOf(false) }
             var salaryOpen by remember { mutableStateOf(false) }
+            var colorsOpen by remember { mutableStateOf(false) }
             // SAF file operations and JSON validation must not block Compose rendering.
             val exportLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.CreateDocument("text/csv")
@@ -141,7 +142,7 @@ class MainActivity : ComponentActivity() {
                 if (onboarding) {
                     OnboardingScreen(onComplete = vm::finishOnboarding)
                 } else {
-                    BackHandler(enabled = tab != 0 && editing == null && !rotationOpen && !salaryOpen && pendingRestore == null) {
+                    BackHandler(enabled = tab != 0 && editing == null && !rotationOpen && !salaryOpen && !colorsOpen && pendingRestore == null) {
                         tab = 0
                     }
                     val sections = listOf(
@@ -188,7 +189,8 @@ class MainActivity : ComponentActivity() {
                             val goSettings: () -> Unit = { tab = 4 }
                             when (tab) {
                                 0 -> HomeScreen(shifts, salary, add, edit, track, { tab = it }, goSettings)
-                                1 -> CalendarScreen(shifts, add, edit, goSettings)
+                                1 -> CalendarScreen(shifts, salary, monthlyFunds, add, edit,
+                                    vm::setMonthlyFund, goSettings)
                                 2 -> StatsScreen(shifts, salary, goSettings)
                                 3 -> SalaryScreen(shifts, salary, { salaryOpen = true }, goSettings)
                                 else -> MoreScreen(
@@ -197,7 +199,8 @@ class MainActivity : ComponentActivity() {
                                     onCsv = { exportLauncher.launch("Shiftora-smjene-${LocalDate.now()}.csv") },
                                     onBackup = { backupLauncher.launch("Shiftora-kopija-${LocalDate.now()}.json") },
                                     onRestore = { restoreLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
-                                    onEditSalary = { salaryOpen = true }
+                                    onEditSalary = { salaryOpen = true },
+                                    onShiftColors = { colorsOpen = true }
                                 )
                             }
                         }
@@ -232,6 +235,11 @@ class MainActivity : ComponentActivity() {
                     if (rotationOpen) RotationDialog(
                         onDismiss = { rotationOpen = false },
                         onGenerate = { start, pattern, days -> vm.rotation(start, pattern, days) }
+                    )
+                    if (colorsOpen) ShiftColorSettingsDialog(
+                        colors = shiftColors,
+                        onChange = vm::setShiftColor,
+                        onDismiss = { colorsOpen = false }
                     )
                     if (salaryOpen) SalarySettingsDialog(
                         current = salary,
