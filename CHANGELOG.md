@@ -1,5 +1,16 @@
 # Povijest izdanja
 
+## 0.6.0 — 18. 10. 2026.
+
+- Statistika: kružni graf sada koristi četiri stvarne kategorije prema referentnom dizajnu — redovne, prekovremene, noćne i nedjeljne/blagdanske sate.
+- Podjela kruga matematički je međusobno isključiva; zasebni obračunski indikatori i dalje pravilno prate preklapajuće dodatke.
+- Stvarni postotci svakog segmenta i 2×2 pregledne kartice statistike.
+- Usporedba tjedna/mjeseca/godine s prethodnim ekvivalentnim razdobljem; nema izmišljenih postotaka rasta kad prethodno razdoblje iznosi nula.
+- Procjena bruto plaće: stvarna osnovica, dodaci i trend, bez netočnih neto iznosa.
+- Objašnjenje obračuna proširivo na dodir; bolja podrška za male ekrane i tamnu temu.
+- Početna: aktivna smjena, stvarno preostalo vrijeme preko ponoći, osvježavanje svakih 60 sekundi i proporcionalne tjedne trake.
+- Jedinični i Android UI regresijski testovi za statistiku, datume, indikatore i promjenu razdoblja.
+
 ## 0.5.0 — 18. 10. 2026.
 
 - Kalendar: kompaktniji raspored dana, manji razmaci i jasnije istaknut odabrani dan na manjim telefonima.
