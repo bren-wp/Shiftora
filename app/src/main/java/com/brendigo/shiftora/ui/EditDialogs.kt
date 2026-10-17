@@ -373,7 +373,6 @@ fun OnboardingScreen(onComplete: () -> Unit) {
         "Razlikuj planirano od odrađenog, računaj noćne sate i prekovremeni rad.",
         "Procijeni bruto plaću prema satnici i dodacima koje sam odrediš."
     )
-    val icons = listOf(Icons.Default.CalendarMonth, Icons.Default.Schedule, Icons.Default.BarChart)
     Column(
         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             .statusBarsPadding().navigationBarsPadding().padding(26.dp),

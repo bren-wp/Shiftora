@@ -14,14 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Canvas
 import com.brendigo.shiftora.BuildConfig
 import com.brendigo.shiftora.data.SalarySettings
 import com.brendigo.shiftora.data.Shift
@@ -633,6 +630,37 @@ fun MoreScreen(
     onRotation: () -> Unit, onCsv: () -> Unit,
     onBackup: () -> Unit, onRestore: () -> Unit, onEditSalary: () -> Unit
 ) {
+    var privacyVisible by remember { mutableStateOf(false) }
+    if (privacyVisible) {
+        AlertDialog(
+            onDismissRequest = { privacyVisible = false },
+            title = { Text("Privatnost podataka") },
+            text = {
+                Column(Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) {
+                    Text("Shiftora radi lokalno, bez registracije, oglasa, analitike ili praćenja. " +
+                        "Ne traži dozvolu za internet, lokaciju ni kontakte.",
+                        style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(10.dp))
+                    Text("Smjene i postavke pohranjuju se samo na ovom uređaju. " +
+                        "Automatsko sigurnosno kopiranje aplikacije je isključeno. " +
+                        "CSV i JSON izvozi stvaraju se samo kada ih sam odabereš, " +
+                        "a mjesto spremanja kontroliraš u Androidovom odabiru datoteka.",
+                        style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(10.dp))
+                    Text("Za brisanje podataka obriši unose u aplikaciji ili podatke aplikacije " +
+                        "u Android postavkama. Ranije izvezene datoteke moraš obrisati zasebno.",
+                        style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(10.dp))
+                    Text("Javna verzija pravila: github.com/bren-wp/Shiftora/blob/main/PRIVACY.md",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { privacyVisible = false }) { Text("Zatvori") }
+            }
+        )
+    }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader("Više", "Postavke i tvoji podaci.", dark = true, showSettings = false)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
@@ -659,6 +687,9 @@ fun MoreScreen(
                 }
             }
             SurfaceCard(Modifier.fillMaxWidth()) {
+                ListAction("Pravila privatnosti", "Kako čuvamo tvoje podatke",
+                    Icons.Default.Shield, { privacyVisible = true })
+                HorizontalDivider()
                 Text("Shiftora • Brendigo", fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(7.dp))
                 Text("Verzija ${BuildConfig.VERSION_NAME} • Tvoji se podaci pohranjuju lokalno na uređaju. Aplikacija ne zahtijeva prijavu niti internetsku vezu.",
