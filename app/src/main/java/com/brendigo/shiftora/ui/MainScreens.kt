@@ -130,7 +130,7 @@ fun HomeScreen(
             item {
                 SectionTitle("Brze akcije")
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    if (maxWidth < 370.dp) {
+                    if (maxWidth < 430.dp) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             BlueAction("Dodaj smjenu", { onAdd(today) }, Modifier.fillMaxWidth())
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
