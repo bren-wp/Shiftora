@@ -216,8 +216,8 @@ fun CalendarScreen(
         BrandedHeader(dark = true, onSettings = onSettings)
         BoxWithConstraints(Modifier.fillMaxSize()) {
         val compact = maxHeight < 715.dp
-        val dayHeight = if (compact) 34.dp else 43.dp
-        val spacing = if (compact) 6.dp else 10.dp
+        val dayHeight = if (compact) 30.dp else 38.dp
+        val spacing = if (compact) 5.dp else 7.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 12.dp, end = 12.dp, top = 7.dp, bottom = 12.dp)) {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
@@ -331,7 +331,7 @@ fun CalendarScreen(
                 if (dayShifts.isEmpty()) {
                     Text("Za ovaj dan nema spremljene smjene.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
-                    dayShifts.forEach { shift ->
+                    dayShifts.forEachIndexed { index, shift ->
                         Row(verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                             Box(Modifier.size(if (compact) 44.dp else 52.dp).clip(RoundedCornerShape(14.dp))
@@ -356,19 +356,28 @@ fun CalendarScreen(
                                 DetailTile("Bilješka", shift.note.ifBlank { "—" }, Modifier.weight(1f))
                             }
                         }
-                        Spacer(Modifier.height(7.dp))
-                        OutlinedButton(onClick = { onEdit(shift) },
-                            modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp),
-                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 5.dp),
-                            shape = RoundedCornerShape(13.dp)) {
-                            Icon(Icons.Default.Edit, contentDescription = null)
-                            Spacer(Modifier.width(7.dp))
-                            Text("Uredi smjenu")
+                        Spacer(Modifier.height(6.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedButton(onClick = { onEdit(shift) },
+                                modifier = Modifier.weight(1f).heightIn(min = 46.dp),
+                                contentPadding = PaddingValues(horizontal = 6.dp),
+                                shape = RoundedCornerShape(13.dp)) {
+                                Icon(Icons.Default.Edit, contentDescription = null,
+                                    modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("Uredi", maxLines = 1)
+                            }
+                            if (index == dayShifts.lastIndex) {
+                                BlueAction("Dodaj smjenu", { onAdd(selected) }, Modifier.weight(1f))
+                            }
                         }
                     }
                 }
-                Spacer(Modifier.height(7.dp))
-                BlueAction("Dodaj smjenu", { onAdd(selected) }, Modifier.fillMaxWidth())
+                if (dayShifts.isEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    BlueAction("Dodaj smjenu", { onAdd(selected) }, Modifier.fillMaxWidth())
+                }
             }
         }
         }
