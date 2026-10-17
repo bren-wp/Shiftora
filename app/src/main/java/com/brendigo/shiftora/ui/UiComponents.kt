@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,26 +41,54 @@ fun euros(cents: Long): String = NumberFormat.getNumberInstance(hr).apply {
 }.format(cents / 100.0) + " €"
 fun clock(minutes: Int): String = "%02d:%02d".format(hr, minutes / 60, minutes % 60)
 
-fun shiftColor(kind: ShiftKind): Color = when (kind) {
+/** User-defined colors are provided throughout the app by ShiftoraTheme. */
+val LocalShiftColors = compositionLocalOf<Map<ShiftKind, Int>> { emptyMap() }
+
+private fun defaultShiftColor(kind: ShiftKind): Color = when (kind) {
     ShiftKind.MORNING -> Palette.Amber
     ShiftKind.AFTERNOON -> Palette.Blue
     ShiftKind.NIGHT -> Palette.Purple
-    ShiftKind.OFF -> Palette.Mint
     ShiftKind.CUSTOM -> Palette.Coral
+    ShiftKind.OFF -> Palette.Mint
+    ShiftKind.DAY -> Color(0xFF1976D2)
+    ShiftKind.STANDBY -> Color(0xFF8665CB)
+    ShiftKind.ANNUAL -> Color(0xFF059669)
+    ShiftKind.SICK -> Color(0xFFAD4BC6)
+    ShiftKind.PAID_LEAVE -> Color(0xFF0891B2)
 }
-fun shiftBg(kind: ShiftKind): Color = when (kind) {
-    ShiftKind.MORNING -> Palette.AmberLight
-    ShiftKind.AFTERNOON -> Palette.BlueLight
-    ShiftKind.NIGHT -> Palette.PurpleLight
-    ShiftKind.OFF -> Palette.MintLight
-    ShiftKind.CUSTOM -> Palette.CoralLight
+
+@Composable
+fun shiftColor(kind: ShiftKind): Color =
+    LocalShiftColors.current[kind]?.let(::Color) ?: defaultShiftColor(kind)
+
+@Composable
+fun shiftBg(kind: ShiftKind): Color {
+    // Light, readable surfaces for labels in the details, full color in month cells.
+    val custom = LocalShiftColors.current[kind]
+    if (custom != null) return Color(custom).copy(alpha = .15f)
+    return when (kind) {
+        ShiftKind.MORNING -> Palette.AmberLight
+        ShiftKind.AFTERNOON -> Palette.BlueLight
+        ShiftKind.NIGHT -> Palette.PurpleLight
+        ShiftKind.OFF, ShiftKind.ANNUAL -> Palette.MintLight
+        ShiftKind.CUSTOM, ShiftKind.SICK -> Palette.CoralLight
+        ShiftKind.DAY -> Palette.BlueLight
+        ShiftKind.STANDBY -> Palette.PurpleLight
+        ShiftKind.PAID_LEAVE -> Palette.MintLight
+    }
 }
+
 fun shiftIcon(kind: ShiftKind): ImageVector = when (kind) {
     ShiftKind.MORNING -> Icons.Default.WbSunny
     ShiftKind.AFTERNOON -> Icons.Default.WbTwilight
     ShiftKind.NIGHT -> Icons.Default.NightsStay
     ShiftKind.OFF -> Icons.Default.BeachAccess
     ShiftKind.CUSTOM -> Icons.Default.Schedule
+    ShiftKind.DAY -> Icons.Default.WbSunny
+    ShiftKind.STANDBY -> Icons.Default.NotificationsActive
+    ShiftKind.ANNUAL -> Icons.Default.BeachAccess
+    ShiftKind.SICK -> Icons.Default.Healing
+    ShiftKind.PAID_LEAVE -> Icons.Default.EventAvailable
 }
 
 @Composable
