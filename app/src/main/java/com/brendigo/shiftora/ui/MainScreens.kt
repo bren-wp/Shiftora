@@ -24,6 +24,7 @@ import com.brendigo.shiftora.data.SalarySettings
 import com.brendigo.shiftora.data.Shift
 import com.brendigo.shiftora.data.ShiftKind
 import com.brendigo.shiftora.domain.WorkCalculator
+import com.brendigo.shiftora.domain.MonthlyFund
 import com.brendigo.shiftora.domain.CurrentShiftIndicator
 import kotlinx.coroutines.delay
 import java.time.ZonedDateTime
@@ -228,12 +229,22 @@ fun HomeScreen(
 
 @Composable
 fun CalendarScreen(
-    shifts: List<Shift>, onAdd: (LocalDate) -> Unit,
-    onEdit: (Shift) -> Unit, onSettings: () -> Unit
+    shifts: List<Shift>, salary: SalarySettings, monthlyFunds: Map<String, Int>,
+    onAdd: (LocalDate) -> Unit, onEdit: (Shift) -> Unit,
+    onFundSave: (YearMonth, Int?) -> Unit, onSettings: () -> Unit
 ) {
     var shown by remember { mutableStateOf(YearMonth.now()) }
     var selected by remember { mutableStateOf(LocalDate.now()) }
     var weekOnly by remember { mutableStateOf(false) }
+    var fundEditorOpen by remember { mutableStateOf(false) }
+    val fund = remember(shown, shifts, salary, monthlyFunds) {
+        MonthlyFund.summary(shown, shifts, salary, monthlyFunds[shown.toString()])
+    }
+    if (fundEditorOpen) {
+        MonthlyFundEditor(shown, monthlyFunds[shown.toString()],
+            onSave = { onFundSave(shown, it) },
+            onDismiss = { fundEditorOpen = false })
+    }
     val first = shown.atDay(1)
     val start = first.minusDays((first.dayOfWeek.value - 1).toLong())
     val weeks = ((first.dayOfWeek.value - 1 + shown.lengthOfMonth() + 6) / 7)
@@ -249,7 +260,7 @@ fun CalendarScreen(
         BrandedHeader(dark = true, onSettings = onSettings)
         BoxWithConstraints(Modifier.fillMaxSize()) {
         val compact = maxHeight < 715.dp
-        val dayHeight = if (compact) 30.dp else 38.dp
+        val dayHeight = if (compact) 51.dp else 61.dp
         val spacing = if (compact) 5.dp else 7.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 12.dp, end = 12.dp, top = 7.dp, bottom = 12.dp)) {
@@ -294,31 +305,41 @@ fun CalendarScreen(
                         val entries = shiftsByDate[date].orEmpty()
                         val entry = entries.firstOrNull()
                         val inMonth = YearMonth.from(date) == shown
-                        val bg = if (chosen) Palette.Blue
-                        else if (entry != null) shiftBg(entry.kind)
-                        else Color.Transparent
-                        Column(
+                        // A filled day tile shows the code clearly: D/N/J/P/GO/BO/SD/PD/PR.
+                        // Selection remains a border so it never hides the chosen shift color.
+                        val tileColor = if (entry != null) shiftColor(entry.kind)
+                            else if (chosen) Palette.BlueLight else Color.Transparent
+                        Box(
                             Modifier.weight(1f).padding(2.dp).height(dayHeight)
-                                .clip(RoundedCornerShape(13.dp)).background(bg)
+                                .clip(RoundedCornerShape(11.dp))
+                                .background(tileColor)
+                                .then(if (chosen) Modifier.border(2.dp, Palette.Navy,
+                                    RoundedCornerShape(11.dp)) else Modifier)
                                 .clickable {
                                     selected = date
                                     shown = YearMonth.from(date)
                                 },
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(date.dayOfMonth.toString(),
-                                color = if (chosen) Color.White else if (inMonth) MaterialTheme.colorScheme.onSurface else Palette.Secondary.copy(alpha = .45f),
-                                fontWeight = if (chosen || date == LocalDate.now()) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = if (compact) 13.sp else 15.sp,
-                                lineHeight = if (compact) 16.sp else 18.sp)
-                            if (entry != null) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    entries.take(3).forEach { item ->
-                                        Box(Modifier.size(if (compact) 5.dp else 7.dp)
-                                            .clip(CircleShape)
-                                            .background(if (chosen) Color.White else shiftColor(item.kind)))
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center) {
+                                Text(date.dayOfMonth.toString(),
+                                    color = if (entry != null) Color.White.copy(alpha = .85f)
+                                        else if (inMonth) MaterialTheme.colorScheme.onSurface
+                                        else Palette.Secondary.copy(alpha = .5f),
+                                    fontWeight = FontWeight.Medium, fontSize = 10.sp,
+                                    lineHeight = 13.sp)
+                                if (entry != null) {
+                                    Text(entry.kind.code, color = Color.White,
+                                        fontSize = if (entry.kind.code.length > 1) 16.sp else 24.sp,
+                                        lineHeight = 26.sp, fontWeight = FontWeight.ExtraBold,
+                                        maxLines = 1)
+                                    if (entries.size > 1) {
+                                        Text("+${entries.size - 1}", color = Color.White,
+                                            fontSize = 9.sp, lineHeight = 10.sp)
                                     }
+                                } else {
+                                    Spacer(Modifier.height(19.dp))
                                 }
                             }
                         }
@@ -326,30 +347,38 @@ fun CalendarScreen(
                 }
             }
             Spacer(Modifier.height(spacing))
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val kinds = listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF)
-                if (maxWidth < 350.dp) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        kinds.chunked(2).forEach { pair ->
-                            Row(Modifier.fillMaxWidth()) {
-                                pair.forEach { kind ->
-                                    Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        Box(Modifier.size(9.dp).clip(CircleShape).background(shiftColor(kind)))
-                                        Text(kind.label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
-                                }
+            Column(Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                ShiftKind.calendarOrder.chunked(5).forEach { kinds ->
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                        kinds.forEach { kind ->
+                            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                Box(Modifier.size(8.dp).clip(CircleShape).background(shiftColor(kind)))
+                                Text(kind.code, fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
-                } else {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        kinds.forEach { kind ->
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Box(Modifier.size(9.dp).clip(CircleShape).background(shiftColor(kind)))
-                                Text(kind.label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
+                }
+            }
+            Spacer(Modifier.height(spacing))
+            SurfaceCard(Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Fond sati · ${shown.atDay(1).monthLabel()}",
+                            fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text("Fond: ${minutesLabel(fund.fundMinutes.toLong())}   •   Evidentirano: ${minutesLabel(fund.recordedMinutes)}",
+                            fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Odrađeno: ${minutesLabel(fund.actuallyWorkedMinutes)}   •   GO/BO/PD: ${minutesLabel(fund.leaveCreditMinutes.toLong())}",
+                            fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Do fonda: ${minutesLabel(fund.remainingMinutes)}" +
+                            if (fund.overFundMinutes > 0) "   •   Iznad: ${minutesLabel(fund.overFundMinutes)}" else "",
+                            fontSize = 11.sp, color = Palette.Blue, fontWeight = FontWeight.SemiBold)
+                    }
+                    IconButton(onClick = { fundEditorOpen = true }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Uredi fond sati")
                     }
                 }
             }
@@ -373,16 +402,16 @@ fun CalendarScreen(
                                     tint = shiftColor(shift.kind), modifier = Modifier.size(27.dp))
                             }
                             Column(Modifier.weight(1f)) {
-                                Text("${shift.kind.label} smjena", style = MaterialTheme.typography.titleMedium)
-                                Text(if (shift.kind == ShiftKind.OFF) "Slobodan dan"
+                                Text("${shift.kind.code} · ${shift.kind.label}", style = MaterialTheme.typography.titleMedium)
+                                Text(if (!shift.kind.isWork) shift.kind.label
                                     else "${clock(shift.startMinute)} – ${clock(shift.endMinute)} • ${minutesLabel(WorkCalculator.durationMinutes(shift))}",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, maxLines = 1)
                             }
-                            Text(if (shift.actual) "Odrađeno" else "Planirano",
+                            Text(if (!shift.kind.isWork) "Evidencija" else if (shift.actual) "Odrađeno" else "Planirano",
                                 color = if (shift.actual) Palette.Mint else Palette.Blue, fontSize = 11.sp)
                         }
                         Spacer(Modifier.height(7.dp))
-                        if (shift.kind != ShiftKind.OFF) {
+                        if (shift.kind.isWork) {
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 DetailTile("Radno vrijeme", "${clock(shift.startMinute)}–${clock(shift.endMinute)}", Modifier.weight(1f))
                                 DetailTile("Pauza", "${shift.breakMinutes} min", Modifier.weight(1f))
