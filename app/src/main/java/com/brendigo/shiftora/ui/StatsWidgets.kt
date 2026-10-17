@@ -85,13 +85,15 @@ fun StatIndicatorCard(
                 modifier = Modifier.weight(1f))
         }
         Spacer(Modifier.height(3.dp))
-        Text(value, color = Palette.Ink,
-            fontSize = if (value.length > 10) 17.sp else if (value.contains("/")) 19.sp else 23.sp,
-            lineHeight = 25.sp,
-            maxLines = 1, fontWeight = FontWeight.Bold,
-            overflow = TextOverflow.Ellipsis)
-        Spacer(Modifier.height(2.dp))
-        TrendIndicator(currentMinutes, previousMinutes)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            Text(value, color = Palette.Ink,
+                fontSize = if (value.length > 10) 17.sp else 22.sp,
+                lineHeight = 25.sp,
+                maxLines = 1, fontWeight = FontWeight.Bold,
+                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            TrendIndicator(currentMinutes, previousMinutes)
+        }
         if (extra != null) {
             Text(extra, color = Palette.Secondary, fontSize = 10.sp, lineHeight = 12.sp,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -114,7 +116,7 @@ fun ShiftDonutCard(totals: WorkTotals) {
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Box(Modifier.size(120.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(116.dp), contentAlignment = Alignment.Center) {
                 Canvas(Modifier.fillMaxSize().padding(9.dp)) {
                     val width = 21.dp.toPx()
                     if (total <= 0L) {
