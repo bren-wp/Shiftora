@@ -27,6 +27,9 @@ import com.brendigo.shiftora.data.SalarySettings
 import com.brendigo.shiftora.data.Shift
 import com.brendigo.shiftora.data.ShiftKind
 import com.brendigo.shiftora.domain.WorkCalculator
+import com.brendigo.shiftora.domain.CurrentShiftIndicator
+import kotlinx.coroutines.delay
+import java.time.ZonedDateTime
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.TemporalAdjusters
@@ -42,7 +45,17 @@ fun HomeScreen(
     onTab: (Int) -> Unit,
     onSettings: () -> Unit
 ) {
-    val today = remember { LocalDate.now() }
+    var now by remember { mutableStateOf(ZonedDateTime.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000L)
+            now = ZonedDateTime.now()
+        }
+    }
+    val today = now.toLocalDate()
+    val activeShift = remember(shifts, now) {
+        CurrentShiftIndicator.active(shifts, now.toInstant(), now.zone)
+    }
     val weekStart = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
     val weekTotal = remember(shifts, salary, weekStart) {
         WorkCalculator.calculatePeriod(shifts, salary, weekStart, weekStart.plusDays(7))
@@ -57,7 +70,8 @@ fun HomeScreen(
             WorkCalculator.calculatePeriod(shifts, salary, start, start.plusDays(1))
         }
     }
-    val todayShift = shifts.firstOrNull { it.date == today }
+    val todayShift = activeShift?.entry ?: shifts.firstOrNull { it.date == today }
+    val maxDayMinutes = (dailyTotals.maxOfOrNull { it.paidMinutes } ?: 0L).coerceAtLeast(60L)
     val upcoming = shifts.filter { !it.date.isBefore(today.plusDays(1)) }
         .sortedWith(compareBy<Shift> { it.date }.thenBy { it.startMinute }).take(5)
 
@@ -93,14 +107,27 @@ fun HomeScreen(
                             )
                         }
                         Column(Modifier.weight(1f)) {
-                            Text("DANAŠNJA SMJENA", color = Palette.Amber, fontWeight = FontWeight.Bold, fontSize = 11.sp)
-                            Text(todayShift?.kind?.label ?: "Dodaj smjenu", style = MaterialTheme.typography.titleLarge)
+                            Row(verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(if (activeShift != null) "TRENUTNA SMJENA" else "DANAŠNJA SMJENA",
+                                    color = Palette.Amber, fontWeight = FontWeight.Bold, fontSize = 10.sp)
+                                if (activeShift != null) {
+                                    Text("● U tijeku", color = Color(0xFF087E52),
+                                        fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+                            Text(todayShift?.kind?.label ?: "Dodaj smjenu",
+                                style = MaterialTheme.typography.titleLarge, maxLines = 1)
                             Text(
                                 if (todayShift == null) "Nema unosa za danas"
                                 else if (todayShift.kind == ShiftKind.OFF) "Slobodan dan"
                                 else "${clock(todayShift.startMinute)} – ${clock(todayShift.endMinute)}",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
                             )
+                            if (activeShift != null) {
+                                Text("Preostalo " + minutesLabel(activeShift.remainingMinutes),
+                                    color = Color(0xFF087E52), fontSize = 11.sp, maxLines = 1)
+                            }
                         }
                         if (todayShift != null && todayShift.kind != ShiftKind.OFF) {
                             Text(minutesLabel(WorkCalculator.durationMinutes(todayShift)),
@@ -118,12 +145,21 @@ fun HomeScreen(
                         Text(minutesLabel(weekTotal.paidMinutes), fontSize = 29.sp, color = Palette.Ink, fontWeight = FontWeight.Bold)
                         Text("Planirano i odrađeno", color = Palette.Secondary, fontSize = 11.sp)
                         Spacer(Modifier.height(6.dp))
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.Bottom) {
                             repeat(7) { day ->
-                                val t = dailyTotals[day]
-                                val ratio = (t.paidMinutes / 600f).coerceIn(.08f, 1f)
-                                Box(Modifier.weight(1f).height((30f * ratio).dp)
-                                    .clip(RoundedCornerShape(4.dp)).background(if (t.paidMinutes > 0) Palette.Blue else Color(0xFFBED1EF)))
+                                val minutes = dailyTotals[day].paidMinutes
+                                val fraction = (minutes.toFloat() / maxDayMinutes).coerceIn(0f, 1f)
+                                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Box(Modifier.fillMaxWidth().height(38.dp),
+                                        contentAlignment = Alignment.BottomCenter) {
+                                        Box(Modifier.fillMaxWidth().height(if (minutes > 0L) (36f * fraction).coerceAtLeast(4f).dp else 4.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(if (minutes > 0L) Palette.Blue else Color(0xFFCBD7E8)))
+                                    }
+                                    Text(listOf("P", "U", "S", "Č", "P", "S", "N")[day],
+                                        fontSize = 9.sp, color = Palette.Secondary)
+                                }
                             }
                         }
                     }
