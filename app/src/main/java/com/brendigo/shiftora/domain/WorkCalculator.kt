@@ -66,6 +66,9 @@ object WorkCalculator {
         var nightShifts = 0L
         for (shift in shifts) {
             if (shift.kind == ShiftKind.OFF) continue
+            // A shift spans at most two local dates; skip irrelevant periods early.
+            if (startInclusive != null && shift.date.isBefore(startInclusive.minusDays(1))) continue
+            if (endExclusive != null && !shift.date.isBefore(endExclusive)) continue
             val start = shift.date.atStartOfDay().plusMinutes(shift.startMinute.toLong()).atZone(zone)
             val total = durationMinutes(shift, zone)
             val breakEnd = (shift.breakAfterMinutes.toLong() + shift.breakMinutes).coerceAtMost(total)

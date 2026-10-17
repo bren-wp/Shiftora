@@ -37,8 +37,12 @@ object BackupCodec {
                 .put("overtime", shift.overtime)
                 .put("note", shift.note))
         }
-        return JSONObject().put("format", FORMAT).put("version", VERSION)
+        val result = JSONObject().put("format", FORMAT).put("version", VERSION)
             .put("salary", settings).put("shifts", data).toString(2)
+        require(result.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) {
+            "Previše podataka za jednu kopiju (najviše 4 MB)."
+        }
+        return result
     }
 
     fun decode(text: String): ShiftBackup {

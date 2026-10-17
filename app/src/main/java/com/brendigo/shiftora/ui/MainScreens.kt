@@ -32,9 +32,6 @@ import java.time.YearMonth
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
-private fun monthly(shifts: List<Shift>, month: YearMonth): List<Shift> =
-    shifts.filter { YearMonth.from(it.date) == month }
-
 @Composable
 fun HomeScreen(
     shifts: List<Shift>,
@@ -46,7 +43,6 @@ fun HomeScreen(
 ) {
     val today = remember { LocalDate.now() }
     val weekStart = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-    val thisWeek = shifts.filter { !it.date.isBefore(weekStart) && it.date.isBefore(weekStart.plusDays(7)) }
     val weekTotal = WorkCalculator.calculatePeriod(shifts, salary, weekStart, weekStart.plusDays(7))
     val monthTotal = WorkCalculator.calculatePeriod(shifts, salary, YearMonth.from(today).atDay(1), YearMonth.from(today).plusMonths(1).atDay(1))
     val todayShift = shifts.firstOrNull { it.date == today }
@@ -336,13 +332,6 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
     var shown by remember { mutableStateOf(YearMonth.now()) }
     var period by remember { mutableIntStateOf(1) }
     var weekAnchor by remember { mutableStateOf(LocalDate.now().with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))) }
-    val filtered = when (period) {
-        0 -> {
-            shifts.filter { !it.date.isBefore(weekAnchor) && it.date.isBefore(weekAnchor.plusDays(7)) }
-        }
-        2 -> shifts.filter { it.date.year == shown.year }
-        else -> monthly(shifts, shown)
-    }
     val totals = when (period) {
         0 -> WorkCalculator.calculatePeriod(shifts, settings, weekAnchor, weekAnchor.plusDays(7))
         2 -> WorkCalculator.calculatePeriod(shifts, settings, LocalDate.of(shown.year, 1, 1), LocalDate.of(shown.year + 1, 1, 1))
