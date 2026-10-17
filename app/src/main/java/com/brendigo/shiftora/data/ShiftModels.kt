@@ -26,7 +26,7 @@ data class Shift(
     init {
         require(startMinute in 0..1439 && endMinute in 0..1439)
         require(breakMinutes in 0..240)
-        require(breakAfterMinutes >= 0)
+        require(breakAfterMinutes in 0..1440)
     }
 
     val overnight: Boolean get() = kind != ShiftKind.OFF && endMinute <= startMinute
@@ -42,7 +42,7 @@ data class SalarySettings(
     val nightEndHour: Int = 6
 ) {
     init {
-        require(hourlyGross >= 0.0)
+        require(hourlyGross.isFinite() && hourlyGross in 0.0..1_000_000.0)
         require(listOf(nightPercent, sundayPercent, holidayPercent, overtimePercent).all { it in 0.0..300.0 })
         require(nightStartHour in 0..23 && nightEndHour in 0..23)
     }
