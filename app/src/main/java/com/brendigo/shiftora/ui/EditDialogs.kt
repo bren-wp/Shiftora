@@ -354,6 +354,12 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
                 }
                 Text("Primjer: od 22 do 6. Satnica i dodaci nisu službeni obračun.",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (parsed == null) {
+                    Text("Provjeri iznose (0–300 %), bruto satnicu i vrijeme noćnog rada. " +
+                        "Početak i završetak noćnog razdoblja moraju biti različiti.",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall)
+                }
             }
         },
         confirmButton = {

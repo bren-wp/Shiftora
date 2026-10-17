@@ -15,12 +15,14 @@ class Preferences(context: Context) {
 
     /** Corrupt, non-finite or out-of-range saved values must never crash startup. */
     private fun number(key: String, fallback: Double, upper: Double): Double =
-        store.getString(key, null)?.toDoubleOrNull()
+        runCatching { store.getString(key, null) }.getOrNull()?.toDoubleOrNull()
             ?.takeIf { it.isFinite() && it in 0.0..upper } ?: fallback
 
     fun salarySettings(): SalarySettings {
-        val from = store.getInt("night_start_hour", 22).takeIf { it in 0..23 } ?: 22
-        val until = store.getInt("night_end_hour", 6).takeIf { it in 0..23 } ?: 6
+        val from = runCatching { store.getInt("night_start_hour", 22) }
+            .getOrNull()?.takeIf { it in 0..23 } ?: 22
+        val until = runCatching { store.getInt("night_end_hour", 6) }
+            .getOrNull()?.takeIf { it in 0..23 } ?: 6
         return SalarySettings(
             hourlyGross = number("hourly", 8.0, 1_000_000.0),
             nightPercent = number("night", 30.0, 300.0),
