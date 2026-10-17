@@ -3,18 +3,29 @@ package com.brendigo.shiftora.data
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
+import java.time.YearMonth
 import com.brendigo.shiftora.domain.ShiftScheduleValidator
 
 /** Explicit user-controlled portable backup. No cloud transfer or implicit restore. */
-data class ShiftBackup(val shifts: List<Shift>, val salary: SalarySettings)
+data class ShiftBackup(
+    val shifts: List<Shift>,
+    val salary: SalarySettings,
+    val colors: Map<ShiftKind, Int> = emptyMap(),
+    val monthlyFunds: Map<String, Int> = emptyMap(),
+    val version: Int = 2
+)
 
 object BackupCodec {
     private const val FORMAT = "shiftora-backup"
-    private const val VERSION = 1
+    private const val VERSION = 2
     const val MAX_BYTES = 4 * 1024 * 1024
     private const val MAX_SHIFTS = 20_000
 
-    fun encode(shifts: List<Shift>, salary: SalarySettings): String {
+    fun encode(
+        shifts: List<Shift>, salary: SalarySettings,
+        colors: Map<ShiftKind, Int> = emptyMap(),
+        monthlyFunds: Map<String, Int> = emptyMap()
+    ): String {
         require(shifts.size <= MAX_SHIFTS) { "Previše smjena za sigurnosnu kopiju." }
         val settings = JSONObject()
             .put("hourlyGross", salary.hourlyGross)
@@ -38,8 +49,16 @@ object BackupCodec {
                 .put("overtime", shift.overtime)
                 .put("note", shift.note))
         }
+        val colorJson = JSONObject()
+        colors.forEach { (kind, argb) -> colorJson.put(kind.name, argb) }
+        val fundJson = JSONObject()
+        monthlyFunds.forEach { (month, minutes) ->
+            require(runCatching { YearMonth.parse(month) }.isSuccess && minutes in 0..44640)
+            fundJson.put(month, minutes)
+        }
         val result = JSONObject().put("format", FORMAT).put("version", VERSION)
-            .put("salary", settings).put("shifts", data).toString(2)
+            .put("salary", settings).put("shifts", data)
+            .put("colors", colorJson).put("monthlyFunds", fundJson).toString(2)
         require(result.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) {
             "Previše podataka za jednu kopiju (najviše 4 MB)."
         }
@@ -51,7 +70,8 @@ object BackupCodec {
             "Datoteka je prevelika. Ograničenje je 4 MB."
         }
         val root = JSONObject(text)
-        require(root.getString("format") == FORMAT && root.getInt("version") == VERSION) {
+        val version = root.getInt("version")
+        require(root.getString("format") == FORMAT && version in 1..VERSION) {
             "Ovo nije podržana Shiftora sigurnosna kopija."
         }
         val settings = root.getJSONObject("salary")
@@ -97,6 +117,24 @@ object BackupCodec {
         }
         // Reject overlapping entries before asking for destructive restore approval.
         ShiftScheduleValidator.validateAll(shifts)
-        return ShiftBackup(shifts, salary)
+        val colors = mutableMapOf<ShiftKind, Int>()
+        val funds = mutableMapOf<String, Int>()
+        if (version >= 2) {
+            val colorJson = root.getJSONObject("colors")
+            require(colorJson.length() <= ShiftKind.entries.size) { "Previše definicija boja." }
+            colorJson.keys().forEach { key ->
+                val kind = ShiftKind.valueOf(key)
+                colors[kind] = colorJson.getInt(key) or 0xFF000000.toInt()
+            }
+            val fundJson = root.getJSONObject("monthlyFunds")
+            require(fundJson.length() <= 500) { "Previše mjesečnih fondova." }
+            fundJson.keys().forEach { month ->
+                require(runCatching { YearMonth.parse(month) }.isSuccess) { "Neispravan mjesec fonda." }
+                val minutes = fundJson.getInt(month)
+                require(minutes in 0..44640) { "Neispravan fond sati." }
+                funds[month] = minutes
+            }
+        }
+        return ShiftBackup(shifts, salary, colors, funds, version)
     }
 }
