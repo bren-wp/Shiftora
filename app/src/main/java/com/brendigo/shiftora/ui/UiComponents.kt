@@ -215,14 +215,14 @@ fun ShiftRow(shift: Shift, onClick: () -> Unit, showDate: Boolean = true) {
             }
             ShiftBadge(shift.kind)
             Column(Modifier.weight(1f)) {
-                if (shift.kind != ShiftKind.OFF) {
+                if (shift.kind.isWork) {
                     Text("${clock(shift.startMinute)} – ${clock(shift.endMinute)}",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (shift.actual) Text("Odrađeno", color = Palette.Mint, fontSize = 11.sp)
                 } else Text("Slobodan dan", fontSize = 12.sp, color = Palette.Secondary)
             }
-            if (shift.kind != ShiftKind.OFF) Text(minutesLabel(com.brendigo.shiftora.domain.WorkCalculator.durationMinutes(shift)),
+            if (shift.kind.isWork) Text(minutesLabel(com.brendigo.shiftora.domain.WorkCalculator.durationMinutes(shift)),
                 fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Palette.Secondary)
         }

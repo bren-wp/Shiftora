@@ -63,7 +63,9 @@ fun ShiftEditorDialog(
         val result = entry.copy(date = parsedDate, kind = kind,
             startMinute = startMinutes, endMinute = endMinutes,
             breakMinutes = pause, breakAfterMinutes = after,
-            unpaidBreak = unpaid, actual = actual, overtime = overtime, note = note.take(500))
+            unpaidBreak = kind.isWork && unpaid,
+            actual = kind.isWork && actual,
+            overtime = kind.isWork && overtime, note = note.take(500))
         ShiftScheduleValidator.validateInsertion(existing, result)
         result
     }
@@ -77,12 +79,12 @@ fun ShiftEditorDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Vrsta smjene", fontWeight = FontWeight.SemiBold)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                    items(ShiftKind.entries) { option ->
+                    items(ShiftKind.calendarOrder) { option ->
                         FilterChip(selected = kind == option, onClick = {
                             kind = option
                             start = clock(option.start)
                             end = clock(option.end)
-                        }, label = { Text(option.label) },
+                        }, label = { Text("${option.code} · ${option.label}") },
                             leadingIcon = { Icon(shiftIcon(option), contentDescription = null,
                                 modifier = Modifier.size(17.dp)) })
                     }
@@ -103,7 +105,7 @@ fun ShiftEditorDialog(
                     Spacer(Modifier.width(8.dp))
                     Text(LocalDate.parse(date).dateLabel())
                 }
-                if (kind != ShiftKind.OFF) {
+                if (kind.isWork) {
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                         Column(Modifier.weight(1f)) {
                             Text("Početak", style = MaterialTheme.typography.bodyMedium)
@@ -252,7 +254,7 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
                                     onClick = {
                                         val kind = customPattern[index]
                                         customPattern[index] =
-                                            ShiftKind.entries[(ShiftKind.entries.indexOf(kind) + 1) % ShiftKind.entries.size]
+                                            ShiftKind.calendarOrder[(ShiftKind.calendarOrder.indexOf(kind) + 1) % ShiftKind.calendarOrder.size]
                                     },
                                     label = { Text("${index + 1}. ${customPattern[index].label}") },
                                     leadingIcon = {

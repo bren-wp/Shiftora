@@ -118,7 +118,7 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.titleLarge, maxLines = 1)
                             Text(
                                 if (todayShift == null) "Nema unosa za danas"
-                                else if (todayShift.kind == ShiftKind.OFF) "Slobodan dan"
+                                else if (!todayShift.kind.isWork) todayShift.kind.label
                                 else "${clock(todayShift.startMinute)} – ${clock(todayShift.endMinute)}",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
                             )
@@ -127,7 +127,7 @@ fun HomeScreen(
                                     color = Color(0xFF087E52), fontSize = 11.sp, maxLines = 1)
                             }
                         }
-                        if (todayShift != null && todayShift.kind != ShiftKind.OFF) {
+                        if (todayShift != null && todayShift.kind.isWork) {
                             Text(minutesLabel(WorkCalculator.durationMinutes(todayShift)),
                                 fontWeight = FontWeight.Bold, fontSize = 17.sp)
                         }
