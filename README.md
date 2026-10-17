@@ -52,7 +52,7 @@ Odaberi najnovije izdanje i preuzmi **APK** za Android. Uz izdanja je dostupan i
 
 ## Privatnost na prvom mjestu
 
-Shiftora ne zahtijeva korisnički račun, nema analitiku, praćenje ni dozvolu za internet. Rasporedi i postavke čuvaju se lokalno na uređaju. Izvoz i sigurnosna kopija događaju se samo kada ih sam pokreneš.
+Shiftora ne zahtijeva korisnički račun, nema analitiku, praćenje ni dozvolu za internet. Rasporedi i postavke čuvaju se lokalno na uređaju. Izvoz i sigurnosna kopija događaju se samo kada ih sam pokreneš. [Pročitaj pravila privatnosti](PRIVACY.md).
 
 ## Česta pitanja
 

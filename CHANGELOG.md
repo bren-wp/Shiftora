@@ -1,4 +1,15 @@
-# Shiftora – povijest razvoja
+# Povijest izdanja
+
+## 0.4.0 — 18. 10. 2026.
+
+- Novi premium vizualni identitet i pregledan marketinški README s ikonama, bannerom i stvarnim snimkama Android aplikacije
+- Optimiziran prikaz nadzorne ploče, kalendara, statistike i plaće
+- Izračuni za tjedan, mjesec i godinu memorirani radi smanjenja ponovnih obračuna tijekom rada sučelja
+- Usklađeni sistemska statusna traka, format EUR i navigacija
+- Proširene automatizirane provjere na Android emulatorima različitih veličina
+- APK i AAB isporučuju se putem GitHub izdanja
+
+> AAB zahtijeva produkcijsko potpisivanje za Google Play. Ova aplikacija daje informativni obračun bruto plaće.
 
 ## 0.3.1 (2026-10-17) – hotfix i verifikacija
 - Na svim podržanim Android verzijama prikazuje se simbol € umjesto starog HRK ili ISO EUR
