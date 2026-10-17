@@ -43,6 +43,12 @@ class MainActivity : ComponentActivity() {
                     ),
                     month.lengthOfMonth()
                 )
+                // Demonstration only: show planned and actually worked time in real screenshots.
+                store.all().filter { it.date.isBefore(java.time.LocalDate.now()) &&
+                    it.kind != ShiftKind.OFF
+                }.forEach { sample ->
+                    store.save(sample.copy(actual = true, overtime = sample.date.dayOfMonth % 11 == 0))
+                }
             }
         }
         enableEdgeToEdge(

@@ -140,7 +140,7 @@ fun HomeScreen(
             item {
                 SectionTitle("Brze akcije")
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    if (maxWidth < 430.dp) {
+                    if (maxWidth < 340.dp) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             BlueAction("Dodaj smjenu", { onAdd(today) }, Modifier.fillMaxWidth())
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -393,7 +393,7 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader("Statistika i plaća", "Tvoj rad u brojkama. Veća kontrola.", dark = true, onSettings = onSettings)
-        LazyColumn(contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
                 Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Palette.BlueLight)) {
                     listOf("Tjedan", "Mjesec", "Godina").forEachIndexed { index, name ->
@@ -421,11 +421,12 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                 }
             }
             item {
-                SurfaceCard(Modifier.fillMaxWidth()) {
-                    Text("Sati prema vrsti smjene", fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.height(10.dp))
+                Column(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.surface).padding(12.dp)
+                ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Box(Modifier.size(148.dp), contentAlignment = Alignment.Center) {
+                        Box(Modifier.size(126.dp), contentAlignment = Alignment.Center) {
                             Canvas(Modifier.fillMaxSize()) {
                                 val arcWidth = 22.dp.toPx()
                                 val all = totals.paidMinutes.toFloat()

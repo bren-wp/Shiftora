@@ -178,14 +178,14 @@ fun ShiftRow(shift: Shift, onClick: () -> Unit, showDate: Boolean = true) {
 
 @Composable
 fun MetricCard(label: String, value: String, icon: ImageVector, bg: Color, accent: Color, modifier: Modifier = Modifier, sub: String? = null) {
-    Column(modifier = modifier.clip(RoundedCornerShape(19.dp)).background(bg).padding(12.dp)) {
+    Column(modifier = modifier.clip(RoundedCornerShape(19.dp)).background(bg).padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(21.dp))
+            Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(18.dp))
             Text(label, color = Palette.Ink, fontWeight = FontWeight.SemiBold,
                 fontSize = 12.sp, lineHeight = 15.sp, maxLines = 2)
         }
-        Spacer(Modifier.height(5.dp))
-        Text(value, color = Palette.Ink, fontWeight = FontWeight.Bold, fontSize = 23.sp)
+        Spacer(Modifier.height(3.dp))
+        Text(value, color = Palette.Ink, fontWeight = FontWeight.Bold, fontSize = 21.sp)
         if (sub != null) Text(sub, color = Palette.Secondary, fontSize = 10.sp, lineHeight = 12.sp)
     }
 }
