@@ -10,6 +10,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +38,7 @@ fun ShiftEditorDialog(
     onSave: (Shift) -> Unit,
     onDelete: (Long) -> Unit
 ) {
+    val context = LocalContext.current
     var kind by remember(entry) { mutableStateOf(entry.kind) }
     var date by remember(entry) { mutableStateOf(entry.date.toString()) }
     var start by remember(entry) { mutableStateOf(clock(entry.startMinute)) }
@@ -79,17 +83,56 @@ fun ShiftEditorDialog(
                                 modifier = Modifier.size(17.dp)) })
                     }
                 }
-                OutlinedTextField(value = date, onValueChange = { date = it; error = null },
-                    label = { Text("Datum (GGGG-MM-DD)") }, singleLine = true,
-                    modifier = Modifier.fillMaxWidth())
+                Text("Datum", fontWeight = FontWeight.SemiBold)
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        val selected = LocalDate.parse(date)
+                        DatePickerDialog(
+                            context,
+                            { _, year, month, day -> date = LocalDate.of(year, month + 1, day).toString() },
+                            selected.year, selected.monthValue - 1, selected.dayOfMonth
+                        ).show()
+                    }
+                ) {
+                    Icon(Icons.Default.CalendarMonth, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(LocalDate.parse(date).dateLabel())
+                }
                 if (kind != ShiftKind.OFF) {
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                        OutlinedTextField(value = start, onValueChange = { start = it },
-                            label = { Text("Početak") }, modifier = Modifier.weight(1f),
-                            singleLine = true)
-                        OutlinedTextField(value = end, onValueChange = { end = it },
-                            label = { Text("Kraj") }, modifier = Modifier.weight(1f),
-                            singleLine = true)
+                        Column(Modifier.weight(1f)) {
+                            Text("Početak", style = MaterialTheme.typography.bodyMedium)
+                            OutlinedButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    val minute = parseClock(start) ?: 0
+                                    TimePickerDialog(context,
+                                        { _, h, m -> start = clock(h * 60 + m) },
+                                        minute / 60, minute % 60, true).show()
+                                }
+                            ) {
+                                Icon(Icons.Default.Schedule, contentDescription = null)
+                                Spacer(Modifier.width(5.dp))
+                                Text(start)
+                            }
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text("Završetak", style = MaterialTheme.typography.bodyMedium)
+                            OutlinedButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    val minute = parseClock(end) ?: 0
+                                    TimePickerDialog(context,
+                                        { _, h, m -> end = clock(h * 60 + m) },
+                                        minute / 60, minute % 60, true).show()
+                                }
+                            ) {
+                                Icon(Icons.Default.Schedule, contentDescription = null)
+                                Spacer(Modifier.width(5.dp))
+                                Text(end)
+                            }
+                        }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                         OutlinedTextField(value = breakMin, onValueChange = { breakMin = it },
