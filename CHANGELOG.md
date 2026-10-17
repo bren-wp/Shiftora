@@ -1,5 +1,19 @@
 # Povijest izdanja
 
+## 0.7.0 — 18. 10. 2026. | Android 16 & Google Play hardening
+
+- `targetSdk` / `compileSdk` 36 (Android 16), odgovarajući Android Gradle Plugin i Gradle wrapper.
+- Dodatni Android Lint (release), integracijske provjere te emulator na API 30 i 36.
+- Siguran ručni workflow za **potpisani** Google Play AAB i APK — aktivira se tek kada vlasnik postavi tajne za ključ.
+- Uklonjen testni unos smjena iz produkcijske aktivnosti; testni raspored ostaje samo u instrumentacijskim testovima.
+- Izvoz CSV-a, JSON sigurnosne kopije i provjera uvezenih datoteka više ne blokiraju glavnu UI nit.
+- Neispravne spremljene postavke plaće i nevažeći brojevi ne mogu srušiti početni zaslon.
+- Sigurnosne kopije provjeravaju vremenska preklapanja prije upozorenja o zamjeni podataka.
+- Objedinjeno računanje vremenskih granica smjena; optimizirana provjera blagdana i obračun minuta.
+- Uklonjeni nekorišteni Compose tooling ovisnosti, razvojni simboli i dupli importi.
+- Pravila privatnosti mogu se pročitati i izvan mreže unutar aplikacije.
+- Poboljšane poruke o pogrešnim vrijednostima obračuna te dodani regresijski testovi.
+
 ## 0.6.0 — 18. 10. 2026.
 
 - Statistika: kružni graf sada koristi četiri stvarne kategorije prema referentnom dizajnu — redovne, prekovremene, noćne i nedjeljne/blagdanske sate.

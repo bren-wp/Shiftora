@@ -4,8 +4,8 @@ Shiftora je izvorna Android aplikacija napisana u Kotlinu i Jetpack Composeu. U 
 
 ## Razvoj i provjera
 
-- JDK 17, Android SDK 35
-- Gradle wrapper: `./gradlew` (8.10.2)
+- JDK 17, Android SDK 36
+- Gradle wrapper: `./gradlew` (8.11.1)
 - Lokalno: `./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:bundleRelease`
 - Automatizirani Android UI testovi: `.github/workflows/android-ui.yml`
 - Lokalna SQLite baza; sadržaj ne napušta uređaj osim kada korisnik odabere izvoz/backup
