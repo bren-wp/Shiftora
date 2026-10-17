@@ -196,11 +196,12 @@ fun BlueAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
         onClick = onClick,
         modifier = modifier.heightIn(min = 52.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Palette.Blue),
-        shape = RoundedCornerShape(14.dp)
+        shape = RoundedCornerShape(14.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
     ) {
-        Icon(icon, contentDescription = null)
-        Spacer(Modifier.width(7.dp))
-        Text(text, maxLines = 2)
+        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(5.dp))
+        Text(text, maxLines = 2, fontSize = 13.sp, lineHeight = 16.sp)
     }
 }
 
