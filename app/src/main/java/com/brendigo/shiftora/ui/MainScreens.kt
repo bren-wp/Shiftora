@@ -628,7 +628,8 @@ fun SalaryScreen(
 fun MoreScreen(
     darkMode: Boolean, onDark: (Boolean) -> Unit,
     onRotation: () -> Unit, onCsv: () -> Unit,
-    onBackup: () -> Unit, onRestore: () -> Unit, onEditSalary: () -> Unit
+    onBackup: () -> Unit, onRestore: () -> Unit, onEditSalary: () -> Unit,
+    onShiftColors: () -> Unit
 ) {
     var privacyVisible by remember { mutableStateOf(false) }
     if (privacyVisible) {
@@ -670,6 +671,9 @@ fun MoreScreen(
                 ListAction("Automatski raspored", "Ponovi rotaciju smjena", Icons.Default.AutoMode, onRotation)
                 HorizontalDivider()
                 ListAction("Postavke plaće", "Satnica i dodaci", Icons.Default.Calculate, onEditSalary)
+                HorizontalDivider()
+                ListAction("Boje smjena i izostanaka", "Promijeni boju za D, N, J, P, PR, GO, BO, SD, PD i X",
+                    Icons.Default.Palette, onShiftColors)
                 HorizontalDivider()
                 ListAction("Izvoz CSV", "Izvezi smjene i evidenciju sati", Icons.Default.FileDownload, onCsv)
                 HorizontalDivider()
