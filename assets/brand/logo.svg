@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="150" viewBox="0 0 680 150" role="img" aria-label="Shiftora — Moje smjene. Moji sati.">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2563eb"/><stop offset=".52" stop-color="#14b8a6"/><stop offset="1" stop-color="#5eead4"/></linearGradient></defs>
+<rect x="8" y="9" width="132" height="132" rx="32" fill="#0b1f3b"/>
+<path d="M107 43 C83 22 42 33 40 59 C38 79 77 82 89 98 C96 112 67 120 43 99" fill="none" stroke="url(#g)" stroke-width="21" stroke-linecap="round"/>
+<circle cx="112" cy="112" r="18" fill="#fff"/><path d="M112 101 V112 L120 117" fill="none" stroke="#0b1f3b" stroke-width="4" stroke-linecap="round"/>
+<text x="161" y="86" fill="#0b1f3b" font-family="Inter,Arial,sans-serif" font-size="66" font-weight="800" letter-spacing="-2">Shiftora</text>
+<text x="165" y="118" fill="#64748b" font-family="Inter,Arial,sans-serif" font-size="22">Moje smjene. Moji sati.</text></svg>

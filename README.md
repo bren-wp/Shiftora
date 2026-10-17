@@ -1,48 +1,72 @@
-# Shiftora
+<div align="center">
+  <img src="assets/brand/logo.svg" alt="Shiftora — Moje smjene. Moji sati." width="440"/>
+  <br />
+  <strong>Moje smjene. Moji sati.</strong>
+  <br /><br />
+  <a href="https://github.com/bren-wp/Shiftora/releases"><img alt="Preuzmi Shiftoru" src="https://img.shields.io/badge/Preuzmi-Android%20APK-2563EB?style=for-the-badge&logo=android&logoColor=white"/></a>
+  <a href="https://github.com/bren-wp/Shiftora/actions/workflows/android.yml"><img alt="Android CI" src="https://img.shields.io/github/actions/workflow/status/bren-wp/Shiftora/android.yml?branch=main&style=for-the-badge&label=Android%20CI"/></a>
+  <img alt="Android 8.0+" src="https://img.shields.io/badge/Android-8.0%2B-10B981?style=for-the-badge&logo=android&logoColor=white"/>
+  <img alt="MIT" src="https://img.shields.io/badge/Licenca-MIT-0B1F3B?style=for-the-badge"/>
+</div>
 
-**Shiftora** — *Moje smjene. Moji sati.* • Android aplikacija za zaposlenike, Brendigo.
+<br />
 
-Nativna Android aplikacija na hrvatskom jeziku inspirirana vizualnim referencama premium brenda Shiftora. Nema prijave, pozadinskog servera, analitike ni dopuštenja za internet.
+![Shiftora – Tvoj raspored. Tvoja kontrola.](assets/brand/banner.svg)
 
-## Značajke (razvoj 0.3.0)
+## Sve smjene. Svi sati. Jedno mjesto.
 
-- Početna nadzorna ploča s današnjom i nadolazećim smjenama te pregledom tjednih sati
-- Mjesečni i tjedni kalendar, više smjena na dan, unos, uređivanje i brisanje
-- Jutarnja, popodnevna, noćna, slobodan dan i prilagođena vrsta
-- Unos plaćene/neplaćene pauze, oznake odrađene smjene i prekovremenoga rada
-- Automatsko ponavljanje ciklusa (bez prepisivanja postojećih zapisa)
-- Statistika radnih sati i procjena bruto plaće
-- Postavke bruto satnice i postotaka dodataka za noćni rad, nedjelje, blagdane i prekovremeni rad
-- Ispravan obračun noćnih smjena koje prelaze u sljedeći tjedan ili mjesec
-- Lokalne hrvatske blagdanske datume, ljetno/zimsko računanje vremena i CSV izvoz
-- Ručni izbor datuma i 24-satnog vremena kroz sistemske Android dijaloge
-- Prilagođeni smjenski ciklusi do 28 dana
-- JSON sigurnosna kopija i vraćanje svih smjena i satnice uz provjeru valjanosti i izričitu potvrdu korisnika
-- Svijetla/tamna tema, bez korisničkog računa i mrežnog pristupa
+**Shiftora** je osobni kalendar radnih smjena za Android. Planiraj svoj radni tjedan, prati stvarno odrađene sate i pregledaj procjenu bruto zarade — u jednostavnoj aplikaciji potpuno na hrvatskom jeziku.
 
-## Tehnologija
+**Bez reklama · Bez pretplate · Bez registracije · Bez praćenja · Radi izvan mreže.**
 
-Kotlin 2.0.21, Jetpack Compose + Material 3, Android SDK 35 (minSdk 26), SQLite i ViewModel/StateFlow.
+## Upoznaj Shiftoru
 
-## Pokretanje
+<div align="center">
+<table><tr>
+<td align="center" width="33%"><img src="https://raw.githubusercontent.com/bren-wp/Shiftora/readme-media/screenshots/home.png" width="245" alt="Shiftora – Početna"/><br/><strong>Početna</strong><br/><sub>Smjene koje dolaze, sati i brze akcije</sub></td>
+<td align="center" width="33%"><img src="https://raw.githubusercontent.com/bren-wp/Shiftora/readme-media/screenshots/calendar.png" width="245" alt="Shiftora – Kalendar"/><br/><strong>Kalendar</strong><br/><sub>Mjesečni i tjedni pregled smjena</sub></td>
+<td align="center" width="33%"><img src="https://raw.githubusercontent.com/bren-wp/Shiftora/readme-media/screenshots/statistics.png" width="245" alt="Shiftora – Statistika"/><br/><strong>Statistika</strong><br/><sub>Radni sati, dodatci i izvještaji</sub></td>
+</tr><tr>
+<td align="center"><img src="https://raw.githubusercontent.com/bren-wp/Shiftora/readme-media/screenshots/salary.png" width="245" alt="Shiftora – Plaća"/><br/><strong>Plaća</strong><br/><sub>Transparentna bruto procjena</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/bren-wp/Shiftora/readme-media/screenshots/more.png" width="245" alt="Shiftora – Alati"/><br/><strong>Više</strong><br/><sub>Izvoz, postavke i sigurnosne kopije</sub></td>
+<td align="center"><img src="https://raw.githubusercontent.com/bren-wp/Shiftora/readme-media/screenshots/onboarding.png" width="245" alt="Shiftora – Dobrodošli"/><br/><strong>Dobrodošli</strong><br/><sub>Prvi koraci, bez otvaranja računa</sub></td>
+</tr></table>
+<sub>Stvarne snimke Android aplikacije na emulatoru, s demonstracijskim smjenama. Prikaz može odstupati ovisno o uređaju.</sub>
+</div>
 
-1. Otvori repozitorij u Android Studiju s instaliranim Android SDK 35 i JDK 17.
-2. Sinkroniziraj Gradle i pokreni modul **app**.
-3. GitHub Actions / **Android CI** pokreće JVM testove, provjerava kompilaciju UI testova i izrađuje debug APK koji je dostupan kao workflow artifact nakon uspješnog builda.
-4. Dodatni **Android UI smoke test** workflow pokreće emulator pri ručnom pokretanju preko GitHub Actions i sprema stvarnu snimku zaslona (ne generiranu sliku).
+## Pametne mogućnosti
 
-Za CLI koristi uključeni službeni Gradle wrapper 8.10.2: `./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:bundleRelease`. GitHub Actions objavljuje razvojni APK i nepotpisani AAB kao artefakte. Za produkcijsko izdanje potrebni su vlastiti ključevi za potpisivanje i dodatni QA.
+<table>
+<tr><td width="64"><img src="assets/icons/calendar.svg" width="44" alt=""/></td><td><strong>Kalendar koji razumije smjene</strong><br/>Jutarnja, popodnevna, noćna, slobodno i prilagođena smjena. Vlastiti ciklusi i automatsko ponavljanje rasporeda.</td></tr>
+<tr><td><img src="assets/icons/clock.svg" width="44" alt=""/></td><td><strong>Precizna evidencija sati</strong><br/>Planirani i odrađeni sati, plaćene i neplaćene pauze, noćni i prekovremeni rad te prelazak preko ponoći.</td></tr>
+<tr><td><img src="assets/icons/chart.svg" width="44" alt=""/></td><td><strong>Statistika koja ima smisla</strong><br/>Pregled po tjednima, mjesecima i godinama, uključujući nedjelje i hrvatske blagdane.</td></tr>
+<tr><td><img src="assets/icons/wallet.svg" width="44" alt=""/></td><td><strong>Procjena bruto plaće</strong><br/>Unesi vlastitu bruto satnicu i postotke dodataka. Prikaži osnovicu i dodatke zasebno.</td></tr>
+<tr><td><img src="assets/icons/shield.svg" width="44" alt=""/></td><td><strong>Podatci ostaju tvoji</strong><br/>Lokalna pohrana, CSV izvoz, sigurnosna kopija i vraćanje podataka uz tvoju potvrdu.</td></tr>
+</table>
 
-## Obračun
+## Preuzmi Shiftoru
 
-Svi datumi i vremena pohranjeni su lokalno. Radni sati računaju se minutnom preciznošću. Kod prijelaza na ljetno/zimsko vrijeme koristi se vremenska zona uređaja. Dodaci su *preklapajuće* kategorije (npr. nedjelja i noćni rad), stoga se ukupni radni sati ne zbrajaju dvaput.
+[**Pogledaj izdanja i preuzmi APK →**](https://github.com/bren-wp/Shiftora/releases)
 
-**Procjena plaće nije službeni obračun.** Postoci u početnim postavkama samo su primjeri. Korisnik treba unijeti vlastitu satnicu, dodatke i pravila svojega radnog odnosa. Aplikacija ne prikazuje neutemeljenu neto procjenu.
+Odaberi najnovije izdanje i preuzmi **APK** za Android. Uz izdanja je dostupan i **AAB** za distribuciju. Za objavu na Google Playu potreban je valjano potpisan AAB; nepotpisane pakete nije moguće izravno objaviti.
 
-## Privatnost
+## Privatnost na prvom mjestu
 
-Svi osobni unosi ostaju na uređaju i ne koriste se za analitiku. Sigurnosni cloud backup je isključen kako se evidencija rada ne bi slučajno slala u cloud. Izvoz CSV-a pokreće korisnik.
+Shiftora ne zahtijeva korisnički račun, nema analitiku, praćenje ni dozvolu za internet. Rasporedi i postavke čuvaju se lokalno na uređaju. Izvoz i sigurnosna kopija događaju se samo kada ih sam pokreneš.
 
-## Licenca
+## Česta pitanja
 
-MIT © 2026 Brendigo. Razvoj Shiftore je originalan; repozitorij se ne oslanja na kopiranje neprovjereno licenciranog izvornog koda trećih strana.
+**Radi li aplikacija bez interneta?** Da. Kalendar, evidencija i obračun rade izvan mreže.
+
+**Mogu li prilagoditi svoje smjene?** Da. Vrijeme, pauzu, vrstu i ponavljanje smjena podešavaš sam.
+
+**Je li procjena plaće službeni obračun?** Nije. Procjena prikazuje bruto osnovicu i dodatke prema unesenim postavkama; stvarni obračun ovisi o ugovoru, primjenjivim pravilima i poreznim okolnostima.
+
+**Mogu li prenijeti raspored na drugi uređaj?** Da. Spremi sigurnosnu kopiju i vrati je na novom uređaju.
+
+---
+
+<div align="center">
+  <strong>Shiftora</strong> · Android · Hrvatski jezik · © 2026 <a href="https://brendigo.com">Brendigo</a><br/>
+  <sub>Izvorni kod je dostupan pod <a href="LICENSE">MIT licencom</a>.</sub>
+</div>
