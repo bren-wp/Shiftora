@@ -47,6 +47,8 @@ class MainActivity : ComponentActivity() {
             val salary by vm.salary.collectAsState()
             val onboarding by vm.onboarding.collectAsState()
             val darkMode by vm.darkMode.collectAsState()
+            val shiftColors by vm.shiftColors.collectAsState()
+            val monthlyFunds by vm.monthlyFunds.collectAsState()
             val message by vm.message.collectAsState()
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
@@ -135,7 +137,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            ShiftoraTheme(darkMode) {
+            ShiftoraTheme(darkMode, shiftColors) {
                 if (onboarding) {
                     OnboardingScreen(onComplete = vm::finishOnboarding)
                 } else {

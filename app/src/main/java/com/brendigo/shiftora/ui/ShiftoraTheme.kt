@@ -2,6 +2,8 @@ package com.brendigo.shiftora.ui
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.brendigo.shiftora.data.ShiftKind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -54,7 +56,10 @@ private val dark = darkColorScheme(
 )
 
 @Composable
-fun ShiftoraTheme(darkMode: Boolean, content: @Composable () -> Unit) {
+fun ShiftoraTheme(
+    darkMode: Boolean, shiftColors: Map<ShiftKind, Int> = emptyMap(),
+    content: @Composable () -> Unit
+) {
     val base = Typography()
     val typography = Typography(
         headlineLarge = TextStyle(fontSize = 31.sp, lineHeight = 38.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.SansSerif),
@@ -65,5 +70,7 @@ fun ShiftoraTheme(darkMode: Boolean, content: @Composable () -> Unit) {
         bodyMedium = base.bodyMedium.copy(fontSize = 14.sp, lineHeight = 20.sp),
         labelLarge = base.labelLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
     )
-    MaterialTheme(colorScheme = if (darkMode) dark else light, typography = typography, content = content)
+    MaterialTheme(colorScheme = if (darkMode) dark else light, typography = typography) {
+        CompositionLocalProvider(LocalShiftColors provides shiftColors, content = content)
+    }
 }

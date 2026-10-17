@@ -1,6 +1,7 @@
 package com.brendigo.shiftora.data
 
 import android.content.Context
+import java.time.YearMonth
 
 class Preferences(context: Context) {
     private val store = context.getSharedPreferences("shiftora_settings", Context.MODE_PRIVATE)
@@ -32,6 +33,39 @@ class Preferences(context: Context) {
             nightStartHour = if (from == until) 22 else from,
             nightEndHour = if (from == until) 6 else until
         )
+    }
+
+    fun shiftColors(): Map<ShiftKind, Int> = ShiftKind.entries.mapNotNull { kind ->
+        val key = "color_${kind.name}"
+        val value = runCatching {
+            if (store.contains(key)) store.getInt(key, 0) else null
+        }.getOrNull()
+        value?.let { kind to (it or 0xFF000000.toInt()) }
+    }.toMap()
+
+    fun saveShiftColor(kind: ShiftKind, argb: Int?) {
+        store.edit().apply {
+            if (argb == null) remove("color_${kind.name}")
+            else putInt("color_${kind.name}", argb or 0xFF000000.toInt())
+        }.apply()
+    }
+
+    /** Per-month optional custom fund in minutes (0..744 hours). */
+    fun monthlyFundOverrides(): Map<String, Int> =
+        store.all.mapNotNull { (key, value) ->
+            if (!key.startsWith("fund_") || value !is Int || value !in 0..44640) null
+            else {
+                val month = key.removePrefix("fund_")
+                if (runCatching { YearMonth.parse(month) }.isSuccess) month to value else null
+            }
+        }.toMap()
+
+    fun saveMonthlyFund(month: YearMonth, minutes: Int?) {
+        require(minutes == null || minutes in 0..44640)
+        store.edit().apply {
+            if (minutes == null) remove("fund_$month")
+            else putInt("fund_$month", minutes)
+        }.apply()
     }
 
     fun saveSalary(settings: SalarySettings) {

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.YearMonth
 
 class ShiftViewModel(application: Application) : AndroidViewModel(application) {
     private val store = ShiftStore(application)
@@ -20,6 +21,22 @@ class ShiftViewModel(application: Application) : AndroidViewModel(application) {
     val onboarding: StateFlow<Boolean> = _onboarding
     private val _darkMode = MutableStateFlow(preferences.darkMode)
     val darkMode: StateFlow<Boolean> = _darkMode
+    private val _shiftColors = MutableStateFlow(preferences.shiftColors())
+    val shiftColors: StateFlow<Map<ShiftKind, Int>> = _shiftColors
+    private val _monthlyFunds = MutableStateFlow(preferences.monthlyFundOverrides())
+    val monthlyFunds: StateFlow<Map<String, Int>> = _monthlyFunds
+
+    fun setShiftColor(kind: ShiftKind, argb: Int?) {
+        preferences.saveShiftColor(kind, argb)
+        _shiftColors.value = preferences.shiftColors()
+    }
+
+    fun setMonthlyFund(month: YearMonth, minutes: Int?) {
+        preferences.saveMonthlyFund(month, minutes)
+        _monthlyFunds.value = preferences.monthlyFundOverrides()
+        _message.value = "Fond sati je spremljen."
+    }
+
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message
 
