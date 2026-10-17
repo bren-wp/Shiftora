@@ -231,6 +231,7 @@ class MainActivity : ComponentActivity() {
                     editing?.let { item ->
                         ShiftEditorDialog(
                             entry = item,
+                            existing = shifts,
                             onDismiss = { editing = null },
                             onSave = { vm.save(it) },
                             onDelete = { vm.delete(it) }

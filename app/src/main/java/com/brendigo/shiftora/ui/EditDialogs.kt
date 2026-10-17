@@ -35,6 +35,7 @@ private fun parseClock(value: String): Int? {
 @Composable
 fun ShiftEditorDialog(
     entry: Shift,
+    existing: List<Shift>,
     onDismiss: () -> Unit,
     onSave: (Shift) -> Unit,
     onDelete: (Long) -> Unit
@@ -63,7 +64,7 @@ fun ShiftEditorDialog(
             startMinute = startMinutes, endMinute = endMinutes,
             breakMinutes = pause, breakAfterMinutes = after,
             unpaidBreak = unpaid, actual = actual, overtime = overtime, note = note.take(500))
-        ShiftScheduleValidator.validateBreak(result)
+        ShiftScheduleValidator.validateInsertion(existing, result)
         result
     }
 
@@ -152,6 +153,11 @@ fun ShiftEditorDialog(
                 OutlinedTextField(value = note, onValueChange = { note = it.take(500) },
                     label = { Text("Bilješka") }, modifier = Modifier.fillMaxWidth(),
                     maxLines = 3)
+                val validationError = valid.exceptionOrNull()?.message
+                if (validationError != null) {
+                    Text(validationError, color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall)
+                }
                 if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error)
                 if (entry.id != 0L) {
                     TextButton(onClick = { confirmDelete = true }) {
