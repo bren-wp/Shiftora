@@ -136,4 +136,18 @@ class WorkCalculatorTest {
         assertEquals(totals.paidMinutes, totals.chartRegularMinutes)
     }
 
+    @Test fun sundayPublicHolidayIsOneSpecialIndicatorWithoutDoubleCounting() {
+        val shift = Shift(date = LocalDate.of(2026, 10, 31), kind = ShiftKind.NIGHT)
+        val summary = WorkCalculator.calculatePeriod(
+            listOf(shift), SalarySettings(),
+            LocalDate.of(2026, 11, 1), LocalDate.of(2026, 11, 2), zagreb
+        )
+        assertEquals(360L, summary.paidMinutes)
+        assertEquals(360L, summary.sundayMinutes)
+        assertEquals(360L, summary.holidayMinutes)
+        assertEquals(360L, summary.specialMinutes)
+        assertEquals(360L, summary.chartSpecialMinutes)
+    }
+
+
 }
