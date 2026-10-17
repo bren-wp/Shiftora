@@ -59,6 +59,8 @@ data class WorkTotals(
     val nightMinutes: Long = 0,
     val sundayMinutes: Long = 0,
     val holidayMinutes: Long = 0,
+    /** Unique minutes on a Sunday or public holiday, counted once even if both apply. */
+    val specialMinutes: Long = 0,
     val morningMinutes: Long = 0,
     val afternoonMinutes: Long = 0,
     val nightShiftMinutes: Long = 0,

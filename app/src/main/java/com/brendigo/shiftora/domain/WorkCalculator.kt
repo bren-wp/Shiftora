@@ -60,6 +60,7 @@ object WorkCalculator {
         var night = 0L
         var sunday = 0L
         var holiday = 0L
+        var special = 0L
         var overtime = 0L
         var morning = 0L
         var afternoon = 0L
@@ -92,6 +93,7 @@ object WorkCalculator {
                 if (isNight) night++
                 if (isSunday) sunday++
                 if (isHoliday) holiday++
+                if (isSunday || isHoliday) special++
                 // Each paid minute appears in exactly one donut segment.
                 // Actual premium counters above intentionally overlap when legally applicable.
                 when {
@@ -125,7 +127,7 @@ object WorkCalculator {
         return WorkTotals(
             paidMinutes = paid, actualMinutes = actual, plannedMinutes = planned,
             overtimeMinutes = overtime, nightMinutes = night,
-            sundayMinutes = sunday, holidayMinutes = holiday,
+            sundayMinutes = sunday, holidayMinutes = holiday, specialMinutes = special,
             morningMinutes = morning, afternoonMinutes = afternoon,
             nightShiftMinutes = nightShifts,
             chartRegularMinutes = chartRegular,
