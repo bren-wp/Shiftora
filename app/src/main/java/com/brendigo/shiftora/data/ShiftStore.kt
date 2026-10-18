@@ -5,10 +5,13 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import java.time.LocalDate
+import java.time.Instant
 import com.brendigo.shiftora.domain.ShiftScheduleValidator
 
+data class ArchivedShift(val archiveId: Long, val archivedAt: String, val entry: Shift)
+
 /** Local-only storage: no internet permission, accounts or analytics. */
-class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", null, 1) {
+class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", null, 2) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """CREATE TABLE shifts (
@@ -26,11 +29,30 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
             )""".trimIndent()
         )
         db.execSQL("CREATE INDEX idx_shifts_date ON shifts(date)")
+        createArchive(db)
+    }
+
+    private fun createArchive(db: SQLiteDatabase) {
+        db.execSQL("""CREATE TABLE IF NOT EXISTS shift_archive (
+            archive_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            original_id INTEGER NOT NULL,
+            archived_at TEXT NOT NULL,
+            date TEXT NOT NULL,
+            kind TEXT NOT NULL,
+            start_minute INTEGER NOT NULL,
+            end_minute INTEGER NOT NULL,
+            break_minutes INTEGER NOT NULL,
+            break_after INTEGER NOT NULL,
+            unpaid_break INTEGER NOT NULL,
+            actual INTEGER NOT NULL,
+            overtime INTEGER NOT NULL,
+            note TEXT NOT NULL
+        )""".trimIndent())
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_shift_archive_date ON shift_archive(date)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Add explicit, non-destructive migrations when schema changes.
-        require(oldVersion == newVersion) { "Missing migration from $oldVersion to $newVersion" }
+        if (oldVersion < 2) createArchive(db)
     }
 
     @Synchronized fun all(): List<Shift> {
@@ -55,6 +77,33 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
         return shifts
     }
 
+    /** Records are kept here when the user explicitly removes a calendar entry. */
+    @Synchronized fun archived(): List<ArchivedShift> {
+        val items = mutableListOf<ArchivedShift>()
+        readableDatabase.rawQuery("SELECT * FROM shift_archive ORDER BY archive_id DESC", null).use { c ->
+            while (c.moveToNext()) {
+                val entry = Shift(
+                    id = c.getLong(c.getColumnIndexOrThrow("original_id")),
+                    date = LocalDate.parse(c.getString(c.getColumnIndexOrThrow("date"))),
+                    kind = ShiftKind.valueOf(c.getString(c.getColumnIndexOrThrow("kind"))),
+                    startMinute = c.getInt(c.getColumnIndexOrThrow("start_minute")),
+                    endMinute = c.getInt(c.getColumnIndexOrThrow("end_minute")),
+                    breakMinutes = c.getInt(c.getColumnIndexOrThrow("break_minutes")),
+                    breakAfterMinutes = c.getInt(c.getColumnIndexOrThrow("break_after")),
+                    unpaidBreak = c.getInt(c.getColumnIndexOrThrow("unpaid_break")) != 0,
+                    actual = c.getInt(c.getColumnIndexOrThrow("actual")) != 0,
+                    overtime = c.getInt(c.getColumnIndexOrThrow("overtime")) != 0,
+                    note = c.getString(c.getColumnIndexOrThrow("note"))
+                )
+                items += ArchivedShift(
+                    c.getLong(c.getColumnIndexOrThrow("archive_id")),
+                    c.getString(c.getColumnIndexOrThrow("archived_at")), entry
+                )
+            }
+        }
+        return items
+    }
+
     private fun values(shift: Shift) = ContentValues().apply {
         put("date", shift.date.toString())
         put("kind", shift.kind.name)
@@ -77,25 +126,83 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
         return shift.id
     }
 
-    @Synchronized fun delete(id: Long) {
-        writableDatabase.delete("shifts", "id=?", arrayOf(id.toString()))
-    }
-
     /**
-     * Transactional replacement. The original schedule remains intact when a row is invalid
-     * or the database encounters an error before the transaction is committed.
+     * No irreversible deletion from the calendar. Move the full record to the
+     * on-device archive atomically so it can be restored at any future date.
      */
-    @Synchronized fun replaceAll(shifts: List<Shift>) {
-        require(shifts.size <= 20_000)
-        ShiftScheduleValidator.validateAll(shifts)
+    @Synchronized fun delete(id: Long) {
         val db = writableDatabase
         db.beginTransaction()
         try {
-            db.delete("shifts", null, null)
-            shifts.forEach { shift ->
-                db.insertOrThrow("shifts", null, values(shift))
+            db.execSQL("""INSERT INTO shift_archive (
+                    original_id, archived_at, date, kind, start_minute, end_minute,
+                    break_minutes, break_after, unpaid_break, actual, overtime, note
+                ) SELECT id, ?, date, kind, start_minute, end_minute, break_minutes,
+                    break_after, unpaid_break, actual, overtime, note
+                FROM shifts WHERE id = ?""",
+                arrayOf(Instant.now().toString(), id))
+            require(db.delete("shifts", "id=?", arrayOf(id.toString())) == 1) {
+                "Smjena nije pronađena. Nema promjena."
             }
             db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    /** Archived entry stays untouched if restoration would create a conflict. */
+    @Synchronized fun restoreArchived(archiveId: Long): Long {
+        val entry = archived().firstOrNull { it.archiveId == archiveId }
+            ?: error("Arhivirana smjena nije pronađena.")
+        val candidate = entry.entry.copy(id = 0L)
+        ShiftScheduleValidator.validateInsertion(all(), candidate)
+        val db = writableDatabase
+        db.beginTransaction()
+        return try {
+            val restored = db.insertOrThrow("shifts", null, values(candidate))
+            require(db.delete("shift_archive", "archive_id=?", arrayOf(archiveId.toString())) == 1) {
+                "Arhivirani unos nije pronađen."
+            }
+            db.setTransactionSuccessful()
+            restored
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    data class MergeResult(val added: Int, val skipped: Int)
+
+    /**
+     * Non-destructive import. Every existing past/future shift keeps its original
+     * row and ID. Conflicting or identical incoming entries are skipped.
+     */
+    @Synchronized fun mergeBackup(incoming: List<Shift>): MergeResult {
+        require(incoming.size <= 20_000) { "Sigurnosna kopija sadrži previše smjena." }
+        ShiftScheduleValidator.validateAll(incoming)
+        val db = writableDatabase
+        db.beginTransaction()
+        return try {
+            val saved = all().toMutableList()
+            var added = 0
+            var skipped = 0
+            incoming.forEach { raw ->
+                val shift = raw.copy(id = 0L)
+                val identical = saved.any {
+                    it.copy(id = 0L) == shift
+                }
+                val valid = !identical && runCatching {
+                    ShiftScheduleValidator.validateInsertion(saved, shift)
+                }.isSuccess
+                if (!valid || saved.size >= 20_000) {
+                    skipped++
+                } else {
+                    val id = db.insertOrThrow("shifts", null, values(shift))
+                    saved += shift.copy(id = id)
+                    added++
+                }
+            }
+            db.setTransactionSuccessful()
+            MergeResult(added, skipped)
         } finally {
             db.endTransaction()
         }
@@ -113,7 +220,7 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
         try {
             val saved = all().toMutableList()
             val existing = mutableSetOf<String>()
-            db.rawQuery("SELECT DISTINCT date FROM shifts", null).use { c ->
+            db.rawQuery("SELECT date FROM shifts UNION SELECT date FROM shift_archive", null).use { c ->
                 while (c.moveToNext()) existing += c.getString(0)
             }
             repeat(days) { offset ->
