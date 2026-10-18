@@ -1,5 +1,14 @@
 # Povijest izdanja
 
+## 0.8.1 — 18. 10. 2026. | Precizniji fond sati i pripravnost
+
+- PR (pripravnost) može postojati uz radnu smjenu istog datuma bez udvostručenja radnih ili plaćenih sati.
+- GO, BO, PD i SD ostaju cjelodnevni statusi koji ne mogu dijeliti dan s drugim unosima.
+- Mjesečni fond podržava zaseban unos sati i minuta (npr. 151 h 30 min), uz strogu validaciju raspona.
+- Odvojeni pokazatelji stvarno odrađenih, planiranih i GO/BO/PD sati; dodana projekcija koliko nedostaje do fonda ako se planirane smjene odrade.
+- Novi predložak automatskog rasporeda D–N–SD–SD za smjenski turnus.
+- Regresijski unit i Android instrumentacijski testovi za istodobnu pripravnost i rad, isključivost godišnjeg odmora, minute fonda te planirane i odrađene sate.
+
 ## 0.8.0 — 18. 10. 2026. | Smjene, boje i mjesečni fond sati
 
 - Nove oznake u kalendaru: D (dnevna), N (noćna), J (jutarnja), P (popodnevna), PR (pripravnost), GO (godišnji), BO (bolovanje), SD (slobodni dan), PD (plaćeni dopust) te X (prilagođena).

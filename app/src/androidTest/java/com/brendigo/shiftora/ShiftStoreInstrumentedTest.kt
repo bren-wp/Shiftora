@@ -57,4 +57,32 @@ class ShiftStoreInstrumentedTest {
             }
         }
     }
+    @Test fun standbyAndWorkPersistTogetherWithoutInflatingWorkedHours() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val day = LocalDate.of(2097, 3, 5)
+        ShiftStore(context).use { store ->
+            store.all().filter { it.date == day }.forEach { store.delete(it.id) }
+            try {
+                store.save(Shift(date = day, kind = ShiftKind.MORNING, actual = true))
+                store.save(Shift(date = day, kind = ShiftKind.STANDBY,
+                    startMinute = 840, endMinute = 1200))
+                val entries = store.all().filter { it.date == day }
+                assertEquals(2, entries.size)
+                assertTrue(entries.any { it.kind == ShiftKind.STANDBY })
+                val summary = com.brendigo.shiftora.domain.WorkCalculator.calculate(
+                    entries, com.brendigo.shiftora.data.SalarySettings()
+                )
+                assertEquals(480L, summary.paidMinutes)
+                assertEquals(480L, summary.actualMinutes)
+                try {
+                    store.save(Shift(date = day, kind = ShiftKind.ANNUAL))
+                    throw AssertionError("Annual leave must not coexist with work or standby")
+                } catch (_: IllegalArgumentException) {
+                    assertEquals(2, store.all().count { it.date == day })
+                }
+            } finally {
+                store.all().filter { it.date == day }.forEach { store.delete(it.id) }
+            }
+        }
+    }
 }

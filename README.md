@@ -40,7 +40,7 @@
 
 Svaka oznaka može imati **svoju boju**: odaberi gotovu paletu ili upiši vlastitu HEX boju pod **Više → Boje smjena i izostanaka**. Zaslon kalendara prikazuje oznaku preko pune obojene ćelije datuma, s jasno istaknutim odabirom.
 
-**Fond sati po mjesecu** nalazi se ispod kalendara. Uredi ga zasebno za svaki mjesec ili koristi informativni fond: 8 h po radnom danu, bez vikenda i hrvatskih blagdana. Evidencija GO, BO i PD vodi se odvojeno od stvarno odrađenih sati; PR ne ulazi u obračun rada bez zasebne radne smjene. Fond nije službeni obračun prava ili naknada.
+**Fond sati po mjesecu** nalazi se ispod kalendara. Možeš unijeti i sate i minute (npr. 151 h 30 min); odrađeni i planirani sati prikazuju se zasebno. Uredi fond za svaki mjesec ili koristi informativni fond: 8 h po radnom danu, bez vikenda i hrvatskih blagdana. Evidencija GO, BO i PD vodi se odvojeno od stvarno odrađenih sati; PR može stajati uz radnu smjenu na isti datum, ali sam po sebi ne ulazi u obračun odrađenih sati. U automatskom rasporedu dostupan je i turnus D–N–SD–SD. Fond nije službeni obračun prava ili naknada.
 
 CSV sadrži kodove, a JSON sigurnosna kopija v2 čuva i boje i posebne mjesečne fondove. Stare kopije v1 ostaju podržane.
 
