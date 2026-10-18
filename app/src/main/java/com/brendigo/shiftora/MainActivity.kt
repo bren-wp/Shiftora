@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -56,6 +57,7 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val snackbars = remember { SnackbarHostState() }
             var tab by rememberSaveable { mutableIntStateOf(0) }
+            val screenStateHolder = rememberSaveableStateHolder()
             var editing by remember { mutableStateOf<Shift?>(null) }
             var rotationOpen by remember { mutableStateOf(false) }
             var salaryOpen by remember { mutableStateOf(false) }
@@ -194,7 +196,8 @@ class MainActivity : ComponentActivity() {
                                 Box(Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                                     CircularProgressIndicator()
                                 }
-                            } else when (tab) {
+                            } else screenStateHolder.SaveableStateProvider(tab) {
+                                when (tab) {
                                 0 -> HomeScreen(shifts, salary, add, edit, track, { tab = it }, goSettings)
                                 1 -> CalendarScreen(shifts, salary, monthlyFunds, add, edit,
                                     vm::setMonthlyFund, goSettings)
@@ -210,6 +213,7 @@ class MainActivity : ComponentActivity() {
                                     onShiftColors = { colorsOpen = true },
                                     onArchive = { archiveOpen = true }
                                 )
+                                }
                             }
                         }
                     }

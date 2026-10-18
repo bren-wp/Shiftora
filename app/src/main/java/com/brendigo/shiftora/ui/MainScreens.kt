@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -236,9 +237,11 @@ fun CalendarScreen(
     onAdd: (LocalDate) -> Unit, onEdit: (Shift) -> Unit,
     onFundSave: (YearMonth, Int?) -> Unit, onSettings: () -> Unit
 ) {
-    var shown by remember { mutableStateOf(YearMonth.now()) }
-    var selected by remember { mutableStateOf(LocalDate.now()) }
-    var weekOnly by remember { mutableStateOf(false) }
+    var shownText by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
+    var selectedText by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
+    val shown = YearMonth.parse(shownText)
+    val selected = LocalDate.parse(selectedText)
+    var weekOnly by rememberSaveable { mutableStateOf(false) }
     var fundEditorOpen by remember { mutableStateOf(false) }
     val fund = remember(shown, shifts, salary, monthlyFunds) {
         MonthlyFund.summary(shown, shifts, salary, monthlyFunds[shown.toString()])
@@ -283,14 +286,14 @@ fun CalendarScreen(
             Spacer(Modifier.height(spacing))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = {
-                    shown = shown.minusMonths(1)
-                    selected = shown.atDay(1)
+                    shownText = shown.minusMonths(1).toString()
+                    selectedText = YearMonth.parse(shownText).atDay(1).toString()
                 }) { Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodni mjesec") }
                 Text(shown.atDay(1).monthLabel(), style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                 IconButton(onClick = {
-                    shown = shown.plusMonths(1)
-                    selected = shown.atDay(1)
+                    shownText = shown.plusMonths(1).toString()
+                    selectedText = YearMonth.parse(shownText).atDay(1).toString()
                 }) { Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeći mjesec") }
             }
             Spacer(Modifier.height(4.dp))
@@ -320,8 +323,8 @@ fun CalendarScreen(
                                 .then(if (chosen) Modifier.border(2.dp, Palette.Navy,
                                     RoundedCornerShape(11.dp)) else Modifier)
                                 .clickable {
-                                    selected = date
-                                    shown = YearMonth.from(date)
+                                    selectedText = date.toString()
+                                    shownText = YearMonth.from(date).toString()
                                 },
                             contentAlignment = Alignment.Center
                         ) {
