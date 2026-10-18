@@ -715,6 +715,23 @@ fun MoreScreen(
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SurfaceCard(Modifier.fillMaxWidth()) {
+                SectionTitle("Alati")
+                ListAction("Automatski raspored", "Ponovi rotaciju smjena", Icons.Default.AutoMode, onRotation)
+                HorizontalDivider()
+                ListAction("Postavke plaće", "Satnica i dodaci", Icons.Default.Calculate, onEditSalary)
+                HorizontalDivider()
+                ListAction("Boje smjena i izostanaka", "Promijeni boju za D, N, J, P, PR, GO, BO, SD, PD i X",
+                    Icons.Default.Palette, onShiftColors)
+                HorizontalDivider()
+                ListAction("Izvoz CSV", "Izvezi smjene i evidenciju sati", Icons.Default.FileDownload, onCsv)
+                HorizontalDivider()
+                ListAction("Sigurnosna kopija", "Spremi aktivne i arhivirane smjene u JSON", Icons.Default.SaveAlt, onBackup)
+                HorizontalDivider()
+                ListAction("Arhiva rasporeda", "Pregledaj i vrati ručno arhivirane smjene", Icons.Default.Inventory2, onArchive)
+                HorizontalDivider()
+                ListAction("Uvezi raspored", "Spoji JSON kopiju bez brisanja postojećih unosa", Icons.Default.Restore, onRestore)
+            }
+            SurfaceCard(Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Icon(Icons.Default.Security, contentDescription = null, tint = Palette.Mint)
@@ -738,23 +755,6 @@ fun MoreScreen(
                     Spacer(Modifier.width(6.dp))
                     Text("Izvezi sigurnosnu kopiju")
                 }
-            }
-            SurfaceCard(Modifier.fillMaxWidth()) {
-                SectionTitle("Alati")
-                ListAction("Automatski raspored", "Ponovi rotaciju smjena", Icons.Default.AutoMode, onRotation)
-                HorizontalDivider()
-                ListAction("Postavke plaće", "Satnica i dodaci", Icons.Default.Calculate, onEditSalary)
-                HorizontalDivider()
-                ListAction("Boje smjena i izostanaka", "Promijeni boju za D, N, J, P, PR, GO, BO, SD, PD i X",
-                    Icons.Default.Palette, onShiftColors)
-                HorizontalDivider()
-                ListAction("Izvoz CSV", "Izvezi smjene i evidenciju sati", Icons.Default.FileDownload, onCsv)
-                HorizontalDivider()
-                ListAction("Sigurnosna kopija", "Spremi aktivne i arhivirane smjene u JSON", Icons.Default.SaveAlt, onBackup)
-                HorizontalDivider()
-                ListAction("Arhiva rasporeda", "Pregledaj i vrati ručno arhivirane smjene", Icons.Default.Inventory2, onArchive)
-                HorizontalDivider()
-                ListAction("Uvezi raspored", "Spoji JSON kopiju bez brisanja postojećih unosa", Icons.Default.Restore, onRestore)
             }
             SurfaceCard(Modifier.fillMaxWidth()) {
                 SectionTitle("Izgled")

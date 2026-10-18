@@ -51,7 +51,7 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Pregled radnih sati i dodataka.").assertExists()
         compose.onNodeWithText("Više").performClick()
         compose.onNodeWithText("Alati").assertExists()
-        compose.onNodeWithText("Boje smjena i izostanaka").performClick()
+        compose.onNodeWithText("Boje smjena i izostanaka").performScrollTo().performClick()
         compose.onNodeWithText("Boje i oznake smjena").assertExists()
         compose.onNodeWithText("Gotovo").performClick()
         compose.onNodeWithText("Arhiva rasporeda").performScrollTo().performClick()
