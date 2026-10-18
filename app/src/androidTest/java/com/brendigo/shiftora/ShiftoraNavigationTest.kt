@@ -10,6 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.brendigo.shiftora.data.ShiftKind
 import com.brendigo.shiftora.data.ShiftStore
 import java.time.YearMonth
+import com.brendigo.shiftora.ui.monthLabel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,6 +28,13 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Početna").assertExists()
         compose.onNodeWithText("Kalendar").performClick()
         compose.onNodeWithText("Mjesec").assertExists()
+        val nextMonth = YearMonth.now().plusMonths(1).atDay(1).monthLabel()
+        compose.onNodeWithContentDescription("Sljedeći mjesec").performClick()
+        compose.onNodeWithText(nextMonth).assertExists()
+        // Navigating through tabs must never reset the selected future month.
+        compose.onNodeWithText("Statistika").performClick()
+        compose.onNodeWithText("Kalendar").performClick()
+        compose.onNodeWithText(nextMonth).assertExists()
         compose.onNodeWithText("GO").assertExists()
         compose.onNodeWithText("BO").assertExists()
         compose.onNodeWithContentDescription("Uredi fond sati").performScrollTo().performClick()
@@ -46,6 +54,9 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Boje smjena i izostanaka").performClick()
         compose.onNodeWithText("Boje i oznake smjena").assertExists()
         compose.onNodeWithText("Gotovo").performClick()
+        compose.onNodeWithText("Arhiva rasporeda").performScrollTo().performClick()
+        compose.onNodeWithText("Zatvori").assertExists()
+        compose.onNodeWithText("Zatvori").performClick()
         // Emulator-only sample data used by screenshot QA. Never included in production.
         val store = ShiftStore(compose.activity.applicationContext)
         try {
