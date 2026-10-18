@@ -17,7 +17,7 @@ fi
 ui_checked="false"
 for attempt in $(seq 1 90); do
   ui_conclusion="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/android-ui.yml/runs?per_page=40" \
-    --jq '[.workflow_runs[] | select(.head_sha == "'$run_sha'")] | first | .conclusion // "pending"')"
+    --jq '[.workflow_runs[] | select(.head_sha == "'$run_sha'")] | .[0].conclusion // "pending"')"
   case "$ui_conclusion" in
     success) ui_checked="true"; break ;;
     failure|cancelled|timed_out|action_required)
