@@ -373,13 +373,19 @@ fun CalendarScreen(
                     Column(Modifier.weight(1f)) {
                         Text("Fond sati · ${shown.atDay(1).monthLabel()}",
                             fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Text("Fond: ${minutesLabel(fund.fundMinutes.toLong())}   •   Evidentirano: ${minutesLabel(fund.recordedMinutes)}",
+                        Text("Fond: ${minutesLabel(fund.fundMinutes.toLong())}" +
+                            "   •   Odrađeno: ${minutesLabel(fund.actuallyWorkedMinutes)}",
                             fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Odrađeno: ${minutesLabel(fund.actuallyWorkedMinutes)}   •   GO/BO/PD: ${minutesLabel(fund.leaveCreditMinutes.toLong())}",
+                        Text("Planirano: ${minutesLabel(fund.plannedMinutes)}" +
+                            "   •   GO/BO/PD: ${minutesLabel(fund.leaveCreditMinutes.toLong())}",
                             fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Do fonda: ${minutesLabel(fund.remainingMinutes)}" +
-                            if (fund.overFundMinutes > 0) "   •   Iznad: ${minutesLabel(fund.overFundMinutes)}" else "",
+                        Text("Preostalo: ${minutesLabel(fund.remainingMinutes)}" +
+                            "   •   Uz plan: ${minutesLabel(fund.projectedRemainingMinutes)}",
                             fontSize = 11.sp, color = Palette.Blue, fontWeight = FontWeight.SemiBold)
+                        if (fund.overFundMinutes > 0) {
+                            Text("Iznad fonda: ${minutesLabel(fund.overFundMinutes)}",
+                                color = Palette.Coral, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+                        }
                     }
                     IconButton(onClick = { fundEditorOpen = true }) {
                         Icon(Icons.Default.Edit, contentDescription = "Uredi fond sati")

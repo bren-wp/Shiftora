@@ -213,7 +213,8 @@ private fun OptionSwitch(text: String, value: Boolean, onChange: (Boolean) -> Un
 @Composable
 fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind>, Int) -> Unit) {
     val presets = listOf(
-        "J–P–N–S" to listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF),
+        "D–N–SD–SD (turnus)" to listOf(ShiftKind.DAY, ShiftKind.NIGHT, ShiftKind.OFF, ShiftKind.OFF),
+        "J–P–N–SD" to listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF),
         "2+2+2+2" to listOf(ShiftKind.MORNING, ShiftKind.MORNING,
             ShiftKind.AFTERNOON, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.NIGHT, ShiftKind.OFF, ShiftKind.OFF),
         "5 radnih + 2 slobodna" to listOf(ShiftKind.MORNING, ShiftKind.MORNING,
@@ -222,7 +223,7 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
     )
     var selection by remember { mutableIntStateOf(0) }
     val customPattern = remember {
-        mutableStateListOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF)
+        mutableStateListOf(ShiftKind.DAY, ShiftKind.NIGHT, ShiftKind.OFF, ShiftKind.OFF)
     }
     var start by remember { mutableStateOf(LocalDate.now().toString()) }
     var days by remember { mutableStateOf("90") }

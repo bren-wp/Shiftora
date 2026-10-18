@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -128,10 +127,13 @@ fun MonthlyFundEditor(
     onDismiss: () -> Unit
 ) {
     val standard = MonthlyFund.standardMinutes(month)
-    var text by remember(month, overrideMinutes) {
+    var hoursText by remember(month, overrideMinutes) {
         mutableStateOf(((overrideMinutes ?: standard) / 60).toString())
     }
-    val hours = text.toIntOrNull()?.takeIf { it in 0..744 }
+    var minutesText by remember(month, overrideMinutes) {
+        mutableStateOf(((overrideMinutes ?: standard) % 60).toString())
+    }
+    val parsedFund = MonthlyFund.parseFund(hoursText, minutesText)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Fond sati — ${month.atDay(1).monthLabel()}") },
@@ -140,15 +142,32 @@ fun MonthlyFundEditor(
                 Text("Standardni fond: ${standard / 60} h. Računa se 8 sati po radnom danu, " +
                     "bez vikenda i hrvatskih blagdana. Fond po ugovoru može biti drukčiji.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it.filter(Char::isDigit).take(3) },
-                    label = { Text("Fond sati u ovom mjesecu") },
-                    suffix = { Text("h") },
-                    singleLine = true,
-                    isError = hours == null,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = hoursText,
+                        onValueChange = { hoursText = it.filter(Char::isDigit).take(3) },
+                        label = { Text("Sati") },
+                        suffix = { Text("h") },
+                        singleLine = true,
+                        isError = parsedFund == null,
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = minutesText,
+                        onValueChange = { minutesText = it.filter(Char::isDigit).take(2) },
+                        label = { Text("Minute") },
+                        suffix = { Text("min") },
+                        singleLine = true,
+                        isError = parsedFund == null,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (parsedFund == null) {
+                    Text("Unesi ispravan fond (najviše 744 h, minute od 0 do 59).",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall)
+                }
                 Text("Godišnji, bolovanje i plaćeni dopust evidentiraju se odvojeno " +
                     "od odrađenih sati. Ovaj fond nije službeni obračun plaće.",
                     style = MaterialTheme.typography.bodySmall,
@@ -157,8 +176,8 @@ fun MonthlyFundEditor(
         },
         confirmButton = {
             Button(onClick = {
-                hours?.let { onSave(it * 60); onDismiss() }
-            }, enabled = hours != null) { Text("Spremi") }
+                parsedFund?.let { onSave(it); onDismiss() }
+            }, enabled = parsedFund != null) { Text("Spremi") }
         },
         dismissButton = {
             TextButton(onClick = { onSave(null); onDismiss() }) {
