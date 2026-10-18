@@ -172,7 +172,7 @@ fun ShiftEditorDialog(
                     TextButton(onClick = { confirmDelete = true }) {
                         Icon(Icons.Default.DeleteOutline, contentDescription = null)
                         Spacer(Modifier.width(6.dp))
-                        Text("Obriši ovu smjenu", color = MaterialTheme.colorScheme.error)
+                        Text("Premjesti u arhivu", color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -190,11 +190,11 @@ fun ShiftEditorDialog(
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Obrisati smjenu?") },
-            text = { Text("Ova se radnja ne može poništiti.") },
+            title = { Text("Arhivirati smjenu?") },
+            text = { Text("Smjena će nestati iz aktivnog kalendara, ali ostaje sigurno spremljena u lokalnoj arhivi. Možeš je vratiti u Više → Arhiva rasporeda. Ne briše se trajno.") },
             confirmButton = {
                 TextButton(onClick = { onDelete(entry.id); confirmDelete = false; onDismiss() }) {
-                    Text("Obriši", color = MaterialTheme.colorScheme.error)
+                    Text("Arhiviraj", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Odustani") } }

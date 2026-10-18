@@ -44,6 +44,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val vm: ShiftViewModel = viewModel()
             val shifts by vm.shifts.collectAsState()
+            val archived by vm.archived.collectAsState()
+            val loading by vm.loading.collectAsState()
             val salary by vm.salary.collectAsState()
             val onboarding by vm.onboarding.collectAsState()
             val darkMode by vm.darkMode.collectAsState()
@@ -58,6 +60,7 @@ class MainActivity : ComponentActivity() {
             var rotationOpen by remember { mutableStateOf(false) }
             var salaryOpen by remember { mutableStateOf(false) }
             var colorsOpen by remember { mutableStateOf(false) }
+            var archiveOpen by remember { mutableStateOf(false) }
             // SAF file operations and JSON validation must not block Compose rendering.
             val exportLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.CreateDocument("text/csv")
@@ -142,7 +145,7 @@ class MainActivity : ComponentActivity() {
                 if (onboarding) {
                     OnboardingScreen(onComplete = vm::finishOnboarding)
                 } else {
-                    BackHandler(enabled = tab != 0 && editing == null && !rotationOpen && !salaryOpen && !colorsOpen && pendingRestore == null) {
+                    BackHandler(enabled = tab != 0 && editing == null && !rotationOpen && !salaryOpen && !colorsOpen && !archiveOpen && pendingRestore == null) {
                         tab = 0
                     }
                     val sections = listOf(
@@ -182,12 +185,16 @@ class MainActivity : ComponentActivity() {
                             }
                             val edit: (Shift) -> Unit = { entry -> editing = entry }
                             val track: (LocalDate) -> Unit = { date ->
-                                editing = shifts.firstOrNull { it.date == date && it.kind != ShiftKind.OFF }
+                                editing = shifts.firstOrNull { it.date == date && it.kind.isWork }
                                     ?.copy(actual = true)
                                     ?: Shift(date = date, kind = ShiftKind.MORNING, actual = true)
                             }
                             val goSettings: () -> Unit = { tab = 4 }
-                            when (tab) {
+                            if (loading) {
+                                Box(Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                                    CircularProgressIndicator()
+                                }
+                            } else when (tab) {
                                 0 -> HomeScreen(shifts, salary, add, edit, track, { tab = it }, goSettings)
                                 1 -> CalendarScreen(shifts, salary, monthlyFunds, add, edit,
                                     vm::setMonthlyFund, goSettings)
@@ -200,7 +207,8 @@ class MainActivity : ComponentActivity() {
                                     onBackup = { backupLauncher.launch("Shiftora-kopija-${LocalDate.now()}.json") },
                                     onRestore = { restoreLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
                                     onEditSalary = { salaryOpen = true },
-                                    onShiftColors = { colorsOpen = true }
+                                    onShiftColors = { colorsOpen = true },
+                                    onArchive = { archiveOpen = true }
                                 )
                             }
                         }
@@ -208,21 +216,26 @@ class MainActivity : ComponentActivity() {
                     pendingRestore?.let { backup ->
                         AlertDialog(
                             onDismissRequest = { pendingRestore = null },
-                            title = { Text("Vratiti sigurnosnu kopiju?") },
+                            title = { Text("Dodati smjene iz sigurnosne kopije?") },
                             text = {
-                                Text("Kopija sadrži ${backup.shifts.size} smjena. Postojeće smjene i postavke satnice bit će ZAMIJENJENE. Ovo se ne može poništiti. Želiš li nastaviti?")
+                                Text("Kopija sadrži ${backup.shifts.size} smjena. Dodaju se samo unosi koji ne postoje i ne preklapaju se s tvojim rasporedom. Ni prošle ni buduće smjene neće se obrisati ili zamijeniti. Trenutačne boje, fond sati i postavke plaće ostaju nepromijenjeni.")
                             },
                             confirmButton = {
                                 Button(onClick = {
                                     vm.restoreBackup(backup)
                                     pendingRestore = null
-                                }) { Text("Zamijeni podatke") }
+                                }) { Text("Dodaj bez brisanja") }
                             },
                             dismissButton = {
                                 TextButton(onClick = { pendingRestore = null }) { Text("Odustani") }
                             }
                         )
                     }
+                    if (archiveOpen) ShiftArchiveDialog(
+                        entries = archived,
+                        onRestore = vm::restoreArchived,
+                        onDismiss = { archiveOpen = false }
+                    )
                     editing?.let { item ->
                         ShiftEditorDialog(
                             entry = item,
