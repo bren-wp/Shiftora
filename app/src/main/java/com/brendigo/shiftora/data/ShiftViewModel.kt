@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
@@ -121,13 +122,20 @@ class ShiftViewModel(application: Application) : AndroidViewModel(application) {
 
     fun consumeMessage() { _message.value = null }
 
-    /** User-initiated local export, no server upload. */
-    fun exportCsv(): String = CsvExporter.encode(shifts.value)
+    /** Export a locked SQLite snapshot, not a potentially stale Compose flow. */
+    suspend fun exportCsv(): String = withContext(Dispatchers.IO) {
+        scheduleMutex.withLock { CsvExporter.encode(store.all()) }
+    }
 
-    fun exportBackup(): String = BackupCodec.encode(
-        shifts.value, salary.value, shiftColors.value, monthlyFunds.value,
-        archived.value.map { it.entry }
-    )
+    /** Includes all committed past, future and archived shifts at export time. */
+    suspend fun exportBackup(): String = withContext(Dispatchers.IO) {
+        scheduleMutex.withLock {
+            BackupCodec.encode(
+                store.all(), salary.value, shiftColors.value, monthlyFunds.value,
+                store.archived().map { it.entry }
+            )
+        }
+    }
 
     /** Merge only: existing records, colors, salary settings and monthly funds stay untouched. */
     fun restoreBackup(backup: ShiftBackup) = viewModelScope.launch(Dispatchers.IO) {
