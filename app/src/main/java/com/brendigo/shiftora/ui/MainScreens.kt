@@ -694,8 +694,10 @@ fun MoreScreen(
                         "a mjesto spremanja kontroliraš u Androidovom odabiru datoteka.",
                         style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(10.dp))
-                    Text("Za brisanje podataka obriši unose u aplikaciji ili podatke aplikacije " +
-                        "u Android postavkama. Ranije izvezene datoteke moraš obrisati zasebno.",
+                    Text("Ručno arhivirani unosi ostaju u lokalnoj arhivi i mogu se vratiti. " +
+                        "Uvoz ne briše postojeći raspored. Brisanje podataka aplikacije ili " +
+                        "deinstalacija mogu ukloniti lokalnu bazu, zato prije promjene uređaja " +
+                        "izvezi JSON kopiju na sigurno mjesto.",
                         style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(10.dp))
                     Text("Javna verzija pravila: github.com/bren-wp/Shiftora/blob/main/PRIVACY.md",
@@ -717,7 +719,7 @@ fun MoreScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Icon(Icons.Default.Security, contentDescription = null, tint = Palette.Mint)
                     Column(Modifier.weight(1f)) {
-                        Text("Tvoj raspored je sačuvan", fontWeight = FontWeight.Bold)
+                        Text("Zaštita rasporeda", fontWeight = FontWeight.Bold)
                         Text("U kalendaru: $savedShifts · U arhivi: $archivedShifts",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp)

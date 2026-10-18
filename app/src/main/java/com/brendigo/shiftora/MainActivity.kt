@@ -187,9 +187,19 @@ class MainActivity : ComponentActivity() {
                             }
                             val edit: (Shift) -> Unit = { entry -> editing = entry }
                             val track: (LocalDate) -> Unit = { date ->
-                                editing = shifts.firstOrNull { it.date == date && it.kind.isWork }
-                                    ?.copy(actual = true)
-                                    ?: Shift(date = date, kind = ShiftKind.MORNING, actual = true)
+                                val existingWork = shifts.firstOrNull { it.date == date && it.kind.isWork }
+                                if (existingWork != null) {
+                                    editing = existingWork.copy(actual = true)
+                                } else if (shifts.any { it.date == date && it.kind.blocksDay }) {
+                                    scope.launch {
+                                        snackbars.showSnackbar(
+                                            "Na ovom datumu je GO, BO, PD ili SD. " +
+                                                "Za evidenciju rada prvo uredi postojeći status."
+                                        )
+                                    }
+                                } else {
+                                    editing = Shift(date = date, kind = ShiftKind.MORNING, actual = true)
+                                }
                             }
                             val goSettings: () -> Unit = { tab = 4 }
                             if (loading) {
