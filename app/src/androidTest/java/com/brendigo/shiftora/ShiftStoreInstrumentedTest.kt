@@ -138,12 +138,39 @@ class ShiftStoreInstrumentedTest {
         ShiftStore(context).use { reopened ->
             assertTrue(reopened.archived().any { it.archiveId == archiveId })
             val id = reopened.restoreArchived(archiveId)
-            assertTrue(reopened.all().any { it.id == id && it.entryDateMatches(day) })
+            assertTrue(reopened.all().any { it.id == id && it.date == day })
             assertFalse(reopened.archived().any { it.archiveId == archiveId })
             reopened.delete(id)
         }
     }
 
-    private fun Shift.entryDateMatches(date: LocalDate): Boolean = this.date == date
+
+
+    @Test fun backupImportMergesArchiveWithoutOverwritingExistingFutureWork() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val future = LocalDate.of(2094, 12, 8)
+        val historicalArchive = Shift(date = LocalDate.of(2093, 2, 11),
+            kind = ShiftKind.NIGHT, note = "Arhiva iz stare kopije")
+        ShiftStore(context).use { store ->
+            store.all().filter { it.date == future }.forEach { store.delete(it.id) }
+            try {
+                val id = store.save(Shift(date = future, kind = ShiftKind.DAY,
+                    note = "Ovo ostaje u kalendaru"))
+                val first = store.mergeBackup(
+                    listOf(Shift(date = future, kind = ShiftKind.OFF)),
+                    listOf(historicalArchive)
+                )
+                assertEquals(0, first.added)
+                assertEquals(1, first.skipped)
+                assertEquals(1, first.archivedAdded)
+                assertTrue(store.all().any { it.id == id && it.note == "Ovo ostaje u kalendaru" })
+                val second = store.mergeBackup(emptyList(), listOf(historicalArchive))
+                assertEquals(0, second.archivedAdded)
+                assertTrue(store.archived().any { it.entry.note == historicalArchive.note })
+            } finally {
+                store.all().filter { it.date == future }.forEach { store.delete(it.id) }
+            }
+        }
+    }
 
 }

@@ -128,7 +128,7 @@ object BackupCodec {
         require(shifts.size + archivedShifts.size <= MAX_SHIFTS) {
             "Previše ukupnih unosa u sigurnosnoj kopiji."
         }
-        // Reject overlapping entries before asking for destructive restore approval.
+        // Reject overlapping imports before offering the non-destructive merge preview.
         ShiftScheduleValidator.validateAll(shifts)
         val colors = mutableMapOf<ShiftKind, Int>()
         val funds = mutableMapOf<String, Int>()

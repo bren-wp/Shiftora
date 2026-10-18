@@ -34,7 +34,7 @@ class ShiftBackupTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun rejectsUnsupportedSchema() {
-        BackupCodec.decode("""{"format":"shiftora-backup","version":3,"salary":{},"shifts":[]}""")
+        BackupCodec.decode("""{"format":"shiftora-backup","version":4,"salary":{},"shifts":[]}""")
     }
 
     @Test(expected = IllegalArgumentException::class)
