@@ -218,7 +218,7 @@ class MainActivity : ComponentActivity() {
                             onDismissRequest = { pendingRestore = null },
                             title = { Text("Dodati smjene iz sigurnosne kopije?") },
                             text = {
-                                Text("Kopija sadrži ${backup.shifts.size} smjena. Dodaju se samo unosi koji ne postoje i ne preklapaju se s tvojim rasporedom. Ni prošle ni buduće smjene neće se obrisati ili zamijeniti. Trenutačne boje, fond sati i postavke plaće ostaju nepromijenjeni.")
+                                Text("Kopija sadrži ${backup.shifts.size} aktivnih i ${backup.archivedShifts.size} arhiviranih smjena. Dodaju se samo unosi koji ne postoje i ne preklapaju se s tvojim rasporedom. Prošle ni buduće smjene neće se obrisati ili zamijeniti. Trenutačne boje, fond sati i postavke plaće ostaju nepromijenjeni.")
                             },
                             confirmButton = {
                                 Button(onClick = {

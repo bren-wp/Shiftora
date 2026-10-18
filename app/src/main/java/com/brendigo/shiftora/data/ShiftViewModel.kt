@@ -125,16 +125,17 @@ class ShiftViewModel(application: Application) : AndroidViewModel(application) {
     fun exportCsv(): String = CsvExporter.encode(shifts.value)
 
     fun exportBackup(): String = BackupCodec.encode(
-        shifts.value, salary.value, shiftColors.value, monthlyFunds.value
+        shifts.value, salary.value, shiftColors.value, monthlyFunds.value,
+        archived.value.map { it.entry }
     )
 
     /** Merge only: existing records, colors, salary settings and monthly funds stay untouched. */
     fun restoreBackup(backup: ShiftBackup) = viewModelScope.launch(Dispatchers.IO) {
         scheduleMutex.withLock {
-            runCatching { store.mergeBackup(backup.shifts) }.onSuccess { summary ->
+            runCatching { store.mergeBackup(backup.shifts, backup.archivedShifts) }.onSuccess { summary ->
                 reload()
-                _message.value = "Uvezeno ${summary.added} smjena, preskočeno ${summary.skipped}. " +
-                    "Postojeći rasporedi i postavke nisu mijenjani."
+                _message.value = "Uvezeno ${summary.added} smjena i ${summary.archivedAdded} arhiviranih unosa; " +
+                    "preskočeno ${summary.skipped}. Postojeći rasporedi i postavke nisu mijenjani."
             }.onFailure {
                 _message.value = "Uvoz nije uspio: ${it.message}. Postojeći rasporedi su sačuvani."
             }

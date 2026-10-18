@@ -719,7 +719,7 @@ fun MoreScreen(
                 HorizontalDivider()
                 ListAction("Izvoz CSV", "Izvezi smjene i evidenciju sati", Icons.Default.FileDownload, onCsv)
                 HorizontalDivider()
-                ListAction("Sigurnosna kopija", "Spremi sve aktivne smjene u JSON", Icons.Default.SaveAlt, onBackup)
+                ListAction("Sigurnosna kopija", "Spremi aktivne i arhivirane smjene u JSON", Icons.Default.SaveAlt, onBackup)
                 HorizontalDivider()
                 ListAction("Arhiva rasporeda", "Pregledaj i vrati ručno arhivirane smjene", Icons.Default.Inventory2, onArchive)
                 HorizontalDivider()
