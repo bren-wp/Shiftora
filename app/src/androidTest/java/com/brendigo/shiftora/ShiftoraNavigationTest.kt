@@ -3,6 +3,7 @@ package com.brendigo.shiftora
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -28,7 +29,7 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Mjesec").assertExists()
         compose.onNodeWithText("GO").assertExists()
         compose.onNodeWithText("BO").assertExists()
-        compose.onNodeWithContentDescription("Uredi fond sati").performClick()
+        compose.onNodeWithContentDescription("Uredi fond sati").performScrollTo().performClick()
         compose.onNodeWithText("Zadani fond").assertExists()
         compose.onNodeWithText("Zadani fond").performClick()
         compose.onNodeWithText("Statistika").performClick()
