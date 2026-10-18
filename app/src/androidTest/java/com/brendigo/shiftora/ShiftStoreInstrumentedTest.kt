@@ -85,4 +85,65 @@ class ShiftStoreInstrumentedTest {
             }
         }
     }
+
+    @Test fun importNeverDeletesOldOrFutureSchedulesEvenWithConflicts() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        ShiftStore(context).use { store ->
+            val oldDay = LocalDate.of(2096, 1, 6)
+            val futureDay = LocalDate.of(2096, 12, 29)
+            val importedDay = LocalDate.of(2096, 6, 10)
+            listOf(oldDay, futureDay, importedDay).forEach { date ->
+                store.all().filter { it.date == date }.forEach { store.delete(it.id) }
+            }
+            try {
+                val historic = Shift(date = oldDay, kind = ShiftKind.DAY,
+                    note = "Povijesni raspored ostaje zauvijek")
+                val future = Shift(date = futureDay, kind = ShiftKind.NIGHT,
+                    note = "Budući raspored mora ostati")
+                val idOld = store.save(historic)
+                val idFuture = store.save(future)
+                val merge = store.mergeBackup(listOf(
+                    Shift(date = oldDay, kind = ShiftKind.OFF),
+                    Shift(date = importedDay, kind = ShiftKind.MORNING)
+                ))
+                assertEquals(1, merge.added)
+                assertEquals(1, merge.skipped)
+                val stored = store.all()
+                assertTrue(stored.any { it.id == idOld && it.note == historic.note })
+                assertTrue(stored.any { it.id == idFuture && it.note == future.note })
+                assertTrue(stored.any { it.date == importedDay })
+            } finally {
+                store.all().filter {
+                    it.date.year == 2096 && it.date in LocalDate.of(2096, 1, 1)..LocalDate.of(2096, 12, 31)
+                }.forEach { store.delete(it.id) }
+            }
+        }
+    }
+
+    @Test fun archivedShiftSurvivesDatabaseReopeningAndCanBeRestored() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val day = LocalDate.of(2095, 10, 11)
+        var archiveId = 0L
+        ShiftStore(context).use { store ->
+            store.all().filter { it.date == day }.forEach { store.delete(it.id) }
+            val id = store.save(Shift(date = day, kind = ShiftKind.DAY, note = "Za oporavak"))
+            store.delete(id)
+            assertFalse(store.all().any { it.id == id })
+            archiveId = store.archived().first {
+                it.entry.date == day && it.entry.note == "Za oporavak"
+            }.archiveId
+            val skippedRotation = store.addRotation(day, listOf(ShiftKind.MORNING), 1)
+            assertEquals(0, skippedRotation)
+        }
+        ShiftStore(context).use { reopened ->
+            assertTrue(reopened.archived().any { it.archiveId == archiveId })
+            val id = reopened.restoreArchived(archiveId)
+            assertTrue(reopened.all().any { it.id == id && it.entryDateMatches(day) })
+            assertFalse(reopened.archived().any { it.archiveId == archiveId })
+            reopened.delete(id)
+        }
+    }
+
+    private fun Shift.entryDateMatches(date: LocalDate): Boolean = this.date == date
+
 }

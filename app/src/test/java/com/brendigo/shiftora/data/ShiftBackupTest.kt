@@ -70,7 +70,7 @@ class ShiftBackupTest {
             ShiftKind.PAID_LEAVE to 0xFF77AA33.toInt())
         val funds = mapOf("2026-10" to 9600, "2026-11" to 8400)
         val decoded = BackupCodec.decode(BackupCodec.encode(shifts, SalarySettings(), colors, funds))
-        assertEquals(2, decoded.version)
+        assertEquals(3, decoded.version)
         assertEquals(colors, decoded.colors)
         assertEquals(funds, decoded.monthlyFunds)
         assertEquals(ShiftKind.ANNUAL, decoded.shifts.single().kind)
@@ -78,10 +78,50 @@ class ShiftBackupTest {
 
     @Test fun oldVersionOneBackupStillDecodes() {
         val newBackup = BackupCodec.encode(emptyList(), SalarySettings())
-        val oldBackup = newBackup.replace("\"version\": 2", "\"version\": 1")
+        val oldBackup = newBackup.replace("\"version\": 3", "\"version\": 1")
         val decoded = BackupCodec.decode(oldBackup)
         assertEquals(1, decoded.version)
         assertTrue(decoded.colors.isEmpty())
+    }
+
+
+    @Test fun archivingIsIncludedInPortableBackupV3() {
+        val history = listOf(Shift(date = LocalDate.of(2021, 2, 14),
+            kind = ShiftKind.NIGHT, note = "Arhivirana prošla smjena"))
+        val active = listOf(Shift(date = LocalDate.of(2030, 8, 20),
+            kind = ShiftKind.DAY, note = "Buduća smjena"))
+        val restored = BackupCodec.decode(
+            BackupCodec.encode(active, SalarySettings(), archivedShifts = history)
+        )
+        assertEquals(3, restored.version)
+        assertEquals(active, restored.shifts)
+        assertEquals(history, restored.archivedShifts)
+    }
+
+    @Test fun olderV2BackupDoesNotRequireArchiveField() {
+        val current = BackupCodec.encode(
+            listOf(Shift(date = LocalDate.of(2026, 10, 14), kind = ShiftKind.MORNING)),
+            SalarySettings(), monthlyFunds = mapOf("2026-10" to 9600)
+        )
+        val legacy = current.replace("\"version\": 3", "\"version\": 2")
+        val obj = org.json.JSONObject(legacy).apply { remove("archived") }
+        val restored = BackupCodec.decode(obj.toString())
+        assertEquals(2, restored.version)
+        assertEquals(1, restored.shifts.size)
+        assertEquals(9600, restored.monthlyFunds["2026-10"])
+        assertTrue(restored.archivedShifts.isEmpty())
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsInvalidArchivedShiftWithoutAffectingActive() {
+        val valid = BackupCodec.encode(
+            listOf(Shift(date = LocalDate.of(2026, 10, 14), kind = ShiftKind.MORNING)),
+            SalarySettings(),
+            archivedShifts = listOf(Shift(date = LocalDate.of(2026, 10, 15), kind = ShiftKind.NIGHT))
+        )
+        val obj = org.json.JSONObject(valid)
+        obj.getJSONArray("archived").getJSONObject(0).put("breakMinutes", 999)
+        BackupCodec.decode(obj.toString())
     }
 
 }
