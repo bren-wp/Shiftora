@@ -39,9 +39,9 @@ object ShiftScheduleValidator {
         validateBreak(candidate, zone)
         require(existing.none {
             it.id != candidate.id && it.date == candidate.date &&
-                (!it.kind.isWork || !candidate.kind.isWork)
+                (it.kind.blocksDay || candidate.kind.blocksDay)
         }) {
-            "Izostanak, pripravnost i slobodan dan ne mogu dijeliti datum s drugom smjenom."
+            "Slobodan dan ili izostanak ne mogu dijeliti datum s drugim unosom."
         }
         require(existing.none { it.id != candidate.id && overlaps(it, candidate, zone) }) {
             "Smjena se preklapa s postojećom smjenom. Provjeri početak i završetak."
@@ -51,8 +51,8 @@ object ShiftScheduleValidator {
     fun validateAll(entries: List<Shift>, zone: ZoneId = ZoneId.systemDefault()) {
         entries.forEach { validateBreak(it, zone) }
         val grouped = entries.groupBy { it.date }
-        require(grouped.values.none { day -> day.size > 1 && day.any { !it.kind.isWork } }) {
-            "Neradni status ne smije dijeliti datum s drugom smjenom."
+        require(grouped.values.none { day -> day.size > 1 && day.any { it.kind.blocksDay } }) {
+            "Slobodan dan ili izostanak ne smiju dijeliti datum s drugim unosom."
         }
         val intervals = entries.filter { it.kind.isWork }.map { interval(it, zone) }.sortedBy { it.from }
         for (index in 1 until intervals.size) {

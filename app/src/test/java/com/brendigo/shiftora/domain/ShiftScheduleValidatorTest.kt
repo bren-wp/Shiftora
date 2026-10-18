@@ -82,4 +82,32 @@ class ShiftScheduleValidatorTest {
             Shift(date = day, kind = ShiftKind.AFTERNOON)
         ), zagreb)
     }
+
+    @Test fun standbyCanCoexistWithWorkOnSameDay() {
+        val day = LocalDate.of(2026, 10, 20)
+        val working = Shift(id = 7, date = day, kind = ShiftKind.MORNING)
+        val standby = Shift(date = day, kind = ShiftKind.STANDBY,
+            startMinute = 840, endMinute = 1200)
+        ShiftScheduleValidator.validateInsertion(listOf(working), standby, zagreb)
+        ShiftScheduleValidator.validateAll(listOf(working, standby), zagreb)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun annualLeaveAndStandbyCannotShareSameDay() {
+        val day = LocalDate.of(2026, 10, 20)
+        ShiftScheduleValidator.validateAll(listOf(
+            Shift(date = day, kind = ShiftKind.ANNUAL),
+            Shift(date = day, kind = ShiftKind.STANDBY)
+        ), zagreb)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun paidLeaveCannotBeAddedOverExistingShift() {
+        val day = LocalDate.of(2026, 10, 21)
+        ShiftScheduleValidator.validateInsertion(
+            listOf(Shift(id = 17, date = day, kind = ShiftKind.DAY)),
+            Shift(date = day, kind = ShiftKind.PAID_LEAVE), zagreb
+        )
+    }
+
 }

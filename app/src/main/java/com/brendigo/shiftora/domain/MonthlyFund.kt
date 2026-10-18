@@ -11,12 +11,23 @@ data class MonthlyFundSummary(
     val defaultFundMinutes: Int,
     val recordedMinutes: Long,
     val actuallyWorkedMinutes: Long,
+    val plannedMinutes: Long,
     val leaveCreditMinutes: Int,
+    val projectedRemainingMinutes: Long,
     val remainingMinutes: Long,
     val overFundMinutes: Long
 )
 
 object MonthlyFund {
+    /** Separate hours and minutes permit non-integer monthly funds such as 151 h 30 min. */
+    fun parseFund(hours: String, minutes: String): Int? {
+        val h = hours.toIntOrNull() ?: return null
+        val m = minutes.toIntOrNull() ?: return null
+        if (h !in 0..744 || m !in 0..59) return null
+        val total = h * 60 + m
+        return total.takeIf { it <= 44640 }
+    }
+
     fun standardMinutes(month: YearMonth): Int =
         (1..month.lengthOfMonth()).count { day ->
             val date = month.atDay(day)
@@ -52,7 +63,9 @@ object MonthlyFund {
             fundMinutes = target, defaultFundMinutes = standard,
             recordedMinutes = work.paidMinutes,
             actuallyWorkedMinutes = work.actualMinutes,
+            plannedMinutes = work.plannedMinutes,
             leaveCreditMinutes = leaveCredit,
+            projectedRemainingMinutes = (target.toLong() - (work.paidMinutes + leaveCredit)).coerceAtLeast(0L),
             remainingMinutes = (target.toLong() - accounted).coerceAtLeast(0L),
             overFundMinutes = (accounted - target).coerceAtLeast(0L)
         )

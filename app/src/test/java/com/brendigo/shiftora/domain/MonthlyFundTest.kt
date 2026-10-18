@@ -43,4 +43,26 @@ class MonthlyFundTest {
         assertEquals(480, MonthlyFund.summary(YearMonth.of(2026, 11),
             shifts, SalarySettings()).leaveCreditMinutes)
     }
+
+    @Test fun acceptsPartialHourFundsWithValidation() {
+        assertEquals(9090, MonthlyFund.parseFund("151", "30"))
+        assertEquals(0, MonthlyFund.parseFund("0", "0"))
+        assertEquals(44640, MonthlyFund.parseFund("744", "0"))
+        assertNull(MonthlyFund.parseFund("744", "1"))
+        assertNull(MonthlyFund.parseFund("-1", "30"))
+        assertNull(MonthlyFund.parseFund("150", "60"))
+        assertNull(MonthlyFund.parseFund("", "15"))
+    }
+
+    @Test fun plannedShiftsAffectProjectedButNotActuallyWorkedHours() {
+        val shift = Shift(date = LocalDate.of(2026, 10, 20), kind = ShiftKind.MORNING)
+        val summary = MonthlyFund.summary(
+            YearMonth.of(2026, 10), listOf(shift), SalarySettings(), 4800
+        )
+        assertEquals(0L, summary.actuallyWorkedMinutes)
+        assertEquals(480L, summary.plannedMinutes)
+        assertEquals(4800L, summary.remainingMinutes)
+        assertEquals(4320L, summary.projectedRemainingMinutes)
+    }
+
 }

@@ -22,6 +22,9 @@ enum class ShiftKind(
     SICK("Bolovanje", "BO", 0, 0, isWork = false, isAbsence = true),
     PAID_LEAVE("Plaćeni dopust", "PD", 0, 0, isWork = false, isAbsence = true);
 
+    /** Full-day statuses cannot share a date with any other recorded entry. */
+    val blocksDay: Boolean get() = this == OFF || isAbsence
+
     companion object {
         /** UI order is deliberately independent from persisted enum values. */
         val calendarOrder = listOf(DAY, NIGHT, MORNING, AFTERNOON, STANDBY,
