@@ -29,7 +29,7 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("GO").assertExists()
         compose.onNodeWithText("BO").assertExists()
         compose.onNodeWithContentDescription("Uredi fond sati").performClick()
-        compose.onNodeWithText("Fond sati u ovom mjesecu").assertExists()
+        compose.onNodeWithText("Zadani fond").assertExists()
         compose.onNodeWithText("Zadani fond").performClick()
         compose.onNodeWithText("Statistika").performClick()
         compose.onNodeWithText("Statistika i plaća").assertExists()
