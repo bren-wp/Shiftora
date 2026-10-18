@@ -170,21 +170,28 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
         }
     }
 
-    data class MergeResult(val added: Int, val skipped: Int)
+    data class MergeResult(val added: Int, val skipped: Int, val archivedAdded: Int)
 
     /**
      * Non-destructive import. Every existing past/future shift keeps its original
      * row and ID. Conflicting or identical incoming entries are skipped.
      */
-    @Synchronized fun mergeBackup(incoming: List<Shift>): MergeResult {
-        require(incoming.size <= 20_000) { "Sigurnosna kopija sadrži previše smjena." }
+    @Synchronized fun mergeBackup(
+        incoming: List<Shift>, incomingArchived: List<Shift> = emptyList()
+    ): MergeResult {
+        require(incoming.size + incomingArchived.size <= 20_000) {
+            "Sigurnosna kopija sadrži previše smjena."
+        }
         ShiftScheduleValidator.validateAll(incoming)
+        incomingArchived.forEach { ShiftScheduleValidator.validateBreak(it) }
         val db = writableDatabase
         db.beginTransaction()
         return try {
             val saved = all().toMutableList()
+            val preservedArchive = archived().map { it.entry.copy(id = 0L) }.toMutableSet()
             var added = 0
             var skipped = 0
+            var archivedAdded = 0
             incoming.forEach { raw ->
                 val shift = raw.copy(id = 0L)
                 val identical = saved.any {
@@ -201,8 +208,20 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
                     added++
                 }
             }
+            incomingArchived.forEach { raw ->
+                val shift = raw.copy(id = 0L)
+                if (shift !in preservedArchive) {
+                    val archiveValues = ContentValues(values(shift)).apply {
+                        put("original_id", raw.id)
+                        put("archived_at", Instant.now().toString())
+                    }
+                    db.insertOrThrow("shift_archive", null, archiveValues)
+                    preservedArchive += shift
+                    archivedAdded++
+                }
+            }
             db.setTransactionSuccessful()
-            MergeResult(added, skipped)
+            MergeResult(added, skipped, archivedAdded)
         } finally {
             db.endTransaction()
         }
