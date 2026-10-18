@@ -12,21 +12,23 @@ data class ShiftBackup(
     val salary: SalarySettings,
     val colors: Map<ShiftKind, Int> = emptyMap(),
     val monthlyFunds: Map<String, Int> = emptyMap(),
-    val version: Int = 2
+    val version: Int = 3,
+    val archivedShifts: List<Shift> = emptyList()
 )
 
 object BackupCodec {
     private const val FORMAT = "shiftora-backup"
-    private const val VERSION = 2
+    private const val VERSION = 3
     const val MAX_BYTES = 4 * 1024 * 1024
     private const val MAX_SHIFTS = 20_000
 
     fun encode(
         shifts: List<Shift>, salary: SalarySettings,
         colors: Map<ShiftKind, Int> = emptyMap(),
-        monthlyFunds: Map<String, Int> = emptyMap()
+        monthlyFunds: Map<String, Int> = emptyMap(),
+        archivedShifts: List<Shift> = emptyList()
     ): String {
-        require(shifts.size <= MAX_SHIFTS) { "Previše smjena za sigurnosnu kopiju." }
+        require(shifts.size + archivedShifts.size <= MAX_SHIFTS) { "Previše smjena za sigurnosnu kopiju." }
         val settings = JSONObject()
             .put("hourlyGross", salary.hourlyGross)
             .put("nightPercent", salary.nightPercent)
@@ -35,20 +37,23 @@ object BackupCodec {
             .put("overtimePercent", salary.overtimePercent)
             .put("nightStartHour", salary.nightStartHour)
             .put("nightEndHour", salary.nightEndHour)
-        val data = JSONArray()
-        shifts.forEach { shift ->
-            data.put(JSONObject()
-                .put("date", shift.date.toString())
-                .put("kind", shift.kind.name)
-                .put("startMinute", shift.startMinute)
-                .put("endMinute", shift.endMinute)
-                .put("breakMinutes", shift.breakMinutes)
-                .put("breakAfterMinutes", shift.breakAfterMinutes)
-                .put("unpaidBreak", shift.unpaidBreak)
-                .put("actual", shift.actual)
-                .put("overtime", shift.overtime)
-                .put("note", shift.note))
+        fun encodeShifts(entries: List<Shift>) = JSONArray().apply {
+            entries.forEach { shift ->
+                put(JSONObject()
+                    .put("date", shift.date.toString())
+                    .put("kind", shift.kind.name)
+                    .put("startMinute", shift.startMinute)
+                    .put("endMinute", shift.endMinute)
+                    .put("breakMinutes", shift.breakMinutes)
+                    .put("breakAfterMinutes", shift.breakAfterMinutes)
+                    .put("unpaidBreak", shift.unpaidBreak)
+                    .put("actual", shift.actual)
+                    .put("overtime", shift.overtime)
+                    .put("note", shift.note))
+            }
         }
+        val data = encodeShifts(shifts)
+        val archivedData = encodeShifts(archivedShifts)
         val colorJson = JSONObject()
         colors.forEach { (kind, argb) -> colorJson.put(kind.name, argb) }
         val fundJson = JSONObject()
@@ -58,7 +63,8 @@ object BackupCodec {
         }
         val result = JSONObject().put("format", FORMAT).put("version", VERSION)
             .put("salary", settings).put("shifts", data)
-            .put("colors", colorJson).put("monthlyFunds", fundJson).toString(2)
+            .put("colors", colorJson).put("monthlyFunds", fundJson)
+            .put("archived", archivedData).toString(2)
         require(result.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) {
             "Previše podataka za jednu kopiju (najviše 4 MB)."
         }
@@ -91,10 +97,10 @@ object BackupCodec {
             nightStartHour = settings.getInt("nightStartHour"),
             nightEndHour = settings.getInt("nightEndHour")
         )
-        val entries = root.getJSONArray("shifts")
-        require(entries.length() <= MAX_SHIFTS) { "Sigurnosna kopija sadrži previše smjena." }
-        val shifts = ArrayList<Shift>(entries.length())
-        repeat(entries.length()) { index ->
+        fun decodeEntries(entries: JSONArray): List<Shift> {
+            require(entries.length() <= MAX_SHIFTS) { "Sigurnosna kopija sadrži previše smjena." }
+            val decoded = ArrayList<Shift>(entries.length())
+            repeat(entries.length()) { index ->
             val item = entries.getJSONObject(index)
             val day = LocalDate.parse(item.getString("date"))
             require(day.year in 1900..2200) { "Neispravan datum u sigurnosnoj kopiji." }
@@ -102,7 +108,7 @@ object BackupCodec {
             require(note.length <= 500) { "Bilješka je predugačka." }
             val breakAfter = item.getInt("breakAfterMinutes")
             require(breakAfter in 0..1440) { "Neispravan početak pauze." }
-            shifts += Shift(
+            decoded += Shift(
                 date = day,
                 kind = ShiftKind.valueOf(item.getString("kind")),
                 startMinute = item.getInt("startMinute"),
@@ -114,6 +120,13 @@ object BackupCodec {
                 overtime = item.getBoolean("overtime"),
                 note = note
             )
+            }
+            return decoded
+        }
+        val shifts = decodeEntries(root.getJSONArray("shifts"))
+        val archivedShifts = if (version >= 3) decodeEntries(root.getJSONArray("archived")) else emptyList()
+        require(shifts.size + archivedShifts.size <= MAX_SHIFTS) {
+            "Previše ukupnih unosa u sigurnosnoj kopiji."
         }
         // Reject overlapping entries before asking for destructive restore approval.
         ShiftScheduleValidator.validateAll(shifts)
@@ -135,6 +148,6 @@ object BackupCodec {
                 funds[month] = minutes
             }
         }
-        return ShiftBackup(shifts, salary, colors, funds, version)
+        return ShiftBackup(shifts, salary, colors, funds, version, archivedShifts)
     }
 }
