@@ -4,11 +4,11 @@ Shiftora ne zahtijeva korisnički račun ni internetsku vezu. Nema analitiku, og
 
 ## Pohrana
 
-Raspored, sati i postavke čuvaju se u lokalnoj bazi i postavkama aplikacije na uređaju. Automatsko spremanje u cloud putem Android backupa je isključeno. Gubitkom ili resetiranjem uređaja podatci se mogu izgubiti ako korisnik nije izradio vlastitu sigurnosnu kopiju.
+Raspored, arhivirane smjene, sati i postavke čuvaju se u lokalnoj SQLite bazi i postavkama aplikacije na uređaju. Ručno arhivirani unosi ostaju dostupni za oporavak; automatska rotacija i uvoz rasporeda ne brišu postojeće smjene. Automatsko spremanje u cloud putem Android backupa je isključeno. Deinstalacijom, brisanjem podataka, resetiranjem ili gubitkom uređaja podatci se mogu izgubiti ako korisnik nije izradio vlastitu sigurnosnu kopiju.
 
 ## Izvoz i vraćanje
 
-CSV i JSON sigurnosne kopije nastaju isključivo kad korisnik odabere izvoz. Mjesto pohrane bira korisnik putem Android sustavnog dijaloga. Vraćanje sigurnosne kopije zamjenjuje postojeći raspored tek nakon prikaza upozorenja i potvrde.
+CSV i JSON sigurnosne kopije nastaju isključivo kad korisnik odabere izvoz. Mjesto pohrane bira korisnik putem Android sustavnog dijaloga. Uvoz JSON sigurnosne kopije zahtijeva korisnikovu potvrdu i spaja podatke bez brisanja postojećih unosa. Konfliktni unosi se preskaču. JSON format v3 može sadržavati i arhivirane smjene.
 
 ## Dopuštenja
 

@@ -1,4 +1,4 @@
-# Shiftora — audit koda i kvalitete (0.7.0)
+# Shiftora — audit koda i kvalitete (0.9.0)
 
 Ovaj dokument sadrži pregled izvorne strukture, pronađene greške, stvarne izmjene i provjere. CI rezultat vrijedi samo za točan commit, a nije jamstvo odsutnosti svih nepoznatih grešaka.
 
@@ -8,9 +8,9 @@ Ovaj dokument sadrži pregled izvorne strukture, pronađene greške, stvarne izm
 |---|---|
 | Android manifest / dozvole / offline pristup | Bez potrebe za INTERNET, lokacijom, oglašavanjem, kontaktima; `allowBackup=false`, cleartext promet onemogućen |
 | Target SDK / AndroidX / Gradle | Migracija na API 36, AGP 8.10.1, Gradle 8.11.1 |
-| Lokalna baza i rotacije | SQLite transakcije, indeks datuma, izbjegavanje preklapanja, nedestruktivno dodavanje smjena |
+| Lokalna baza i rotacije | SQLite schema v2 s nedestruktivnom migracijom, recoverable archive, rotacije koje preskaču aktivne i arhivirane datume, serializirane operacije |
 | Obračun minuta i dodataka | Jedinstveni `ShiftTimeline`, provjera preklapanja kategorija, DST i mjesečne granice |
-| JSON / CSV datoteke | UTF-8, gornje granice veličine, zaštita od formula u CSV-u, prethodna provjera uvoza |
+| JSON / CSV datoteke | UTF-8, ograničenja veličine, zaštita od CSV formula, JSON v3 koji čuva arhivu; import je transakcijsko spajanje bez brisanja |
 | Preferencije i postavke plaće | Popravak NaN/Infinity, pokvarenih tipova i raspona noćnog rada |
 | UI niti i veliki dokumenti | SAF i dekodiranje sigurnosne kopije premješteni na IO dispatcher |
 | Dead-code i duplikati | Uklonjen debug fixture iz glavne aktivnosti, neupotrijebljeni `icons`/Canvas/Stroke importi i nepotrebne UI tooling ovisnosti |
@@ -23,6 +23,14 @@ JVM: smjene i pauze, prelazak preko ponoći, promjene DST, hrvatski blagdani, ob
 
 Pokreću se:
 `./gradlew :app:testDebugUnitTest :app:assembleDebugAndroidTest :app:lintDebug :app:lintRelease :app:assembleDebug :app:bundleRelease`
+
+## Granice trajnosti podataka
+
+- Niti jedna automatska rotacija, pregled mjeseca ili JSON uvoz ne smije obrisati već spremljenu smjenu.
+- Arhiviranje uklanja unos iz aktivnog kalendara **samo uz potvrdu**, ali ga zadržava u lokalnoj tablici za oporavak.
+- Android može izbrisati lokalne podatke nakon brisanja podataka aplikacije, deinstalacije, resetiranja ili kvara uređaja. Bez ručne JSON kopije ne postoji jamstvo oporavka.
+- Postojeća ograničenja JSON kopije (4 MB / 20 000 ukupnih unosa) treba uzeti u obzir kod vrlo velikih dugoročnih rasporeda.
+- Sigurnost obnove treba dodatno provjeravati automatiziranim testovima nakon svake buduće migracije sheme.
 
 ## Izričito otvoreno prije produkcijskog odobrenja
 

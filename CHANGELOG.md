@@ -1,5 +1,19 @@
 # Povijest izdanja
 
+## 0.9.0 — 18. 10. 2026. | Očuvanje rasporeda i stabilnost
+
+- Sigurna migracija SQLite baze v1 → v2 bez brisanja povijesnih ili budućih smjena.
+- Ručno uklanjanje smjene sada je arhiviranje u zasebnu lokalnu tablicu, s mogućnošću vraćanja u kalendar.
+- Rotacije preskaču sve datume koji imaju aktivan ili arhiviran unos; nema automatskog prepisivanja.
+- Uvoz JSON datoteke sada je isključivo **spajanje**: postojeće smjene i postavke ostaju netaknute, konfliktni i duplicirani unosi preskaču se bez gubitka podataka.
+- JSON sigurnosna kopija v3 uključuje aktivne i arhivirane smjene, boje i fond sati; stare v1/v2 kopije ostaju podržane.
+- UI pamti mjesec, datum i tjedni/mjesečni način pregleda i nakon promjene taba ili ponovnog stvaranja ekrana.
+- Izbjegnuto privremeno prikazivanje praznog rasporeda tijekom učitavanja te serijalizirane operacije spremanja i uvoza.
+- Dodan ekran Arhive, zaštitna kartica s brojem smjena i izravan izvoz JSON kopije.
+- Poboljšano rukovanje brzom evidencijom rada na GO/BO/PD/SD danima i tekstovi potvrda arhiviranja.
+- Regresijski JVM i Android testovi za arhivu, uvoz bez brisanja, očuvanje starih/budućih smjena i promjene navigacije.
+- Lokalna pohrana **ne preživljava nužno deinstalaciju, brisanje podataka ili gubitak uređaja**: za to se preporučuje ručno izvezena JSON kopija.
+
 ## 0.8.1 — 18. 10. 2026. | Precizniji fond sati i pripravnost
 
 - PR (pripravnost) može postojati uz radnu smjenu istog datuma bez udvostručenja radnih ili plaćenih sati.

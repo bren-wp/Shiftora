@@ -34,6 +34,16 @@
 <sub>Stvarne snimke Android aplikacije na emulatoru, s demonstracijskim smjenama. Prikaz može odstupati ovisno o uređaju.</sub>
 </div>
 
+## Rasporedi ostaju sačuvani
+
+Shiftora čuva sve unesene **prošle i buduće smjene** u lokalnoj SQLite bazi. Listanje mjeseci, navigacija, promjena teme i automatski ciklusi ne brišu ni ne prepisuju postojeći raspored.
+
+Ako korisnik **sam potvrdi arhiviranje**, smjena se ne briše trajno, nego prelazi u **Više → Arhiva rasporeda**, odakle se može vratiti. Vraćanje JSON sigurnosne kopije sada samo **dodaje nove nekonfliktne unose**, a postojeće smjene, boje i satnice ostavlja nepromijenjenima.
+
+JSON sigurnosna kopija formata **v3** uključuje aktivne i arhivirane smjene, boje i mjesečne fondove; podržani su uvozi v1 i v2. Sigurnosnu kopiju napravi kroz **Više → Izvezi sigurnosnu kopiju**.
+
+**Važno:** aplikacija radi lokalno i ne šalje podatke u oblak. Deinstalacija, brisanje podataka, kvar ili gubitak uređaja mogu uništiti lokalnu bazu. Čuvaj ručno izvezenu JSON kopiju na zasebnom sigurnom mjestu.
+
 ## Kalendar s vlastitim oznakama
 
 **D** dnevna · **N** noćna · **J** jutarnja · **P** popodnevna · **PR** pripravnost · **GO** godišnji odmor · **BO** bolovanje · **SD** slobodan dan · **PD** plaćeni dopust · **X** prilagođena smjena.
