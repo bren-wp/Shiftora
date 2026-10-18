@@ -671,6 +671,7 @@ fun SalaryScreen(
 @Composable
 fun MoreScreen(
     darkMode: Boolean, onDark: (Boolean) -> Unit,
+    savedShifts: Int, archivedShifts: Int,
     onRotation: () -> Unit, onCsv: () -> Unit,
     onBackup: () -> Unit, onRestore: () -> Unit, onEditSalary: () -> Unit,
     onShiftColors: () -> Unit,
@@ -711,6 +712,31 @@ fun MoreScreen(
         BrandedHeader("Više", "Postavke i tvoji podaci.", dark = true, showSettings = false)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SurfaceCard(Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Icon(Icons.Default.Security, contentDescription = null, tint = Palette.Mint)
+                    Column(Modifier.weight(1f)) {
+                        Text("Tvoj raspored je sačuvan", fontWeight = FontWeight.Bold)
+                        Text("U kalendaru: $savedShifts · U arhivi: $archivedShifts",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp)
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                Text("Pregled prošlih i budućih smjena ne briše podatke. " +
+                    "Uvoz samo dopunjuje raspored, a ručno arhivirani unosi mogu se vratiti. " +
+                    "Za promjenu uređaja ili ponovnu instalaciju izvezi JSON sigurnosnu kopiju.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp)
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(onClick = onBackup, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Default.SaveAlt, contentDescription = null,
+                        modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Izvezi sigurnosnu kopiju")
+                }
+            }
             SurfaceCard(Modifier.fillMaxWidth()) {
                 SectionTitle("Alati")
                 ListAction("Automatski raspored", "Ponovi rotaciju smjena", Icons.Default.AutoMode, onRotation)

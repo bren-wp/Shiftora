@@ -205,6 +205,7 @@ class MainActivity : ComponentActivity() {
                                 3 -> SalaryScreen(shifts, salary, { salaryOpen = true }, goSettings)
                                 else -> MoreScreen(
                                     darkMode = darkMode, onDark = vm::setDarkMode,
+                                    savedShifts = shifts.size, archivedShifts = archived.size,
                                     onRotation = { rotationOpen = true },
                                     onCsv = { exportLauncher.launch("Shiftora-smjene-${LocalDate.now()}.csv") },
                                     onBackup = { backupLauncher.launch("Shiftora-kopija-${LocalDate.now()}.json") },
