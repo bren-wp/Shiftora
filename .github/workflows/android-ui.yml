@@ -1,6 +1,18 @@
 name: Android UI smoke test
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/android-ui.yml'
+      - 'app/src/main/java/com/brendigo/shiftora/ui/**'
+      - 'app/src/main/java/com/brendigo/shiftora/MainActivity.kt'
+      - 'app/src/androidTest/**'
+      - 'app/src/main/java/com/brendigo/shiftora/data/**'
+      - 'app/src/main/java/com/brendigo/shiftora/domain/**'
+      - 'app/build.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle/wrapper/gradle-wrapper.properties'
+      - 'scripts/publish-preview.sh'
   push:
     branches: [main]
     paths:
