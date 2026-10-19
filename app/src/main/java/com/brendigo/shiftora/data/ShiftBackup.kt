@@ -19,7 +19,7 @@ data class ShiftBackup(
 object BackupCodec {
     private const val FORMAT = "shiftora-backup"
     private const val VERSION = 3
-    const val MAX_BYTES = 4 * 1024 * 1024
+    const val MAX_BYTES = 16 * 1024 * 1024
     private const val MAX_SHIFTS = 20_000
 
     fun encode(
@@ -66,14 +66,14 @@ object BackupCodec {
             .put("colors", colorJson).put("monthlyFunds", fundJson)
             .put("archived", archivedData).toString(2)
         require(result.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) {
-            "Previše podataka za jednu kopiju (najviše 4 MB)."
+            "Previše podataka za jednu kopiju (najviše 16 MB)."
         }
         return result
     }
 
     fun decode(text: String): ShiftBackup {
         require(text.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) {
-            "Datoteka je prevelika. Ograničenje je 4 MB."
+            "Datoteka je prevelika. Ograničenje je 16 MB."
         }
         val root = JSONObject(text)
         val version = root.getInt("version")
