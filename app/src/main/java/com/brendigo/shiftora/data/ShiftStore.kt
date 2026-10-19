@@ -11,7 +11,8 @@ import com.brendigo.shiftora.domain.ShiftScheduleValidator
 data class ArchivedShift(val archiveId: Long, val archivedAt: String, val entry: Shift)
 
 /** Local-only storage: no internet permission, accounts or analytics. */
-class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", null, 2) {
+class ShiftStore(context: Context, databaseName: String = "shiftora.db") :
+    SQLiteOpenHelper(context, databaseName, null, 2) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """CREATE TABLE shifts (
@@ -187,24 +188,37 @@ class ShiftStore(context: Context) : SQLiteOpenHelper(context, "shiftora.db", nu
         val db = writableDatabase
         db.beginTransaction()
         return try {
-            val saved = all().toMutableList()
+            val saved = all()
             val preservedArchive = archived().map { it.entry.copy(id = 0L) }.toMutableSet()
+            // An archived date reflects an explicit removal; a bulk import must not
+            // silently recreate its calendar entry. Manual creation/restoration is still allowed.
+            val archivedDates = preservedArchive.mapTo(mutableSetOf()) { it.date }
+            val existingEntries = saved.mapTo(mutableSetOf()) { it.copy(id = 0L) }
+            val entriesByDate = saved.groupBy { it.date }
+                .mapValuesTo(mutableMapOf()) { (_, items) -> items.toMutableList() }
+            var activeCount = saved.size
             var added = 0
             var skipped = 0
             var archivedAdded = 0
             incoming.forEach { raw ->
                 val shift = raw.copy(id = 0L)
-                val identical = saved.any {
-                    it.copy(id = 0L) == shift
-                }
-                val valid = !identical && runCatching {
-                    ShiftScheduleValidator.validateInsertion(saved, shift)
-                }.isSuccess
-                if (!valid || saved.size >= 20_000) {
+                // A shift can only span its own date and the next one. Checking
+                // neighbouring start dates preserves overnight overlap validation
+                // without repeatedly scanning every historical shift.
+                val nearby = listOf(shift.date.minusDays(1), shift.date, shift.date.plusDays(1))
+                    .flatMap { entriesByDate[it].orEmpty() }
+                val valid = shift !in existingEntries &&
+                    shift.date !in archivedDates &&
+                    runCatching {
+                        ShiftScheduleValidator.validateInsertion(nearby, shift)
+                    }.isSuccess
+                if (!valid || activeCount >= 20_000) {
                     skipped++
                 } else {
                     val id = db.insertOrThrow("shifts", null, values(shift))
-                    saved += shift.copy(id = id)
+                    entriesByDate.getOrPut(shift.date) { mutableListOf() }.add(shift.copy(id = id))
+                    existingEntries += shift
+                    activeCount++
                     added++
                 }
             }
