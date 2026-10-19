@@ -124,4 +124,21 @@ class ShiftBackupTest {
         BackupCodec.decode(obj.toString())
     }
 
+    @Test fun longTermScheduleWithTwentyThousandEntriesFitsPortableBackup() {
+        val entries = (0 until 20_000).map { day ->
+            Shift(
+                date = LocalDate.of(2020, 1, 1).plusDays(day.toLong()),
+                kind = ShiftKind.OFF,
+                note = "Sačuvana povijest rada i slobodnih dana kroz više desetljeća rasporeda."
+            )
+        }
+        val json = BackupCodec.encode(entries, SalarySettings())
+        // This legitimate archive exceeded the former 4 MB limit.
+        assertTrue(json.toByteArray(Charsets.UTF_8).size > 4 * 1024 * 1024)
+        val restored = BackupCodec.decode(json)
+        assertEquals(entries.size, restored.shifts.size)
+        assertEquals(entries.first(), restored.shifts.first())
+        assertEquals(entries.last(), restored.shifts.last())
+    }
+
 }
