@@ -37,6 +37,6 @@ mv dist/apk/app-debug.apk "dist/shiftora-${version}-debug.apk"
 mv dist/aab/app-release.aab "dist/shiftora-${version}-unsigned.aab"
 gh release create "$tag" --repo "$GITHUB_REPOSITORY" --target "$run_sha" \
   --title "Shiftora ${version} – Development Preview" \
-  --notes "PREVIEW ONLY. Tests: Android CI + Pixel 2 (API 30) and Pixel 4 (API 36) UI smoke tests passed. WARNING: debug APK signatures may differ between GitHub builds, so an old debug APK might not update in place. NEVER uninstall or clear app data to update without first exporting a JSON backup (Više → Sigurnosna kopija) and securely preserving it off-device. The unsigned AAB is NOT Play-upload ready. Stable future upgrades require consistent production signing. Pixel-exact 1:1 UI parity and payroll compliance are not certified." \
+  --notes "RAZVOJNO IZDANJE — nije odobreno za Google Play. Android CI i emulator testovi na API 30 i 36 uspješno su završeni za ovaj commit. Upozorenje: debug APK može imati drukčiji potpis od prethodne verzije, pa nadogradnja možda neće biti moguća bez produkcijskog ključa. Prije promjene instalacije izvezi JSON sigurnosnu kopiju (Više → Sigurnosna kopija) i spremi je izvan uređaja. Nemoj deinstalirati aplikaciju niti brisati njezine podatke bez sigurne kopije. AAB je NEPOTPISAN i nije spreman za Play Console. Procjena bruto plaće je informativna, a potpuna vizualna 1:1 podudarnost još nije certificirana. Promjene su opisane u CHANGELOG.md." \
   --prerelease \
   "dist/shiftora-${version}-debug.apk" "dist/shiftora-${version}-unsigned.aab"
