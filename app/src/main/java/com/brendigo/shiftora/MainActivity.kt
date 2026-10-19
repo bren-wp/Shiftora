@@ -70,8 +70,11 @@ class MainActivity : ComponentActivity() {
                 if (uri != null) scope.launch {
                     val result = runCatching {
                         withContext(Dispatchers.IO) {
+                            // Prepare the entire export before touching the destination.
+                            // A serialization failure must not truncate an existing document.
+                            val csv = vm.exportCsv()
                             context.contentResolver.openOutputStream(uri)
-                                ?.bufferedWriter(Charsets.UTF_8)?.use { it.write(vm.exportCsv()) }
+                                ?.bufferedWriter(Charsets.UTF_8)?.use { it.write(csv) }
                                 ?: error("Datoteku nije moguće otvoriti.")
                         }
                     }
@@ -88,8 +91,9 @@ class MainActivity : ComponentActivity() {
                 if (uri != null) scope.launch {
                     val result = runCatching {
                         withContext(Dispatchers.IO) {
+                            val backup = vm.exportBackup()
                             context.contentResolver.openOutputStream(uri)
-                                ?.bufferedWriter(Charsets.UTF_8)?.use { it.write(vm.exportBackup()) }
+                                ?.bufferedWriter(Charsets.UTF_8)?.use { it.write(backup) }
                                 ?: error("Datoteku nije moguće otvoriti.")
                         }
                     }
@@ -115,7 +119,7 @@ class MainActivity : ComponentActivity() {
                                     val count = stream.read(buffer)
                                     if (count < 0) break
                                     total += count
-                                    require(total <= BackupCodec.MAX_BYTES) { "Datoteka je veća od 4 MB." }
+                                    require(total <= BackupCodec.MAX_BYTES) { "Datoteka je veća od 16 MB." }
                                     output.write(buffer, 0, count)
                                 }
                                 output.toByteArray()

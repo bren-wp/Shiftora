@@ -1,5 +1,15 @@
 # Povijest izdanja
 
+## 0.9.1 — 19. 10. 2026. | Pouzdanije sigurnosne kopije i zaštita arhive
+
+- JSON uvoz više ne vraća automatski smjene na datume koje je korisnik ranije arhivirao. Vraćanje arhive i dalje se pokreće izričito.
+- Ubrzana je obrada dugoročnih sigurnosnih kopija bez narušavanja provjere konflikata i noćnih smjena.
+- Povećana je dopuštena veličina JSON sigurnosne kopije na 16 MB uz ograničenje 20 000 unosa.
+- CSV i JSON se prvo pripremaju u memoriji, a tek potom otvaraju odredišne datoteke.
+- Dodani su regresijski testovi za migraciju SQLite baze v1 → v2, ponavljani uvoz, arhivu i noćne smjene.
+- Android CI i emulator testovi (API 30 i API 36) provjeravaju i radne pull requestove.
+- **Napomena:** rasporedi se čuvaju lokalno; deinstalacija ili brisanje podataka uklanja ih ako korisnik nije izvezao sigurnosnu kopiju.
+
 ## 0.9.0 — 18. 10. 2026. | Očuvanje rasporeda i stabilnost
 
 - Sigurna migracija SQLite baze v1 → v2 bez brisanja povijesnih ili budućih smjena.

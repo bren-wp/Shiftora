@@ -29,7 +29,7 @@ Pokreću se:
 - Niti jedna automatska rotacija, pregled mjeseca ili JSON uvoz ne smije obrisati već spremljenu smjenu.
 - Arhiviranje uklanja unos iz aktivnog kalendara **samo uz potvrdu**, ali ga zadržava u lokalnoj tablici za oporavak.
 - Android može izbrisati lokalne podatke nakon brisanja podataka aplikacije, deinstalacije, resetiranja ili kvara uređaja. Bez ručne JSON kopije ne postoji jamstvo oporavka.
-- Postojeća ograničenja JSON kopije (4 MB / 20 000 ukupnih unosa) treba uzeti u obzir kod vrlo velikih dugoročnih rasporeda.
+- Aktualno ograničenje JSON kopije je 16 MB / 20 000 ukupnih unosa; i dalje je potreban korisnički odabran vanjski medij za zaštitu nakon gubitka ili deinstalacije uređaja.
 - Sigurnost obnove treba dodatno provjeravati automatiziranim testovima nakon svake buduće migracije sheme.
 
 ## Izričito otvoreno prije produkcijskog odobrenja
@@ -42,3 +42,31 @@ Pokreću se:
 - Treba nastaviti provjeravati ovisnosti i izvještaje o ranjivostima te održavati SDK cilj kako Play pravila napreduju.
 
 Detaljne upute: [Google Play](GOOGLE_PLAY.md), [gradnja](BUILDING.md), [pravila privatnosti](../PRIVACY.md).
+
+## Nastavak revizije — 19. 10. 2026. (PR, prije izdanja)
+
+Proučeni su `ShiftStore`, `ShiftBackup`, `ShiftViewModel`, validator vremenskih preklapanja,
+`WorkCalculator`, Android SAF izvoz, SQLite sheme v1/v2 i okidači CI-a. Ovaj dio
+opisuje izmjene u radnoj grani, **ne potvrđuje objavu niti prolazak novih testova**.
+
+- **Zaštita arhive:** nedestruktivni JSON uvoz preskače datume s arhiviranom
+  smjenom. Prijašnja implementacija dopuštala je ponovno popunjavanje kalendara
+  na takav datum i bez korisnikove radnje „Vrati”.
+- **Veliki uvoz:** indeks po datumu i skup postojećih zapisa zamjenjuju ponovljene
+  linearne usporedbe svih ranijih smjena; provjera zahvaća i prethodni/sljedeći
+  datum kako bi se zadržalo otkrivanje preklapanja preko ponoći.
+- **Sigurnosne kopije:** gornja granica povećana je s 4 MB na 16 MB uz postojeći
+  limit 20 000 unosa i provjeru ulazne veličine. Priprema JSON i CSV sadržaja
+  sada završava prije otvaranja odredišnog toka podataka.
+- **Izolirani instrumentacijski testovi:** posebne baze za svaki novi test sprječavaju
+  zadržavanje testnih arhiviranih smjena u korisničkoj/ranije dijeljenoj bazi.
+  Dodani su scenariji arhiviranih datuma, idempotentnog uvoza, noćnih konflikata
+  i stvarne nedestruktivne SQLite migracije v1 → v2.
+- **CI:** Android emulator testovi (API 30 i 36) pokreću se i za promjene kroz PR,
+  ne samo nakon spajanja u `main`.
+- **Granice provjere:** ovi zahvati nisu cjelovit vizualni 1:1 audit zaslona.
+  Potpuna provjera velikih fontova, stvarnih uređaja i produkcijskog potpisivanja
+  ostaje zasebna obveza prije javnog izdanja.
+
+Nakon GitHub CI-a treba unijeti rezultate po točnom SHA-u PR-a; sve prijavljene
+padove treba riješiti prije mergea ili novog GitHub Releasea.
