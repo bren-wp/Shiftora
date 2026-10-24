@@ -304,6 +304,7 @@ fun CalendarScreen(
                             else if (entry != null) shiftBg(entry.kind)
                             else Color.Transparent
                         val tileText = if (chosen) Color.White
+                            else if (entry != null) Palette.Navy
                             else MaterialTheme.colorScheme.onSurface
                         val details = if (entries.isEmpty()) "Nema smjene"
                             else entries.joinToString(", ") { "${it.kind.code}: ${it.kind.label}" }
@@ -330,6 +331,7 @@ fun CalendarScreen(
                             ) {
                                 Text(date.dayOfMonth.toString(), color =
                                     if (chosen) Color.White
+                                    else if (entry != null) Palette.Navy
                                     else if (inMonth) MaterialTheme.colorScheme.onSurface
                                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .48f),
                                     fontWeight = if (chosen || today) FontWeight.Bold else FontWeight.Medium,
