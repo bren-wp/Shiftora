@@ -280,14 +280,16 @@ fun CalendarScreen(
                     val target = if (weekOnly) selected.minusWeeks(1) else shown.minusMonths(1).atDay(1)
                     selectedText = target.toString()
                     shownText = YearMonth.from(target).toString()
-                }) { Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodni mjesec") }
+                }) { Icon(Icons.Default.ChevronLeft, contentDescription =
+                    if (weekOnly) "Prethodni tjedan" else "Prethodni mjesec") }
                 Text(shown.atDay(1).monthLabel(), style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                 IconButton(onClick = {
                     val target = if (weekOnly) selected.plusWeeks(1) else shown.plusMonths(1).atDay(1)
                     selectedText = target.toString()
                     shownText = YearMonth.from(target).toString()
-                }) { Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeći mjesec") }
+                }) { Icon(Icons.Default.ChevronRight, contentDescription =
+                    if (weekOnly) "Sljedeći tjedan" else "Sljedeći mjesec") }
             }
             Spacer(Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth()) {
