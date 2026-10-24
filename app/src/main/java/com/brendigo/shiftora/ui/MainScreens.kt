@@ -549,8 +549,10 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
         BrandedHeader("Statistika i plaća", "Tvoj rad u brojkama. Veća kontrola.",
             dark = true, showStatsDecor = true, onSettings = onSettings)
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 13.dp, vertical = 11.dp),
+            modifier = Modifier.fillMaxSize()
+                .clip(RoundedCornerShape(topStart = 27.dp, topEnd = 27.dp))
+                .background(MaterialTheme.colorScheme.surface),
+            contentPadding = PaddingValues(horizontal = 13.dp, vertical = 15.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
@@ -629,7 +631,7 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                 }
             }
             item { SalaryStatsCard(totals, previous) }
-            item { StatsExplanation() }
+            item { StatsExplanation(totals, settings) }
         }
     }
 }
@@ -646,7 +648,12 @@ fun SalaryScreen(
     }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader("Plaća", "Pregled radnih sati i dodataka.", dark = true, onSettings = onSettings)
-        LazyColumn(contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+                .clip(RoundedCornerShape(topStart = 27.dp, topEnd = 27.dp))
+                .background(MaterialTheme.colorScheme.surface),
+            contentPadding = PaddingValues(14.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton({ monthText = month.minusMonths(1).toString() }) {
@@ -759,7 +766,10 @@ fun MoreScreen(
     }
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader("Više", "Postavke i tvoji podaci.", dark = true, showSettings = false)
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        Column(Modifier.fillMaxSize().clip(RoundedCornerShape(
+            topStart = 27.dp, topEnd = 27.dp
+        )).background(MaterialTheme.colorScheme.surface)
+            .verticalScroll(rememberScrollState())
             .padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SurfaceCard(Modifier.fillMaxWidth()) {
                 SectionTitle("Alati")
