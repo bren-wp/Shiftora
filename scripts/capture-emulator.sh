@@ -16,22 +16,49 @@ test "$width" -gt 300
 test "$height" -gt 700
 nav_y=$((height - 180))
 adb exec-out screencap -p > "shiftora-${device}-onboarding.png"
-adb shell uiautomator dump /sdcard/shiftora-uia.xml >/dev/null 2>&1 || true
-if adb shell cat /sdcard/shiftora-uia.xml 2>/dev/null | grep -q 'Preskoči'; then
-  adb shell input tap $((width - 160)) 240
+# Use the actual UI element bounds instead of hard-coded pixel taps. This also
+# tolerates status-bar and font scaling changes between API 30 and API 36.
+tap_label() {
+  local label="$1" coords
+  adb shell uiautomator dump /sdcard/shiftora-uia.xml >/dev/null 2>&1 || return 1
+  adb exec-out cat /sdcard/shiftora-uia.xml > /tmp/shiftora-uia.xml || return 1
+  coords="$(python3 - "$label" <<'PY'
+import re
+import sys
+import xml.etree.ElementTree as ET
+try:
+    root = ET.parse("/tmp/shiftora-uia.xml").getroot()
+    for node in root.iter("node"):
+        text = node.get("text", "")
+        desc = node.get("content-desc", "")
+        if text == sys.argv[1] or desc == sys.argv[1]:
+            bounds = re.findall(r"\d+", node.get("bounds", ""))
+            if len(bounds) == 4:
+                x1,y1,x2,y2 = map(int,bounds)
+                print((x1+x2)//2, (y1+y2)//2)
+                break
+except (ET.ParseError, FileNotFoundError):
+    pass
+PY
+)"
+  test -n "$coords" || return 1
+  read -r x y <<< "$coords"
+  adb shell input tap "$x" "$y"
+}
+if tap_label "Preskoči"; then
   sleep 3
 fi
 adb exec-out screencap -p > "shiftora-${device}-home.png"
-adb shell input tap $((width * 3 / 10)) "$nav_y"
+tap_label "Kalendar" || adb shell input tap $((width * 3 / 10)) "$nav_y"
 sleep 2
 adb exec-out screencap -p > "shiftora-${device}-calendar.png"
-adb shell input tap $((width / 2)) "$nav_y"
+tap_label "Statistika" || adb shell input tap $((width / 2)) "$nav_y"
 sleep 2
 adb exec-out screencap -p > "shiftora-${device}-statistics.png"
-adb shell input tap $((width * 7 / 10)) "$nav_y"
+tap_label "Plaća" || adb shell input tap $((width * 7 / 10)) "$nav_y"
 sleep 2
 adb exec-out screencap -p > "shiftora-${device}-salary.png"
-adb shell input tap $((width * 9 / 10)) "$nav_y"
+tap_label "Više" || adb shell input tap $((width * 9 / 10)) "$nav_y"
 sleep 2
 adb exec-out screencap -p > "shiftora-${device}-more.png"
 for kind in onboarding home calendar statistics salary more; do
