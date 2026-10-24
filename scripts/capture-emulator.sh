@@ -64,3 +64,11 @@ adb exec-out screencap -p > "shiftora-${device}-more.png"
 for kind in onboarding home calendar statistics salary more; do
   test -s "shiftora-${device}-${kind}.png"
 done
+# Previous screenshot jobs silently saved onboarding in *every* destination.
+# A screenshot matrix cannot certify navigation unless the frames are distinct.
+distinct="$(sha256sum shiftora-"${device}"-{onboarding,home,calendar,statistics,salary,more}.png |
+  awk '{print $1}' | sort -u | wc -l)"
+if test "$distinct" -ne 6; then
+  echo "Invalid UI screenshot capture: expected six distinct screens, found $distinct" >&2
+  exit 1
+fi
