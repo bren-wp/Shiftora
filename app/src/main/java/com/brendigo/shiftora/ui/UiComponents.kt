@@ -214,8 +214,10 @@ fun ShiftBadge(kind: ShiftKind, modifier: Modifier = Modifier, compact: Boolean 
 @Composable
 fun ShiftRow(shift: Shift, onClick: () -> Unit, showDate: Boolean = true) {
     SurfaceCard(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val narrow = maxWidth < 335.dp
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            horizontalArrangement = Arrangement.spacedBy(if (narrow) 5.dp else 8.dp)) {
             if (showDate) {
                 Column(Modifier.width(40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(shift.date.format(DateTimeFormatter.ofPattern("EEE", hr)),
@@ -225,7 +227,7 @@ fun ShiftRow(shift: Shift, onClick: () -> Unit, showDate: Boolean = true) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                 }
             }
-            ShiftBadge(shift.kind, compact = true)
+            ShiftBadge(shift.kind, compact = narrow)
             Column(Modifier.weight(1f)) {
                 Text(
                     if (shift.kind.hasTime) "${clock(shift.startMinute)} – ${clock(shift.endMinute)}"
@@ -245,7 +247,9 @@ fun ShiftRow(shift: Shift, onClick: () -> Unit, showDate: Boolean = true) {
                     fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Icon(Icons.Default.ChevronRight, contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp))
+        }
         }
     }
 }
