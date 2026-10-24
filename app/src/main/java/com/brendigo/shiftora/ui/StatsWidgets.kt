@@ -85,14 +85,24 @@ fun StatIndicatorCard(
                 modifier = Modifier.weight(1f))
         }
         Spacer(Modifier.height(3.dp))
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text(value, color = Palette.Ink,
-                fontSize = if (value.length > 10) 17.sp else 22.sp,
-                lineHeight = 25.sp,
-                maxLines = 1, fontWeight = FontWeight.Bold,
-                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-            TrendIndicator(currentMinutes, previousMinutes)
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth < 190.dp) {
+                Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(value, color = Palette.Ink, fontSize = 21.sp,
+                        lineHeight = 25.sp, fontWeight = FontWeight.Bold,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    TrendIndicator(currentMinutes, previousMinutes)
+                }
+            } else {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(value, color = Palette.Ink,
+                        fontSize = if (value.length > 10) 17.sp else 22.sp,
+                        lineHeight = 25.sp, maxLines = 1, fontWeight = FontWeight.Bold,
+                        overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                    TrendIndicator(currentMinutes, previousMinutes)
+                }
+            }
         }
         if (extra != null) {
             Text(extra, color = Palette.Secondary, fontSize = 10.sp, lineHeight = 12.sp,
