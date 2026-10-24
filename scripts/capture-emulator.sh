@@ -45,21 +45,36 @@ PY
   read -r x y <<< "$coords"
   adb shell input tap "$x" "$y"
 }
+# Validate the app stays foreground. In an earlier API 36 run tapping a
+# clipped bottom item hit Android's Home button; distinct wallpaper frames
+# falsely appeared to be successful navigation screenshots.
+assert_app_foreground() {
+  if ! adb shell dumpsys activity activities |
+      grep -E 'mResumedActivity|topResumedActivity' | grep -q "$package"; then
+    echo "Screenshot capture left Shiftora: Android launcher/another app foreground" >&2
+    exit 1
+  fi
+}
 if tap_label "Preskoči"; then
   sleep 3
 fi
+assert_app_foreground
 adb exec-out screencap -p > "shiftora-${device}-home.png"
 tap_label "Kalendar" || adb shell input tap $((width * 3 / 10)) "$nav_y"
 sleep 2
+assert_app_foreground
 adb exec-out screencap -p > "shiftora-${device}-calendar.png"
 tap_label "Statistika" || adb shell input tap $((width / 2)) "$nav_y"
 sleep 2
+assert_app_foreground
 adb exec-out screencap -p > "shiftora-${device}-statistics.png"
 tap_label "Plaća" || adb shell input tap $((width * 7 / 10)) "$nav_y"
 sleep 2
+assert_app_foreground
 adb exec-out screencap -p > "shiftora-${device}-salary.png"
 tap_label "Više" || adb shell input tap $((width * 9 / 10)) "$nav_y"
 sleep 2
+assert_app_foreground
 adb exec-out screencap -p > "shiftora-${device}-more.png"
 for kind in onboarding home calendar statistics salary more; do
   test -s "shiftora-${device}-${kind}.png"
