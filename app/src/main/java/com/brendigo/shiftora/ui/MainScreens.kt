@@ -253,18 +253,20 @@ fun CalendarScreen(
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         BrandedHeader(dark = true, onSettings = onSettings)
-        BoxWithConstraints(Modifier.fillMaxSize()) {
+        BoxWithConstraints(Modifier.fillMaxSize().clip(
+            RoundedCornerShape(topStart = 27.dp, topEnd = 27.dp)
+        ).background(MaterialTheme.colorScheme.surface)) {
         val compact = maxHeight < 715.dp
-        val dayHeight = if (compact) 56.dp else 64.dp
-        val spacing = if (compact) 5.dp else 7.dp
+        val dayHeight = if (compact) 47.dp else 54.dp
+        val spacing = if (compact) 7.dp else 11.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-            .padding(start = 12.dp, end = 12.dp, top = 7.dp, bottom = 12.dp)) {
+            .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 19.dp)) {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
                 .background(Palette.BlueLight).padding(3.dp)) {
                 listOf("Mjesec", "Tjedan").forEachIndexed { index, label ->
                     val isSelected = weekOnly == (index == 1)
                     Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
-                        .background(if (isSelected) Color.White else Color.Transparent)
+                        .background(if (isSelected) Color(0xFFD4E5FF) else Color.Transparent)
                         .heightIn(min = 48.dp)
                         .clickable(role = Role.Tab) { weekOnly = index == 1 }
                         .padding(vertical = 8.dp),
@@ -307,23 +309,20 @@ fun CalendarScreen(
                         val entry = entries.firstOrNull()
                         val inMonth = YearMonth.from(date) == shown
                         val today = date == LocalDate.now()
-                        val tileColor = if (entry != null) shiftColor(entry.kind)
-                            else if (chosen) Palette.BlueLight else Color.Transparent
-                        val lightness = tileColor.luminance()
-                        val navyContrast = (lightness + .05f) / (Palette.Navy.luminance() + .05f)
-                        val whiteContrast = 1.05f / (lightness + .05f)
-                        val tileText = if (navyContrast >= whiteContrast) Palette.Navy else Color.White
+                        val tileColor = if (chosen) Palette.Blue
+                            else if (entry != null) shiftBg(entry.kind)
+                            else Color.Transparent
+                        val tileText = if (chosen) Color.White
+                            else MaterialTheme.colorScheme.onSurface
                         val details = if (entries.isEmpty()) "Nema smjene"
                             else entries.joinToString(", ") { "${it.kind.code}: ${it.kind.label}" }
                         Box(
                             Modifier.weight(1f).padding(2.dp).height(dayHeight)
                                 .clip(RoundedCornerShape(11.dp))
                                 .background(tileColor)
-                                .then(when {
-                                    chosen -> Modifier.border(2.dp, Palette.Navy, RoundedCornerShape(11.dp))
-                                    today -> Modifier.border(2.dp, Palette.Mint, RoundedCornerShape(11.dp))
-                                    else -> Modifier
-                                })
+                                .then(if (today && !chosen)
+                                    Modifier.border(1.5.dp, Palette.Blue, RoundedCornerShape(11.dp))
+                                    else Modifier)
                                 .semantics {
                                     contentDescription = "${date.dateLabel()}. $details"
                                     this.selected = chosen
@@ -334,29 +333,40 @@ fun CalendarScreen(
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center) {
-                                Text(date.dayOfMonth.toString(),
-                                    color = if (entry != null) tileText.copy(alpha = .9f)
-                                        else if (inMonth) MaterialTheme.colorScheme.onSurface
-                                        else Palette.Secondary.copy(alpha = .5f),
-                                    fontWeight = if (today) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 10.sp, lineHeight = 12.sp)
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(date.dayOfMonth.toString(), color =
+                                    if (chosen) Color.White
+                                    else if (inMonth) MaterialTheme.colorScheme.onSurface
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .48f),
+                                    fontWeight = if (chosen || today) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 13.sp, lineHeight = 17.sp)
                                 if (entries.isNotEmpty()) {
-                                    entries.take(2).forEach { shift ->
-                                        Text(shift.kind.code, color = tileText,
-                                            fontSize = if (entries.size == 1)
-                                                (if (shift.kind.code.length > 1) 16.sp else 23.sp)
-                                            else 13.sp,
-                                            lineHeight = if (entries.size == 1) 25.sp else 16.sp,
-                                            fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                                    if (entries.size == 1 && entries.first().kind in listOf(
+                                            ShiftKind.MORNING, ShiftKind.AFTERNOON,
+                                            ShiftKind.NIGHT, ShiftKind.OFF, ShiftKind.DAY
+                                        )
+                                    ) {
+                                        Icon(shiftIcon(entries.first().kind),
+                                            contentDescription = null,
+                                            tint = if (chosen) Color.White
+                                                else shiftColor(entries.first().kind),
+                                            modifier = Modifier.size(16.dp))
+                                    } else {
+                                        Text(entries.first().kind.code,
+                                            fontSize = 10.sp, lineHeight = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (chosen) Color.White
+                                                else shiftColor(entries.first().kind))
                                     }
-                                    if (entries.size > 2) {
-                                        Text("+${entries.size - 2}", color = tileText,
-                                            fontSize = 9.sp, lineHeight = 10.sp)
+                                    if (entries.size > 1) {
+                                        Text("+${entries.size - 1}", fontSize = 9.sp,
+                                            lineHeight = 10.sp, color = tileText)
                                     }
-                                } else {
-                                    Spacer(Modifier.height(19.dp))
+                                } else if (inMonth) {
+                                    Spacer(Modifier.height(16.dp))
                                 }
                             }
                         }
@@ -364,6 +374,26 @@ fun CalendarScreen(
                 }
             }
             Spacer(Modifier.height(spacing))
+            Row(Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                listOf(
+                    ShiftKind.MORNING to "Jutarnja",
+                    ShiftKind.AFTERNOON to "Popodnevna",
+                    ShiftKind.NIGHT to "Noćna",
+                    ShiftKind.OFF to "Slobodno"
+                ).forEach { (kind, name) ->
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Box(Modifier.size(9.dp).clip(CircleShape)
+                            .background(shiftColor(kind)))
+                        Text(name, fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1)
+                    }
+                }
+            }
+            Spacer(Modifier.height(5.dp))
             Column(Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 ShiftKind.calendarOrder.chunked(5).forEach { kinds ->
@@ -377,31 +407,6 @@ fun CalendarScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
-                    }
-                }
-            }
-            Spacer(Modifier.height(spacing))
-            SurfaceCard(Modifier.fillMaxWidth()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Fond sati · ${shown.atDay(1).monthLabel()}",
-                            fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Text("Fond: ${minutesLabel(fund.fundMinutes.toLong())}" +
-                            "   •   Odrađeno: ${minutesLabel(fund.actuallyWorkedMinutes)}",
-                            fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Planirano: ${minutesLabel(fund.plannedMinutes)}" +
-                            "   •   GO/BO/PD: ${minutesLabel(fund.leaveCreditMinutes.toLong())}",
-                            fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Preostalo: ${minutesLabel(fund.remainingMinutes)}" +
-                            "   •   Uz plan: ${minutesLabel(fund.projectedRemainingMinutes)}",
-                            fontSize = 11.sp, color = Palette.Blue, fontWeight = FontWeight.SemiBold)
-                        if (fund.overFundMinutes > 0) {
-                            Text("Iznad fonda: ${minutesLabel(fund.overFundMinutes)}",
-                                color = Palette.Coral, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
-                        }
-                    }
-                    IconButton(onClick = { fundEditorOpen = true }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Uredi fond sati")
                     }
                 }
             }
@@ -425,7 +430,8 @@ fun CalendarScreen(
                                     tint = shiftColor(shift.kind), modifier = Modifier.size(27.dp))
                             }
                             Column(Modifier.weight(1f)) {
-                                Text("${shift.kind.code} · ${shift.kind.label}", style = MaterialTheme.typography.titleMedium)
+                                Text(if (shift.kind.isWork) "${shift.kind.label} smjena" else shift.kind.label,
+                                    style = MaterialTheme.typography.titleMedium)
                                 Text(if (shift.kind == ShiftKind.STANDBY)
                                         "${clock(shift.startMinute)} – ${clock(shift.endMinute)} (pripravnost)"
                                     else if (!shift.kind.isWork) shift.kind.label
@@ -466,6 +472,32 @@ fun CalendarScreen(
                     BlueAction("Dodaj smjenu", { onAdd(selected) }, Modifier.fillMaxWidth())
                 }
             }
+            Spacer(Modifier.height(spacing))
+            SurfaceCard(Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Fond sati · ${shown.atDay(1).monthLabel()}",
+                            fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text("Fond: ${minutesLabel(fund.fundMinutes.toLong())}" +
+                            "   •   Odrađeno: ${minutesLabel(fund.actuallyWorkedMinutes)}",
+                            fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Planirano: ${minutesLabel(fund.plannedMinutes)}" +
+                            "   •   GO/BO/PD: ${minutesLabel(fund.leaveCreditMinutes.toLong())}",
+                            fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Preostalo: ${minutesLabel(fund.remainingMinutes)}" +
+                            "   •   Uz plan: ${minutesLabel(fund.projectedRemainingMinutes)}",
+                            fontSize = 11.sp, color = Palette.Blue, fontWeight = FontWeight.SemiBold)
+                        if (fund.overFundMinutes > 0) {
+                            Text("Iznad fonda: ${minutesLabel(fund.overFundMinutes)}",
+                                color = Palette.Coral, fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+                        }
+                    }
+                    IconButton(onClick = { fundEditorOpen = true }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Uredi fond sati")
+                    }
+                }
+            }
+            Spacer(Modifier.height(spacing))
         }
         }
     }
