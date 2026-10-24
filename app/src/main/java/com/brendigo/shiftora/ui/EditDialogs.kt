@@ -14,6 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -142,11 +145,13 @@ fun ShiftEditorDialog(
                     }
                     if (kind.isWork) {
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                        OutlinedTextField(value = breakMin, onValueChange = { breakMin = it },
+                        OutlinedTextField(value = breakMin, onValueChange = { breakMin = it.filter(Char::isDigit).take(3) },
                             label = { Text("Pauza (min)") }, singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f))
-                        OutlinedTextField(value = breakAfter, onValueChange = { breakAfter = it },
+                        OutlinedTextField(value = breakAfter, onValueChange = { breakAfter = it.filter(Char::isDigit).take(4) },
                             label = { Text("Pauza nakon (min)") }, singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f))
                     }
                     OptionSwitch("Pauza nije plaćena", unpaid) { unpaid = it }
@@ -233,7 +238,7 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
         onDismissRequest = onDismiss,
         title = { Text("Automatski raspored") },
         text = {
-            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            Column(Modifier.fillMaxWidth().heightIn(max = 480.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Odaberi ciklus koji se ponavlja. Postojeći dani neće biti prebrisani.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
@@ -272,7 +277,7 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
                                 )
                                 if (customPattern.size > 1) {
                                     IconButton(onClick = { customPattern.removeAt(index) },
-                                        modifier = Modifier.size(32.dp)) {
+                                        modifier = Modifier.size(48.dp)) {
                                         Icon(Icons.Default.Close, contentDescription = "Ukloni ${index + 1}. dan",
                                             modifier = Modifier.size(15.dp))
                                     }
@@ -293,8 +298,9 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
                 OutlinedTextField(start, onValueChange = { start = it },
                     label = { Text("Od datuma (GGGG-MM-DD)") }, singleLine = true,
                     modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(days, onValueChange = { days = it },
+                OutlinedTextField(days, onValueChange = { days = it.filter(Char::isDigit).take(3) },
                     label = { Text("Broj dana (1–366)") }, singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth())
                 Text("Ciklus se računa od prvog dana. Slobodni dani također se prikazuju u kalendaru.",
                     style = MaterialTheme.typography.bodySmall,
@@ -346,21 +352,30 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedTextField(hourly, onValueChange = { hourly = it },
-                    label = { Text("Bruto satnica (€/h)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Bruto satnica (€/h)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 OutlinedTextField(night, onValueChange = { night = it },
-                    label = { Text("Dodatak za noćni rad (%)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Dodatak za noćni rad (%)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 OutlinedTextField(sunday, onValueChange = { sunday = it },
-                    label = { Text("Dodatak za nedjelje (%)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Dodatak za nedjelje (%)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 OutlinedTextField(holiday, onValueChange = { holiday = it },
-                    label = { Text("Dodatak za blagdane (%)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Dodatak za blagdane (%)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 OutlinedTextField(overtime, onValueChange = { overtime = it },
-                    label = { Text("Dodatak za prekovremeni rad (%)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Dodatak za prekovremeni rad (%)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 Text("Razdoblje noćnog rada (24-satni format)", style = MaterialTheme.typography.titleSmall)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(nightFrom, onValueChange = { nightFrom = it },
-                        label = { Text("Od sata") }, singleLine = true, modifier = Modifier.weight(1f))
+                        label = { Text("Od sata") }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f))
                     OutlinedTextField(nightUntil, onValueChange = { nightUntil = it },
-                        label = { Text("Do sata") }, singleLine = true, modifier = Modifier.weight(1f))
+                        label = { Text("Do sata") }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f))
                 }
                 Text("Primjer: od 22 do 6. Satnica i dodaci nisu službeni obračun.",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
