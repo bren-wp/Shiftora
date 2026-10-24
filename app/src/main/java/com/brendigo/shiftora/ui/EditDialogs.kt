@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.brendigo.shiftora.data.SalarySettings
@@ -410,95 +411,156 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
 @Composable
 fun OnboardingScreen(onComplete: () -> Unit) {
     var step by rememberSaveable { mutableIntStateOf(0) }
-    val compact = LocalConfiguration.current.screenHeightDp < 700
+    val compact = LocalConfiguration.current.screenHeightDp < 680
     val titles = listOf("Planiraj smjene", "Prati svoje sate", "Procijeni plaću")
     val descriptions = listOf(
-        "Lako dodaj, uređuj i pregledaj svoj raspored u kalendaru.",
-        "Razlikuj planirano od odrađenog, računaj noćne sate i prekovremeni rad.",
-        "Procijeni bruto plaću prema satnici i dodacima koje sam odrediš."
+        "Lako dodaj, uredi i pregledaj svoje smjene uz pregledan kalendar.",
+        "Evidentiraj odrađene sate, noćni rad i prekovremene sate na jednom mjestu.",
+        "Procijeni bruto zaradu prema svojoj satnici i postavkama dodataka."
     )
     Column(
         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             .statusBarsPadding().navigationBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 26.dp, vertical = 12.dp),
+            .padding(horizontal = 24.dp, vertical = if (compact) 8.dp else 18.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = onComplete) { Text("Preskoči", color = Palette.Blue) }
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            BrandMark(Modifier.size(42.dp))
+            Spacer(Modifier.width(7.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Shiftora", fontWeight = FontWeight.ExtraBold, fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onBackground)
+                Text("Moje smjene. Moji sati.", fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            TextButton(onClick = onComplete) { Text("Preskoči") }
         }
-        Spacer(Modifier.height(if (compact) 10.dp else 28.dp))
-        BrandMark(Modifier.size(if (compact) 64.dp else 74.dp), darkSurface = true)
-        Spacer(Modifier.height(17.dp))
-        Text("Shiftora", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineLarge)
-        Text("Moje smjene. Moji sati.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(if (compact) 14.dp else 28.dp))
-        Column(
-            Modifier.fillMaxWidth().height(if (compact) 166.dp else 188.dp)
-                .background(Palette.BlueLight, RoundedCornerShape(24.dp))
-                .padding(14.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            if (step == 0) {
-                Text("Moj kalendar", color = Palette.Navy, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT,
-                        ShiftKind.OFF, ShiftKind.MORNING).forEachIndexed { i, kind ->
-                        Column(Modifier.weight(1f).height(62.dp)
-                            .background(shiftBg(kind), RoundedCornerShape(11.dp)),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center) {
-                            Text((i + 12).toString(), color = Palette.Navy, fontWeight = FontWeight.Bold)
-                            Icon(shiftIcon(kind), contentDescription = null,
-                                tint = shiftColor(kind), modifier = Modifier.size(19.dp))
+        Spacer(Modifier.height(if (compact) 15.dp else 40.dp))
+        Box(Modifier.fillMaxWidth().height(if (compact) 215.dp else 290.dp),
+            contentAlignment = Alignment.Center) {
+            Box(Modifier.size(if (compact) 195.dp else 255.dp)
+                .background(Palette.BlueLight, RoundedCornerShape(60.dp)))
+            Box(Modifier.fillMaxWidth(.9f)
+                .height(if (compact) 189.dp else 238.dp)
+                .background(Color.White, RoundedCornerShape(27.dp))
+                .padding(15.dp)) {
+                when (step) {
+                    0 -> Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.CalendarMonth, contentDescription = null,
+                                tint = Palette.Blue, modifier = Modifier.size(21.dp))
+                            Spacer(Modifier.width(7.dp))
+                            Text("Moj kalendar", fontWeight = FontWeight.Bold,
+                                color = Palette.Navy, fontSize = 16.sp)
+                        }
+                        Row(Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            listOf("Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned").forEach {
+                                Text(it, Modifier.weight(1f), color = Palette.Secondary,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    fontSize = 9.sp)
+                            }
+                        }
+                        listOf(0, 1, 2).forEach { week ->
+                            Row(Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                (0..6).forEach { day ->
+                                    val kind = listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON,
+                                        ShiftKind.NIGHT, ShiftKind.OFF)[(day + week) % 4]
+                                    Column(Modifier.weight(1f)
+                                        .height(if (compact) 37.dp else 46.dp)
+                                        .background(shiftBg(kind), RoundedCornerShape(9.dp)),
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text((8 + week * 7 + day).toString(),
+                                            fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
+                                            color = Palette.Navy)
+                                        Icon(shiftIcon(kind), contentDescription = null,
+                                            tint = shiftColor(kind),
+                                            modifier = Modifier.size(13.dp))
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-            } else if (step == 1) {
-                listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT).forEach { kind ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)
-                        .background(Color.White, RoundedCornerShape(12.dp))
-                        .padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(shiftIcon(kind), contentDescription = null, tint = shiftColor(kind))
-                        Spacer(Modifier.width(9.dp))
-                        Text(kind.label, color = Palette.Navy, modifier = Modifier.weight(1f))
-                        Text(clock(kind.start) + " – " + clock(kind.end), color = Palette.Secondary,
-                            style = MaterialTheme.typography.bodySmall)
+                    1 -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Schedule, contentDescription = null,
+                                tint = Palette.Blue)
+                            Spacer(Modifier.width(9.dp))
+                            Text("Tvoje radne smjene", fontWeight = FontWeight.Bold,
+                                color = Palette.Navy)
+                        }
+                        listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT).forEach { kind ->
+                            Row(Modifier.fillMaxWidth()
+                                .background(shiftBg(kind), RoundedCornerShape(13.dp))
+                                .padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(shiftIcon(kind), contentDescription = null,
+                                    tint = shiftColor(kind), modifier = Modifier.size(24.dp))
+                                Spacer(Modifier.width(9.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(kind.label + " smjena", fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold, color = Palette.Navy)
+                                    Text(clock(kind.start) + " – " + clock(kind.end),
+                                        fontSize = 11.sp, color = Palette.Secondary)
+                                }
+                                Text("8h", fontWeight = FontWeight.Bold,
+                                    color = Palette.Navy)
+                            }
+                        }
                     }
-                }
-            } else {
-                Text("Procjena bruto plaće", color = Palette.Navy, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(14.dp))
-                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                    listOf(30, 43, 59, 78, 96).forEachIndexed { i, h ->
-                        Box(Modifier.weight(1f).height(h.dp)
-                            .background(if (i < 3) Palette.Blue else Palette.Mint,
-                                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)))
+                    else -> Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.AccountBalanceWallet, contentDescription = null,
+                                tint = Palette.Mint)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Procjena bruto plaće", fontWeight = FontWeight.Bold,
+                                color = Palette.Navy, fontSize = 15.sp)
+                        }
+                        Text("Na temelju tvojih smjena", fontSize = 12.sp,
+                            color = Palette.Secondary)
+                        Row(Modifier.fillMaxWidth().height(110.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.Bottom) {
+                            listOf(32, 50, 66, 83, 105).forEachIndexed { i, height ->
+                                Box(Modifier.weight(1f).height(height.dp)
+                                    .background(if (i < 2) Palette.Blue else Palette.Mint,
+                                        RoundedCornerShape(topStart = 7.dp, topEnd = 7.dp)))
+                            }
+                        }
+                        Text("Satnica + dodatak za smjene", color = Palette.Navy,
+                            fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
                     }
                 }
             }
         }
-        Spacer(Modifier.height(if (compact) 15.dp else 28.dp))
-        Text(titles[step], color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(12.dp))
-        Text(descriptions[step], textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth(),
+        Spacer(Modifier.height(if (compact) 16.dp else 28.dp))
+        Text(titles[step], color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
+        Spacer(Modifier.height(10.dp))
+        Text(descriptions[step],
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyLarge)
-        Spacer(Modifier.height(if (compact) 20.dp else 38.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+        Spacer(Modifier.height(if (compact) 20.dp else 36.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
             repeat(3) { i ->
-                Box(Modifier.size(if (step == i) 18.dp else 7.dp, 7.dp)
+                Box(Modifier.size(if (step == i) 18.dp else 8.dp, 8.dp)
                     .background(if (step == i) Palette.Blue else Color(0xFFCBD5E1),
-                        RoundedCornerShape(6.dp)))
+                        RoundedCornerShape(8.dp)))
             }
         }
-        Spacer(Modifier.height(if (compact) 14.dp else 25.dp))
+        Spacer(Modifier.height(20.dp))
         BlueAction(if (step == 2) "Započni" else "Dalje",
-            { if (step == 2) onComplete() else step++ }, Modifier.fillMaxWidth(),
-            Icons.Default.ArrowForward)
-        Spacer(Modifier.height(15.dp))
-        Text("Bez prijave i bez interneta", color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall)
+            { if (step == 2) onComplete() else step++ },
+            Modifier.fillMaxWidth(), Icons.Default.ArrowForward)
+        Spacer(Modifier.height(12.dp))
+        Text("Bez prijave i interneta · tvoji podaci ostaju na uređaju",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
