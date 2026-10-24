@@ -148,7 +148,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             SideEffect {
-                val whiteStatus = !darkMode && !onboarding && tab == 0
+                val whiteStatus = !darkMode && (onboarding || tab == 0)
                 val status = if (whiteStatus) android.graphics.Color.WHITE
                     else android.graphics.Color.rgb(11, 31, 59)
                 window.statusBarColor = status
@@ -180,6 +180,8 @@ class MainActivity : ComponentActivity() {
                         "Više" to Icons.Default.MoreHoriz
                     )
                     Scaffold(
+                        containerColor = if (tab == 0 && !darkMode)
+                            MaterialTheme.colorScheme.background else Palette.Navy,
                         snackbarHost = { SnackbarHost(snackbars) },
                         bottomBar = {
                             Row(
