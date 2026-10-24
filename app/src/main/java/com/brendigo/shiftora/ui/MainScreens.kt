@@ -326,7 +326,7 @@ fun CalendarScreen(
                                 })
                                 .semantics {
                                     contentDescription = "${date.dateLabel()}. $details"
-                                    selected = chosen
+                                    this.selected = chosen
                                 }
                                 .clickable {
                                     selectedText = date.toString()
