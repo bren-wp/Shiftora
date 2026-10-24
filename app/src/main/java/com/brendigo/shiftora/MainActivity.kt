@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -185,7 +186,8 @@ class MainActivity : ComponentActivity() {
                                 Modifier.fillMaxWidth().background(
                                     MaterialTheme.colorScheme.surface,
                                     RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp)
-                                ).padding(start = 9.dp, end = 9.dp, top = 7.dp, bottom = 3.dp),
+                                ).navigationBarsPadding()
+                                    .padding(start = 9.dp, end = 9.dp, top = 7.dp, bottom = 5.dp),
                                 horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 sections.forEachIndexed { index, option ->
@@ -198,7 +200,10 @@ class MainActivity : ComponentActivity() {
                                             .background(if (active)
                                                 MaterialTheme.colorScheme.primaryContainer
                                                 else Color.Transparent)
-                                            .semantics { selected = active }
+                                            .semantics {
+                                                contentDescription = option.first
+                                                selected = active
+                                            }
                                             .clickable(role = Role.Tab) { tab = index }
                                             .padding(vertical = 7.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally,
