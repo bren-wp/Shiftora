@@ -145,38 +145,22 @@ fun HomeScreen(
                 }
             }
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                    SurfaceCard(Modifier.weight(1f).clickable { onTab(2) }, color = Palette.BlueLight) {
-                        Text("Ovaj tjedan", color = Palette.Ink, fontWeight = FontWeight.SemiBold)
-                        Spacer(Modifier.height(7.dp))
-                        Text(minutesLabel(weekTotal.paidMinutes), fontSize = 29.sp, color = Palette.Ink, fontWeight = FontWeight.Bold)
-                        Text("Planirano i odrađeno", color = Palette.Secondary, fontSize = 11.sp)
-                        Spacer(Modifier.height(6.dp))
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.Bottom) {
-                            repeat(7) { day ->
-                                val minutes = dailyTotals[day].paidMinutes
-                                val fraction = (minutes.toFloat() / maxDayMinutes).coerceIn(0f, 1f)
-                                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Box(Modifier.fillMaxWidth().height(38.dp),
-                                        contentAlignment = Alignment.BottomCenter) {
-                                        Box(Modifier.fillMaxWidth().height(if (minutes > 0L) (36f * fraction).coerceAtLeast(4f).dp else 4.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(if (minutes > 0L) Palette.Blue else Color(0xFFCBD7E8)))
-                                    }
-                                    Text(listOf("P", "U", "S", "Č", "P", "S", "N")[day],
-                                        fontSize = 9.sp, color = Palette.Secondary)
-                                }
-                            }
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    if (maxWidth < 340.dp) {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            HomeWeeklyOverview(weekTotal.paidMinutes, dailyTotals, maxDayMinutes,
+                                Modifier.fillMaxWidth()) { onTab(2) }
+                            HomeSalaryOverview(monthTotal.grossCents, YearMonth.from(today),
+                                Modifier.fillMaxWidth()) { onTab(3) }
                         }
-                    }
-                    SurfaceCard(Modifier.weight(1f).clickable { onTab(3) }, color = Palette.MintLight) {
-                        Text("Procjena bruto plaće", color = Palette.Ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                        Spacer(Modifier.height(8.dp))
-                        Icon(Icons.Default.BarChart, contentDescription = null, tint = Palette.Mint, modifier = Modifier.size(23.dp))
-                        Text(euros(monthTotal.grossCents), fontWeight = FontWeight.Bold, color = Palette.Ink,
-                            fontSize = 21.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(YearMonth.from(today).atDay(1).monthLabel(), color = Palette.Secondary, fontSize = 11.sp)
+                    } else {
+                        Row(Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            HomeWeeklyOverview(weekTotal.paidMinutes, dailyTotals, maxDayMinutes,
+                                Modifier.weight(1f)) { onTab(2) }
+                            HomeSalaryOverview(monthTotal.grossCents, YearMonth.from(today),
+                                Modifier.weight(1f)) { onTab(3) }
+                        }
                     }
                 }
             }
@@ -823,5 +807,61 @@ private fun ListAction(title: String, description: String, icon: androidx.compos
             Text(description, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         }
         Icon(Icons.Default.ChevronRight, contentDescription = null)
+    }
+}
+
+
+@Composable
+private fun HomeWeeklyOverview(
+    paidMinutes: Long,
+    dailyTotals: List<com.brendigo.shiftora.data.WorkTotals>,
+    maxDayMinutes: Long,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    SurfaceCard(modifier.clickable(onClick = onClick), color = Palette.BlueLight) {
+        Text("Ovaj tjedan", color = Palette.Ink, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(7.dp))
+        Text(minutesLabel(paidMinutes), fontSize = 26.sp, color = Palette.Ink,
+            fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text("Planirano i odrađeno", color = Palette.Secondary, fontSize = 12.sp)
+        Spacer(Modifier.height(6.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.Bottom) {
+            repeat(7) { day ->
+                val minutes = dailyTotals[day].paidMinutes
+                val fraction = (minutes.toFloat() / maxDayMinutes).coerceIn(0f, 1f)
+                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.fillMaxWidth().height(38.dp),
+                        contentAlignment = Alignment.BottomCenter) {
+                        Box(Modifier.fillMaxWidth()
+                            .height(if (minutes > 0L) (36f * fraction).coerceAtLeast(4f).dp else 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(if (minutes > 0L) Palette.Blue else Color(0xFFCBD7E8)))
+                    }
+                    Text(listOf("P", "U", "S", "Č", "P", "S", "N")[day],
+                        fontSize = 10.sp, color = Palette.Secondary)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeSalaryOverview(
+    grossCents: Long,
+    month: YearMonth,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    SurfaceCard(modifier.clickable(onClick = onClick), color = Palette.MintLight) {
+        Text("Procjena bruto plaće", color = Palette.Ink,
+            fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(8.dp))
+        Icon(Icons.Default.AccountBalanceWallet, contentDescription = null,
+            tint = Palette.Mint, modifier = Modifier.size(24.dp))
+        Text(euros(grossCents), fontWeight = FontWeight.Bold, color = Palette.Ink,
+            fontSize = 23.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(month.atDay(1).monthLabel(), color = Palette.Secondary, fontSize = 12.sp)
     }
 }
