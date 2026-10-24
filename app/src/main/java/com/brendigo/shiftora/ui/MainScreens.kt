@@ -1,6 +1,8 @@
 package com.brendigo.shiftora.ui
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -269,7 +271,7 @@ fun CalendarScreen(
         BrandedHeader(dark = true, onSettings = onSettings)
         BoxWithConstraints(Modifier.fillMaxSize()) {
         val compact = maxHeight < 715.dp
-        val dayHeight = if (compact) 51.dp else 61.dp
+        val dayHeight = if (compact) 56.dp else 64.dp
         val spacing = if (compact) 5.dp else 7.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 12.dp, end = 12.dp, top = 7.dp, bottom = 12.dp)) {
@@ -279,7 +281,9 @@ fun CalendarScreen(
                     val isSelected = weekOnly == (index == 1)
                     Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
                         .background(if (isSelected) Color.White else Color.Transparent)
-                        .clickable { weekOnly = index == 1 }.padding(vertical = 8.dp),
+                        .heightIn(min = 48.dp)
+                        .clickable(role = Role.Tab) { weekOnly = index == 1 }
+                        .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center) {
                         Text(label, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) Palette.Blue else Palette.Navy)
@@ -319,7 +323,10 @@ fun CalendarScreen(
                         val today = date == LocalDate.now()
                         val tileColor = if (entry != null) shiftColor(entry.kind)
                             else if (chosen) Palette.BlueLight else Color.Transparent
-                        val tileText = if (tileColor.luminance() > .48f) Palette.Navy else Color.White
+                        val lightness = tileColor.luminance()
+                        val navyContrast = (lightness + .05f) / (Palette.Navy.luminance() + .05f)
+                        val whiteContrast = 1.05f / (lightness + .05f)
+                        val tileText = if (navyContrast >= whiteContrast) Palette.Navy else Color.White
                         val details = if (entries.isEmpty()) "Nema smjene"
                             else entries.joinToString(", ") { "${it.kind.code}: ${it.kind.label}" }
                         Box(
@@ -535,7 +542,9 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                         val selected = period == index
                         Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
                             .background(if (selected) Color(0xFFD0E2FF) else Color.Transparent)
-                            .clickable { period = index }.padding(vertical = 9.dp),
+                            .heightIn(min = 48.dp)
+                            .clickable(role = Role.Tab) { period = index }
+                            .padding(vertical = 9.dp),
                             contentAlignment = Alignment.Center) {
                             Text(title, color = if (selected) Palette.Blue else Palette.Navy,
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
@@ -778,11 +787,14 @@ fun MoreScreen(
             }
             SurfaceCard(Modifier.fillMaxWidth()) {
                 SectionTitle("Izgled")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.DarkMode, contentDescription = null, tint = Palette.Blue)
+                Row(Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                    .toggleable(value = darkMode, role = Role.Switch, onValueChange = onDark),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.DarkMode, contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(12.dp))
                     Text("Tamni način rada", Modifier.weight(1f))
-                    Switch(checked = darkMode, onCheckedChange = onDark)
+                    Switch(checked = darkMode, onCheckedChange = null)
                 }
             }
             SurfaceCard(Modifier.fillMaxWidth()) {
@@ -800,9 +812,11 @@ fun MoreScreen(
 
 @Composable
 private fun ListAction(title: String, description: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 13.dp),
+    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp)
+        .clickable(role = Role.Button, onClick = onClick)
+        .padding(vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = Palette.Blue)
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontWeight = FontWeight.SemiBold)
