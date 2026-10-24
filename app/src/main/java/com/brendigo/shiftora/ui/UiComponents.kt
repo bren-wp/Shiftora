@@ -190,7 +190,7 @@ fun SectionTitle(title: String, trailing: String? = null, onTrailing: () -> Unit
 }
 
 @Composable
-fun ShiftBadge(kind: ShiftKind, modifier: Modifier = Modifier) {
+fun ShiftBadge(kind: ShiftKind, modifier: Modifier = Modifier, compact: Boolean = false) {
     Row(
         modifier = modifier.clip(RoundedCornerShape(13.dp))
             .background(shiftBg(kind)).padding(horizontal = 11.dp, vertical = 8.dp),
@@ -198,33 +198,47 @@ fun ShiftBadge(kind: ShiftKind, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(7.dp)
     ) {
         Icon(shiftIcon(kind), contentDescription = null, tint = shiftColor(kind), modifier = Modifier.size(19.dp))
-        Text(kind.label, color = shiftColor(kind), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+        Text(if (compact) kind.code else kind.label, color = shiftColor(kind),
+            fontWeight = FontWeight.SemiBold, fontSize = 13.sp, maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
     }
 }
 
 @Composable
 fun ShiftRow(shift: Shift, onClick: () -> Unit, showDate: Boolean = true) {
     SurfaceCard(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (showDate) {
-                Column(Modifier.width(47.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(shift.date.format(DateTimeFormatter.ofPattern("EEE", hr)), color = Palette.Secondary, fontSize = 12.sp)
-                    Text(shift.date.dayOfMonth.toString(), fontWeight = FontWeight.Bold, fontSize = 22.sp)
-                    Text(shift.date.format(DateTimeFormatter.ofPattern("LLL", hr)), color = Palette.Secondary, fontSize = 11.sp)
+                Column(Modifier.width(40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(shift.date.format(DateTimeFormatter.ofPattern("EEE", hr)),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
+                    Text(shift.date.dayOfMonth.toString(), fontWeight = FontWeight.Bold, fontSize = 21.sp)
+                    Text(shift.date.format(DateTimeFormatter.ofPattern("LLL", hr)),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                 }
             }
-            ShiftBadge(shift.kind)
+            ShiftBadge(shift.kind, compact = true)
             Column(Modifier.weight(1f)) {
-                if (shift.kind.isWork) {
-                    Text("${clock(shift.startMinute)} – ${clock(shift.endMinute)}",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    if (shift.actual) Text("Odrađeno", color = Palette.Mint, fontSize = 11.sp)
-                } else Text("Slobodan dan", fontSize = 12.sp, color = Palette.Secondary)
+                Text(
+                    if (shift.kind.hasTime) "${clock(shift.startMinute)} – ${clock(shift.endMinute)}"
+                    else shift.kind.label,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
+                val detail = when {
+                    shift.kind.isWork && shift.actual -> "Odrađeno · " +
+                        minutesLabel(com.brendigo.shiftora.domain.WorkCalculator.durationMinutes(shift))
+                    shift.kind.isWork -> "Planirano · " +
+                        minutesLabel(com.brendigo.shiftora.domain.WorkCalculator.durationMinutes(shift))
+                    shift.kind == ShiftKind.STANDBY -> "Pripravnost"
+                    else -> shift.kind.label
+                }
+                Text(detail, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            if (shift.kind.isWork) Text(minutesLabel(com.brendigo.shiftora.domain.WorkCalculator.durationMinutes(shift)),
-                fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Palette.Secondary)
+            Icon(Icons.Default.ChevronRight, contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         }
     }
 }
@@ -260,8 +274,13 @@ fun BlueAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
 
 @Composable
 fun LabelValue(label: String, value: String, tint: Color? = null) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-        Text(value, color = tint ?: MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(label, modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp,
+            lineHeight = 19.sp)
+        Text(value, color = tint ?: MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
     }
 }

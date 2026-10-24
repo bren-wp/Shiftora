@@ -9,11 +9,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -142,11 +146,13 @@ fun ShiftEditorDialog(
                     }
                     if (kind.isWork) {
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                        OutlinedTextField(value = breakMin, onValueChange = { breakMin = it },
+                        OutlinedTextField(value = breakMin, onValueChange = { breakMin = it.filter(Char::isDigit).take(3) },
                             label = { Text("Pauza (min)") }, singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f))
-                        OutlinedTextField(value = breakAfter, onValueChange = { breakAfter = it },
+                        OutlinedTextField(value = breakAfter, onValueChange = { breakAfter = it.filter(Char::isDigit).take(4) },
                             label = { Text("Pauza nakon (min)") }, singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f))
                     }
                     OptionSwitch("Pauza nije plaćena", unpaid) { unpaid = it }
@@ -212,6 +218,7 @@ private fun OptionSwitch(text: String, value: Boolean, onChange: (Boolean) -> Un
 
 @Composable
 fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind>, Int) -> Unit) {
+    val context = LocalContext.current
     val presets = listOf(
         "D–N–SD–SD (turnus)" to listOf(ShiftKind.DAY, ShiftKind.NIGHT, ShiftKind.OFF, ShiftKind.OFF),
         "J–P–N–SD" to listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF),
@@ -233,7 +240,7 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
         onDismissRequest = onDismiss,
         title = { Text("Automatski raspored") },
         text = {
-            Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            Column(Modifier.fillMaxWidth().heightIn(max = 480.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Odaberi ciklus koji se ponavlja. Postojeći dani neće biti prebrisani.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
@@ -272,7 +279,7 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
                                 )
                                 if (customPattern.size > 1) {
                                     IconButton(onClick = { customPattern.removeAt(index) },
-                                        modifier = Modifier.size(32.dp)) {
+                                        modifier = Modifier.size(48.dp)) {
                                         Icon(Icons.Default.Close, contentDescription = "Ukloni ${index + 1}. dan",
                                             modifier = Modifier.size(15.dp))
                                     }
@@ -290,11 +297,22 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
                         Text("Dodaj dan u ciklus (${customPattern.size}/28)")
                     }
                 }
-                OutlinedTextField(start, onValueChange = { start = it },
+                OutlinedTextField(start, onValueChange = { start = it.take(10) },
                     label = { Text("Od datuma (GGGG-MM-DD)") }, singleLine = true,
-                    modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(days, onValueChange = { days = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            val selected = parsedStart ?: LocalDate.now()
+                            DatePickerDialog(context, { _, y, m, d ->
+                                start = LocalDate.of(y, m + 1, d).toString()
+                            }, selected.year, selected.monthValue - 1, selected.dayOfMonth).show()
+                        }) {
+                            Icon(Icons.Default.CalendarMonth, contentDescription = "Odaberi početni datum")
+                        }
+                    })
+                OutlinedTextField(days, onValueChange = { days = it.filter(Char::isDigit).take(3) },
                     label = { Text("Broj dana (1–366)") }, singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth())
                 Text("Ciklus se računa od prvog dana. Slobodni dani također se prikazuju u kalendaru.",
                     style = MaterialTheme.typography.bodySmall,
@@ -346,21 +364,30 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedTextField(hourly, onValueChange = { hourly = it },
-                    label = { Text("Bruto satnica (€/h)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Bruto satnica (€/h)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 OutlinedTextField(night, onValueChange = { night = it },
-                    label = { Text("Dodatak za noćni rad (%)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Dodatak za noćni rad (%)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 OutlinedTextField(sunday, onValueChange = { sunday = it },
-                    label = { Text("Dodatak za nedjelje (%)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Dodatak za nedjelje (%)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 OutlinedTextField(holiday, onValueChange = { holiday = it },
-                    label = { Text("Dodatak za blagdane (%)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Dodatak za blagdane (%)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 OutlinedTextField(overtime, onValueChange = { overtime = it },
-                    label = { Text("Dodatak za prekovremeni rad (%)") }, modifier = Modifier.fillMaxWidth())
+                    label = { Text("Dodatak za prekovremeni rad (%)") }, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
                 Text("Razdoblje noćnog rada (24-satni format)", style = MaterialTheme.typography.titleSmall)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(nightFrom, onValueChange = { nightFrom = it },
-                        label = { Text("Od sata") }, singleLine = true, modifier = Modifier.weight(1f))
+                        label = { Text("Od sata") }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f))
                     OutlinedTextField(nightUntil, onValueChange = { nightUntil = it },
-                        label = { Text("Do sata") }, singleLine = true, modifier = Modifier.weight(1f))
+                        label = { Text("Do sata") }, singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f))
                 }
                 Text("Primjer: od 22 do 6. Satnica i dodaci nisu službeni obračun.",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -382,7 +409,8 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
 
 @Composable
 fun OnboardingScreen(onComplete: () -> Unit) {
-    var step by remember { mutableIntStateOf(0) }
+    var step by rememberSaveable { mutableIntStateOf(0) }
+    val compact = LocalConfiguration.current.screenHeightDp < 700
     val titles = listOf("Planiraj smjene", "Prati svoje sate", "Procijeni plaću")
     val descriptions = listOf(
         "Lako dodaj, uređuj i pregledaj svoj raspored u kalendaru.",
@@ -391,20 +419,22 @@ fun OnboardingScreen(onComplete: () -> Unit) {
     )
     Column(
         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding().navigationBarsPadding().padding(26.dp),
+            .statusBarsPadding().navigationBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 26.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             TextButton(onClick = onComplete) { Text("Preskoči", color = Palette.Blue) }
         }
-        Spacer(Modifier.weight(.6f))
-        BrandMark(Modifier.size(74.dp), darkSurface = true)
+        Spacer(Modifier.height(if (compact) 10.dp else 28.dp))
+        BrandMark(Modifier.size(if (compact) 64.dp else 74.dp), darkSurface = true)
         Spacer(Modifier.height(17.dp))
         Text("Shiftora", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineLarge)
         Text("Moje smjene. Moji sati.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.weight(.65f))
+        Spacer(Modifier.height(if (compact) 14.dp else 28.dp))
         Column(
-            Modifier.fillMaxWidth().height(188.dp)
+            Modifier.fillMaxWidth().height(if (compact) 166.dp else 188.dp)
                 .background(Palette.BlueLight, RoundedCornerShape(24.dp))
                 .padding(14.dp),
             verticalArrangement = Arrangement.Center
@@ -449,13 +479,13 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 }
             }
         }
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(if (compact) 15.dp else 28.dp))
         Text(titles[step], color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(12.dp))
         Text(descriptions[step], textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyLarge)
-        Spacer(Modifier.weight(.9f))
+        Spacer(Modifier.height(if (compact) 20.dp else 38.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
             repeat(3) { i ->
                 Box(Modifier.size(if (step == i) 18.dp else 7.dp, 7.dp)
@@ -463,7 +493,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                         RoundedCornerShape(6.dp)))
             }
         }
-        Spacer(Modifier.height(25.dp))
+        Spacer(Modifier.height(if (compact) 14.dp else 25.dp))
         BlueAction(if (step == 2) "Započni" else "Dalje",
             { if (step == 2) onComplete() else step++ }, Modifier.fillMaxWidth(),
             Icons.Default.ArrowForward)
