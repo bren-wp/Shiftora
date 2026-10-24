@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -95,12 +96,12 @@ fun shiftIcon(kind: ShiftKind): ImageVector = when (kind) {
 fun BrandMark(modifier: Modifier = Modifier, darkSurface: Boolean = false) {
     Box(
         modifier = modifier.clip(RoundedCornerShape(13.dp))
-            .background(if (darkSurface) Palette.DeepNavy else Palette.Navy),
+            .background(if (darkSurface) Palette.DeepNavy else Color.Transparent),
         contentAlignment = Alignment.Center
     ) {
         Image(
             painter = painterResource(R.drawable.ic_shiftora_foreground),
-            contentDescription = "Shiftora",
+            contentDescription = null,
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -120,12 +121,14 @@ fun BrandedHeader(
     val fg = if (dark) Color.White else MaterialTheme.colorScheme.onBackground
     Column(
         Modifier.fillMaxWidth().background(background)
-            .padding(start = 18.dp, end = 16.dp, top = 10.dp, bottom = if (title == null) 12.dp else 14.dp)
+            .padding(start = 17.dp, end = 17.dp, top = 13.dp,
+                bottom = if (title == null) 12.dp else if (dark) 25.dp else 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            BrandMark(Modifier.size(38.dp), darkSurface = true)
-            Spacer(Modifier.width(10.dp))
-            Text("Shiftora", color = fg, fontWeight = FontWeight.Bold, fontSize = 23.sp)
+            BrandMark(Modifier.size(45.dp), darkSurface = dark)
+            Spacer(Modifier.width(8.dp))
+            Text("Shiftora", color = fg, fontWeight = FontWeight.ExtraBold,
+                fontSize = 26.sp, letterSpacing = (-0.65).sp)
             Spacer(Modifier.weight(1f))
             if (showSettings) {
                 IconButton(onClick = onSettings) {
@@ -138,11 +141,11 @@ fun BrandedHeader(
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                 Column(Modifier.weight(1f)) {
-                    Text(title, fontSize = 27.sp, lineHeight = 32.sp,
-                        fontWeight = FontWeight.Bold, color = fg)
+                    Text(title, fontSize = 30.sp, lineHeight = 36.sp,
+                        fontWeight = FontWeight.ExtraBold, color = fg)
                     if (subtitle != null) {
                         Spacer(Modifier.height(3.dp))
-                        Text(subtitle, fontSize = 13.sp,
+                        Text(subtitle, fontSize = 15.sp,
                             color = if (dark) Color(0xFFB8CEE9) else Palette.Secondary)
                     }
                 }
@@ -174,9 +177,9 @@ fun SurfaceCard(
 ) {
     Column(
         modifier = modifier
-            .shadow(4.dp, RoundedCornerShape(22.dp), ambientColor = Palette.Navy.copy(alpha = .05f))
-            .background(color, RoundedCornerShape(22.dp))
-            .padding(13.dp),
+            .shadow(5.dp, RoundedCornerShape(21.dp), ambientColor = Palette.Navy.copy(alpha = .09f))
+            .background(color, RoundedCornerShape(21.dp))
+            .padding(14.dp),
         content = content
     )
 }
@@ -185,7 +188,11 @@ fun SurfaceCard(
 fun SectionTitle(title: String, trailing: String? = null, onTrailing: () -> Unit = {}) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-        if (trailing != null) TextButton(onClick = onTrailing) { Text(trailing, color = Palette.Blue) }
+        if (trailing != null) TextButton(onClick = onTrailing) {
+            Text(trailing, color = MaterialTheme.colorScheme.primary)
+            Icon(Icons.Default.ChevronRight, contentDescription = null,
+                modifier = Modifier.size(17.dp))
+        }
     }
 }
 
@@ -261,14 +268,16 @@ fun MetricCard(label: String, value: String, icon: ImageVector, bg: Color, accen
 fun BlueAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: ImageVector = Icons.Default.Add) {
     Button(
         onClick = onClick,
-        modifier = modifier.heightIn(min = 52.dp),
+        modifier = modifier.heightIn(min = 54.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Palette.Blue),
         shape = RoundedCornerShape(14.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+        contentPadding = PaddingValues(horizontal = 11.dp, vertical = 9.dp)
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(5.dp))
-        Text(text, maxLines = 2, fontSize = 13.sp, lineHeight = 16.sp)
+        Text(text, maxLines = 2, fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold, lineHeight = 18.sp,
+            textAlign = TextAlign.Center)
     }
 }
 
