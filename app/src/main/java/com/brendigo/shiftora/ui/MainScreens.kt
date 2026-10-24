@@ -11,6 +11,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -286,14 +289,16 @@ fun CalendarScreen(
             Spacer(Modifier.height(spacing))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = {
-                    shownText = shown.minusMonths(1).toString()
-                    selectedText = YearMonth.parse(shownText).atDay(1).toString()
+                    val target = if (weekOnly) selected.minusWeeks(1) else shown.minusMonths(1).atDay(1)
+                    selectedText = target.toString()
+                    shownText = YearMonth.from(target).toString()
                 }) { Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodni mjesec") }
                 Text(shown.atDay(1).monthLabel(), style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                 IconButton(onClick = {
-                    shownText = shown.plusMonths(1).toString()
-                    selectedText = YearMonth.parse(shownText).atDay(1).toString()
+                    val target = if (weekOnly) selected.plusWeeks(1) else shown.plusMonths(1).atDay(1)
+                    selectedText = target.toString()
+                    shownText = YearMonth.from(target).toString()
                 }) { Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeći mjesec") }
             }
             Spacer(Modifier.height(4.dp))
@@ -311,17 +316,25 @@ fun CalendarScreen(
                         val entries = shiftsByDate[date].orEmpty()
                         val entry = entries.firstOrNull()
                         val inMonth = YearMonth.from(date) == shown
-                        // A filled day tile shows the code clearly: D/N/J/P/GO/BO/SD/PD/PR.
-                        // Selection remains a border so it never hides the chosen shift color.
+                        val today = date == LocalDate.now()
                         val tileColor = if (entry != null) shiftColor(entry.kind)
                             else if (chosen) Palette.BlueLight else Color.Transparent
                         val tileText = if (tileColor.luminance() > .48f) Palette.Navy else Color.White
+                        val details = if (entries.isEmpty()) "Nema smjene"
+                            else entries.joinToString(", ") { "${it.kind.code}: ${it.kind.label}" }
                         Box(
                             Modifier.weight(1f).padding(2.dp).height(dayHeight)
                                 .clip(RoundedCornerShape(11.dp))
                                 .background(tileColor)
-                                .then(if (chosen) Modifier.border(2.dp, Palette.Navy,
-                                    RoundedCornerShape(11.dp)) else Modifier)
+                                .then(when {
+                                    chosen -> Modifier.border(2.dp, Palette.Navy, RoundedCornerShape(11.dp))
+                                    today -> Modifier.border(2.dp, Palette.Mint, RoundedCornerShape(11.dp))
+                                    else -> Modifier
+                                })
+                                .semantics {
+                                    contentDescription = "${date.dateLabel()}. $details"
+                                    selected = chosen
+                                }
                                 .clickable {
                                     selectedText = date.toString()
                                     shownText = YearMonth.from(date).toString()
@@ -331,18 +344,22 @@ fun CalendarScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center) {
                                 Text(date.dayOfMonth.toString(),
-                                    color = if (entry != null) tileText.copy(alpha = .86f)
+                                    color = if (entry != null) tileText.copy(alpha = .9f)
                                         else if (inMonth) MaterialTheme.colorScheme.onSurface
                                         else Palette.Secondary.copy(alpha = .5f),
-                                    fontWeight = FontWeight.Medium, fontSize = 10.sp,
-                                    lineHeight = 13.sp)
-                                if (entry != null) {
-                                    Text(entry.kind.code, color = tileText,
-                                        fontSize = if (entry.kind.code.length > 1) 16.sp else 24.sp,
-                                        lineHeight = 26.sp, fontWeight = FontWeight.ExtraBold,
-                                        maxLines = 1)
-                                    if (entries.size > 1) {
-                                        Text("+${entries.size - 1}", color = tileText,
+                                    fontWeight = if (today) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 10.sp, lineHeight = 12.sp)
+                                if (entries.isNotEmpty()) {
+                                    entries.take(2).forEach { shift ->
+                                        Text(shift.kind.code, color = tileText,
+                                            fontSize = if (entries.size == 1)
+                                                (if (shift.kind.code.length > 1) 16.sp else 23.sp)
+                                            else 13.sp,
+                                            lineHeight = if (entries.size == 1) 25.sp else 16.sp,
+                                            fontWeight = FontWeight.ExtraBold, maxLines = 1)
+                                    }
+                                    if (entries.size > 2) {
+                                        Text("+${entries.size - 2}", color = tileText,
                                             fontSize = 9.sp, lineHeight = 10.sp)
                                     }
                                 } else {
@@ -473,13 +490,15 @@ private fun DetailTile(label: String, value: String, modifier: Modifier = Modifi
 
 @Composable
 fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () -> Unit) {
-    var shown by remember { mutableStateOf(YearMonth.now()) }
-    var period by remember { mutableIntStateOf(1) }
-    var weekAnchor by remember {
+    var shownText by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
+    val shown = YearMonth.parse(shownText)
+    var period by rememberSaveable { mutableIntStateOf(1) }
+    var weekAnchorText by rememberSaveable {
         mutableStateOf(LocalDate.now().with(
             TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)
-        ))
+        ).toString())
     }
+    val weekAnchor = LocalDate.parse(weekAnchorText)
     val rangeStart = when (period) {
         0 -> weekAnchor
         2 -> LocalDate.of(shown.year, 1, 1)
@@ -528,8 +547,8 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = {
-                        if (period == 0) weekAnchor = weekAnchor.minusWeeks(1)
-                        else shown = shown.minusMonths(if (period == 2) 12 else 1)
+                        if (period == 0) weekAnchorText = weekAnchor.minusWeeks(1).toString()
+                        else shownText = shown.minusMonths(if (period == 2) 12 else 1).toString()
                     }) {
                         Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodno razdoblje")
                     }
@@ -542,8 +561,8 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                         style = MaterialTheme.typography.titleMedium, maxLines = 1,
                         overflow = TextOverflow.Ellipsis)
                     IconButton(onClick = {
-                        if (period == 0) weekAnchor = weekAnchor.plusWeeks(1)
-                        else shown = shown.plusMonths(if (period == 2) 12 else 1)
+                        if (period == 0) weekAnchorText = weekAnchor.plusWeeks(1).toString()
+                        else shownText = shown.plusMonths(if (period == 2) 12 else 1).toString()
                     }) {
                         Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeće razdoblje")
                     }
@@ -593,7 +612,8 @@ fun SalaryScreen(
     shifts: List<Shift>, settings: SalarySettings,
     onEditSalary: () -> Unit, onSettings: () -> Unit
 ) {
-    var month by remember { mutableStateOf(YearMonth.now()) }
+    var monthText by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
+    val month = YearMonth.parse(monthText)
     val totals = remember(shifts, settings, month) {
         WorkCalculator.calculatePeriod(shifts, settings, month.atDay(1), month.plusMonths(1).atDay(1))
     }
@@ -602,12 +622,12 @@ fun SalaryScreen(
         LazyColumn(contentPadding = PaddingValues(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton({ month = month.minusMonths(1) }) {
+                    IconButton({ monthText = month.minusMonths(1).toString() }) {
                         Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodni mjesec")
                     }
                     Text(month.atDay(1).monthLabel(), Modifier.weight(1f),
                         textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
-                    IconButton({ month = month.plusMonths(1) }) {
+                    IconButton({ monthText = month.plusMonths(1).toString() }) {
                         Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeći mjesec")
                     }
                 }
