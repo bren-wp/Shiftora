@@ -55,26 +55,50 @@ assert_app_foreground() {
     exit 1
   fi
 }
+assert_screen_text() {
+  local expected="$1"
+  adb shell uiautomator dump /sdcard/shiftora-uia.xml >/dev/null 2>&1
+  adb exec-out cat /sdcard/shiftora-uia.xml > /tmp/shiftora-uia.xml
+  if ! python3 - "$expected" <<'PY'
+import sys
+import xml.etree.ElementTree as ET
+root = ET.parse("/tmp/shiftora-uia.xml").getroot()
+expected = sys.argv[1]
+if not any(expected in n.get("text","") or expected in n.get("content-desc","")
+           for n in root.iter("node")):
+    print("Expected screen label not visible:", expected, file=sys.stderr)
+    sys.exit(1)
+PY
+  then
+    echo "Screenshot navigation failed on: $expected" >&2
+    exit 1
+  fi
+}
 if tap_label "Preskoči"; then
   sleep 3
 fi
 assert_app_foreground
+assert_screen_text "Danas je"
 adb exec-out screencap -p > "shiftora-${device}-home.png"
 tap_label "Kalendar" || adb shell input tap $((width * 3 / 10)) "$nav_y"
 sleep 2
 assert_app_foreground
+assert_screen_text "Mjesec"
 adb exec-out screencap -p > "shiftora-${device}-calendar.png"
 tap_label "Statistika" || adb shell input tap $((width / 2)) "$nav_y"
 sleep 2
 assert_app_foreground
+assert_screen_text "Statistika i plaća"
 adb exec-out screencap -p > "shiftora-${device}-statistics.png"
 tap_label "Plaća" || adb shell input tap $((width * 7 / 10)) "$nav_y"
 sleep 2
 assert_app_foreground
+assert_screen_text "Pregled radnih sati i dodataka."
 adb exec-out screencap -p > "shiftora-${device}-salary.png"
 tap_label "Više" || adb shell input tap $((width * 9 / 10)) "$nav_y"
 sleep 2
 assert_app_foreground
+assert_screen_text "Alati"
 adb exec-out screencap -p > "shiftora-${device}-more.png"
 for kind in onboarding home calendar statistics salary more; do
   test -s "shiftora-${device}-${kind}.png"
