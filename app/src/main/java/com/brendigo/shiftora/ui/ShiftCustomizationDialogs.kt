@@ -9,11 +9,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,12 +89,25 @@ fun ShiftColorSettingsDialog(
                 swatches.chunked(5).forEach { group ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         group.forEach { value ->
-                            Box(Modifier.size(42.dp).clip(CircleShape)
+                            Box(Modifier.size(48.dp).clip(CircleShape)
                                 .background(Color(value))
-                                .border(2.dp,
+                                .border(3.dp,
                                     if (colors[selected] == value) MaterialTheme.colorScheme.onSurface
                                     else Color.Transparent, CircleShape)
-                                .clickable { onChange(selected, value) })
+                                .semantics {
+                                    contentDescription = "Boja " +
+                                        String.format("#%06X", value and 0xFFFFFF)
+                                }
+                                .clickable { onChange(selected, value) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (colors[selected] == value) {
+                                    Icon(Icons.Default.Check, contentDescription = null,
+                                        tint = if (Color(value).luminance() > .3f) Color.Black
+                                            else Color.White,
+                                        modifier = Modifier.size(22.dp))
+                                }
+                            }
                         }
                     }
                 }
@@ -96,6 +116,7 @@ fun ShiftColorSettingsDialog(
                     onValueChange = { hex = it.take(7) },
                     label = { Text("Vlastita HEX boja (#RRGGBB)") },
                     singleLine = true, modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
                     supportingText = {
                         Text("Možeš unijeti bilo koju šestereroznamenkastu RGB boju.")
                     }
@@ -150,6 +171,7 @@ fun MonthlyFundEditor(
                         label = { Text("Sati") },
                         suffix = { Text("h") },
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         isError = parsedFund == null,
                         modifier = Modifier.weight(1f)
                     )
