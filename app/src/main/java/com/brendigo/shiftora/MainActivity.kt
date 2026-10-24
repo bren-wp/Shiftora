@@ -172,13 +172,15 @@ class MainActivity : ComponentActivity() {
                                     NavigationBarItem(
                                         selected = tab == index,
                                         onClick = { tab = index },
-                                        icon = { Icon(option.second, contentDescription = option.first) },
+                                        icon = { Icon(option.second, contentDescription = null) },
                                         label = { Text(option.first, maxLines = 1) },
                                         alwaysShowLabel = true,
                                         colors = NavigationBarItemDefaults.colors(
-                                            selectedIconColor = Palette.Blue,
-                                            selectedTextColor = Palette.Blue,
-                                            indicatorColor = Palette.BlueLight
+                                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            indicatorColor = MaterialTheme.colorScheme.primaryContainer
                                         )
                                     )
                                 }
