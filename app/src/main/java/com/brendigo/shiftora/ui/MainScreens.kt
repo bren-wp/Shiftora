@@ -167,39 +167,30 @@ fun HomeScreen(
             item {
                 SectionTitle("Brze akcije")
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    if (maxWidth < 340.dp) {
+                    if (maxWidth < 355.dp) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            BlueAction("Dodaj smjenu", { onAdd(today) }, Modifier.fillMaxWidth())
+                            HomeQuickAction("Dodaj smjenu", Icons.Default.Add, Palette.Blue,
+                                Color.White, Modifier.fillMaxWidth()) { onAdd(today) }
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                OutlinedButton(onClick = { onTrack(today) }, modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(14.dp)) {
-                                    Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Evidentiraj sate", maxLines = 2)
-                                }
-                                OutlinedButton(onClick = { onTab(3) }, modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(14.dp)) {
-                                    Icon(Icons.Default.Calculate, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(4.dp))
-                                    Text("Izračunaj plaću", maxLines = 2)
-                                }
+                                HomeQuickAction("Evidentiraj sate", Icons.Default.Schedule,
+                                    Palette.BlueLight, Palette.Blue,
+                                    Modifier.weight(1f)) { onTrack(today) }
+                                HomeQuickAction("Izračunaj plaću", Icons.Default.Calculate,
+                                    Palette.MintLight, Color(0xFF087D64),
+                                    Modifier.weight(1f)) { onTab(3) }
                             }
                         }
                     } else {
-                        Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                            BlueAction("Dodaj smjenu", { onAdd(today) }, Modifier.weight(1f))
-                            OutlinedButton(onClick = { onTrack(today) }, modifier = Modifier.weight(1f).heightIn(min = 54.dp),
-                                shape = RoundedCornerShape(14.dp), contentPadding = PaddingValues(horizontal = 7.dp)) {
-                                Icon(Icons.Default.Schedule, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("Evidentiraj sate", fontSize = 12.sp, maxLines = 2)
-                            }
-                            OutlinedButton(onClick = { onTab(3) }, modifier = Modifier.weight(1f).heightIn(min = 54.dp),
-                                shape = RoundedCornerShape(14.dp), contentPadding = PaddingValues(horizontal = 7.dp)) {
-                                Icon(Icons.Default.Calculate, contentDescription = null, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("Izračunaj plaću", fontSize = 12.sp, maxLines = 2)
-                            }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            HomeQuickAction("Dodaj smjenu", Icons.Default.Add,
+                                Palette.Blue, Color.White,
+                                Modifier.weight(1f)) { onAdd(today) }
+                            HomeQuickAction("Evidentiraj sate", Icons.Default.Schedule,
+                                Palette.BlueLight, Palette.Blue,
+                                Modifier.weight(1f)) { onTrack(today) }
+                            HomeQuickAction("Izračunaj plaću", Icons.Default.Calculate,
+                                Palette.MintLight, Color(0xFF087D64),
+                                Modifier.weight(1f)) { onTab(3) }
                         }
                     }
                 }
@@ -907,5 +898,26 @@ private fun HomeSalaryOverview(
         Text(euros(grossCents), fontWeight = FontWeight.Bold, color = Palette.Ink,
             fontSize = 23.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(month.atDay(1).monthLabel(), color = Palette.Secondary, fontSize = 12.sp)
+    }
+}
+
+@Composable
+private fun HomeQuickAction(
+    text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    background: Color,
+    foreground: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Row(modifier.heightIn(min = 65.dp).clip(RoundedCornerShape(18.dp))
+        .background(background).clickable(onClick = onClick)
+        .padding(horizontal = 9.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = foreground,
+            modifier = Modifier.size(25.dp))
+        Text(text, color = foreground, fontWeight = FontWeight.Bold,
+            fontSize = 12.sp, lineHeight = 15.sp, maxLines = 2)
     }
 }
