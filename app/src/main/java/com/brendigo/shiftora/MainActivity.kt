@@ -11,6 +11,19 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -134,8 +147,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
             SideEffect {
+                val whiteStatus = !darkMode && !onboarding && tab == 0
+                val status = if (whiteStatus) android.graphics.Color.WHITE
+                    else android.graphics.Color.rgb(11, 31, 59)
+                window.statusBarColor = status
                 WindowCompat.getInsetsController(window, window.decorView).apply {
-                    isAppearanceLightStatusBars = false
+                    isAppearanceLightStatusBars = whiteStatus
                     isAppearanceLightNavigationBars = !darkMode
                 }
             }
@@ -164,25 +181,36 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         snackbarHost = { SnackbarHost(snackbars) },
                         bottomBar = {
-                            NavigationBar(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                tonalElevation = androidx.compose.ui.unit.Dp.Unspecified
+                            Row(
+                                Modifier.fillMaxWidth().background(
+                                    MaterialTheme.colorScheme.surface,
+                                    RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp)
+                                ).padding(start = 9.dp, end = 9.dp, top = 7.dp, bottom = 3.dp),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 sections.forEachIndexed { index, option ->
-                                    NavigationBarItem(
-                                        selected = tab == index,
-                                        onClick = { tab = index },
-                                        icon = { Icon(option.second, contentDescription = null) },
-                                        label = { Text(option.first, maxLines = 1) },
-                                        alwaysShowLabel = true,
-                                        colors = NavigationBarItemDefaults.colors(
-                                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                                        )
-                                    )
+                                    val active = tab == index
+                                    val ink = if (active) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    Column(
+                                        Modifier.weight(1f).heightIn(min = 65.dp)
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(if (active)
+                                                MaterialTheme.colorScheme.primaryContainer
+                                                else Color.Transparent)
+                                            .semantics { selected = active }
+                                            .clickable(role = Role.Tab) { tab = index }
+                                            .padding(vertical = 7.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(option.second, contentDescription = null,
+                                            tint = ink, modifier = Modifier.size(24.dp))
+                                        Spacer(Modifier.height(4.dp))
+                                        Text(option.first, maxLines = 1, color = ink,
+                                            fontSize = 11.sp, fontWeight = if (active)
+                                                FontWeight.Bold else FontWeight.Medium)
+                                    }
                                 }
                             }
                         }
