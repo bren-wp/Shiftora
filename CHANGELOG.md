@@ -1,5 +1,19 @@
 # Povijest izdanja
 
+## 0.9.2 — 25. 10. 2026. | Poliranje korisničkog sučelja i pristupačnosti
+
+- Ažurirana je prilagodljiva ikona aplikacije prema službenom Shiftora S/sat logotipu. Dodana je jednobojna Android themed-icon varijanta.
+- Kalendar čitljivije prikazuje **dvije smjene na istom datumu** i označuje dodatne unose. Uvedeni su opisi za čitače zaslona, posebna oznaka današnjeg datuma i odabranog dana te kontrastniji tekst na svim korisničkim bojama.
+- Navigacija u tjednom kalendaru pomiče se točno **sedam dana**, umjesto da preskače cijeli mjesec.
+- Odabrano statističko razdoblje, tjedan i mjesec plaće čuvaju se pri promjeni kartica i ponovno stvaranju prikaza.
+- Početni sažeci sati i plaće prilagođeni su uskim zaslonima; redci smjena ne preklapaju vrijeme, datum, oznake i strelicu.
+- Poboljšani su donja navigacija, ikone, dodirne površine, tamna tema i čitljivost statističkih indikatora.
+- Dijalozi imaju preglednije kontrole, brojčane tipkovnice, veće tipke za uklanjanje dana iz ciklusa te odabir datuma za rotaciju.
+- Uređen je prikaz uvođenja korisnika na manjim i vodoravnim zaslonima.
+- Dodani su Android UI regresijski testovi za istovremene oznake smjena i tjednu navigaciju.
+
+**Napomena:** izvorne korisničke referentne slike nisu dostupne u repozitoriju; zato ovo izdanje ne tvrdi potvrđenu piksel-po-piksel (1:1) podudarnost. Nisu mijenjane SQLite shema ni korisnički rasporedi.
+
 ## 0.9.1 — 19. 10. 2026. | Pouzdanije sigurnosne kopije i zaštita arhive
 
 - JSON uvoz više ne vraća automatski smjene na datume koje je korisnik ranije arhivirao. Vraćanje arhive i dalje se pokreće izričito.
