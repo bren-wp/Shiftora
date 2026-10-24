@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 13+ themed monochrome launcher icon, matching the official S-clock mark. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:pathData="M75,32 C59,19 33,26 31,43 C30,56 55,58 63,68 C68,77 49,82 33,69"
+    <path android:pathData="M76,32 C60,22 38,22 32,36 C26,48 36,53 52,58 C67,62 73,68 69,77 C64,88 44,88 32,76"
         android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="13" android:strokeLineCap="round" android:strokeLineJoin="round"/>
-    <!-- Only alpha defines Android's themed icon. A hollow ring preserves the clock hands. -->
-    <path android:pathData="M65,76 a10,10 0,1 0,20 0 a10,10 0,1 0,-20 0"
+        android:strokeWidth="14" android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+    <path android:pathData="M65,72 a11,11 0,1 0,22 0 a11,11 0,1 0,-22 0"
         android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="3"/>
-    <path android:pathData="M75,69 L75,76 L80,79"
+        android:strokeWidth="3.1"/>
+    <path android:pathData="M76,65 L76,72 L81,75"
         android:fillColor="#00000000" android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="2.8" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+        android:strokeWidth="2.8" android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
 </vector>

@@ -1,5 +1,18 @@
 # Povijest izdanja
 
+## 0.9.3 — 25. 10. 2026. | Vizualno usklađivanje s referentnim zaslonima
+
+- Redizajnirani su zajednički elementi: Shiftora znak, zaglavlja, zaobljene bijele površine ispod tamnih zaglavlja, kartice, natpisi i plavi/menta tonovi.
+- Donja navigacija prikazuje zaobljenu podlogu cijele aktivne kartice (ikona i natpis), kao na priloženoj referenci; raspored i svih pet funkcionalnih odredišta ostaju sačuvani.
+- Kalendar sada koristi nježne pastelne pločice, simboličke ikone za standardne smjene, plavo označen odabrani datum te dodatne oznake i opise za višestruke unose. Fond sati ostaje dostupan ispod dnevnih detalja.
+- Statistika dobiva svjetlu zaobljenu radnu površinu, veći kružni graf s udjelima, čitljivije obojene KPI kartice, istaknut informativni bruto iznos i otvorenu karticu objašnjenja s stvarnim satima i postocima.
+- Početna dobiva tri brze akcije u plavom/svijetloplavom/zelenom stilu te puni naziv smjene kad širina zaslona to dopušta.
+- Onboarding zadržava tri funkcionalna koraka i može se preskočiti, ali ima ilustrirane preglede kalendara, rasporeda i procjene plaće izrađene kao nativne Compose komponente.
+- Adaptivna ikona koristi osvježeni vlastiti S+satić simbol bez dodatnog rasteriziranog sadržaja; usklađena je i jednobojna varijanta za tematske ikone.
+- Poboljšana je Android emulator skripta: upravlja stvarnim tekstnim/semantičkim elementima, ne samo fiksnim koordinatama.
+
+**Granice:** dostavljene slike su dizajnerske reference, ne stvarne snimke izvođenja aplikacije. Podudarnost 1:1 zahtijeva usporedbu izvornih snimki uređaja i test na fizičkim telefonima. Izmišljeni neto iznosi i izmišljene smjene iz mockupa nisu uneseni u korisničke podatke. SQLite shema, paket aplikacije i pravila očuvanja podataka nisu mijenjani.
+
 ## 0.9.2 — 25. 10. 2026. | Poliranje korisničkog sučelja i pristupačnosti
 
 - Ažurirana je prilagodljiva ikona aplikacije prema službenom Shiftora S/sat logotipu. Dodana je jednobojna Android themed-icon varijanta.
