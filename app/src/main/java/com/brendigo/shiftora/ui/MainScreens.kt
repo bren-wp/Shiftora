@@ -286,7 +286,7 @@ fun CalendarScreen(
             RoundedCornerShape(topStart = 27.dp, topEnd = 27.dp)
         ).background(MaterialTheme.colorScheme.surface)) {
         val compact = maxHeight < 715.dp
-        val dayHeight = if (compact) 47.dp else 54.dp
+        val dayHeight = if (compact) 50.dp else 56.dp
         val spacing = if (compact) 7.dp else 11.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 19.dp)) {
@@ -428,7 +428,7 @@ fun CalendarScreen(
             // line. Keep every special status discoverable without crowding the
             // selected-day detail below the month grid.
             TextButton(onClick = { showAllLegend = !showAllLegend },
-                modifier = Modifier.align(Alignment.End).heightIn(min = 40.dp),
+                modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp),
                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)) {
                 Text(if (showAllLegend) "Sakrij dodatne oznake" else "Ostale oznake",
                     fontSize = 11.sp)
@@ -497,7 +497,7 @@ fun CalendarScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically) {
                             OutlinedButton(onClick = { onEdit(shift) },
-                                modifier = Modifier.weight(1f).heightIn(min = 46.dp),
+                                modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                                 contentPadding = PaddingValues(horizontal = 6.dp),
                                 shape = RoundedCornerShape(13.dp)) {
                                 Icon(Icons.Default.Edit, contentDescription = null,
