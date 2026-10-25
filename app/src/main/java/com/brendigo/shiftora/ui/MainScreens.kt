@@ -279,6 +279,7 @@ fun CalendarScreen(
     val context = LocalContext.current
     var weekOnly by rememberSaveable { mutableStateOf(false) }
     var showAllLegend by rememberSaveable { mutableStateOf(false) }
+    var dayMenuOpen by remember { mutableStateOf(false) }
     var fundEditorOpen by remember { mutableStateOf(false) }
     val detailRequester = remember { BringIntoViewRequester() }
     var revealDetail by remember { mutableStateOf(false) }
@@ -385,7 +386,7 @@ fun CalendarScreen(
                         val details = if (entries.isEmpty()) "Nema smjene"
                             else entries.joinToString(", ") { "${it.kind.code}: ${it.kind.label}" }
                         Box(
-                            Modifier.weight(1f).padding(1.dp).height(dayHeight)
+                            Modifier.weight(1f).padding(horizontal = 2.dp, vertical = 2.dp).height(dayHeight)
                                 .clip(RoundedCornerShape(11.dp))
                                 .background(tileColor)
                                 .then(if (today && !chosen)
@@ -483,10 +484,20 @@ fun CalendarScreen(
                     }
                 }
             }
-            // The supplied calendar reference shows the four main colors on one
-            // line. Keep every special status discoverable without crowding the
-            // selected-day detail below the month grid.
-             if (showAllLegend) {
+            // Keep secondary statuses discoverable outside the date title row.
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(
+                    onClick = { showAllLegend = !showAllLegend },
+                    modifier = Modifier.heightIn(min = 42.dp)
+                ) {
+                    Text(if (showAllLegend) "Sakrij oznake" else "Ostale oznake",
+                        fontSize = 11.sp)
+                    Icon(if (showAllLegend) Icons.Default.ExpandLess
+                        else Icons.Default.ExpandMore,
+                        contentDescription = null, modifier = Modifier.size(17.dp))
+                }
+            }
+            if (showAllLegend) {
                 Column(Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     ShiftKind.calendarOrder.chunked(5).forEach { kinds ->
@@ -519,19 +530,39 @@ fun CalendarScreen(
             ) {
                 Row(Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text(selected.dateLabel(), Modifier.weight(1f),
+                    Text(
+                        selected.weekdayLabel().replaceFirstChar {
+                            it.uppercase(Locale("hr", "HR"))
+                        } + ", " + selected.dateLabel(),
+                        Modifier.weight(1f),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp, maxLines = 2)
-                    TextButton(
-                        onClick = { showAllLegend = !showAllLegend },
-                        modifier = Modifier.heightIn(min = 48.dp),
-                        contentPadding = PaddingValues(horizontal = 3.dp)
-                    ) {
-                        Text(if (showAllLegend) "Sakrij oznake" else "Ostale oznake",
-                            fontSize = 11.sp)
-                        Icon(if (showAllLegend) Icons.Default.ExpandLess
-                            else Icons.Default.ExpandMore,
-                            contentDescription = null, modifier = Modifier.size(17.dp))
+                        fontSize = 13.sp, lineHeight = 18.sp, maxLines = 2
+                    )
+                    Box {
+                        IconButton(onClick = { dayMenuOpen = true }) {
+                            Icon(Icons.Default.MoreVert,
+                                contentDescription = "Radnje za odabrani dan")
+                        }
+                        DropdownMenu(expanded = dayMenuOpen,
+                            onDismissRequest = { dayMenuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Dodaj smjenu") },
+                                leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                                onClick = {
+                                    dayMenuOpen = false
+                                    onAdd(selected)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Povratak na danas") },
+                                leadingIcon = { Icon(Icons.Default.Today, contentDescription = null) },
+                                onClick = {
+                                    dayMenuOpen = false
+                                    selectedText = LocalDate.now().toString()
+                                    shownText = YearMonth.now().toString()
+                                }
+                            )
+                        }
                     }
                 }
                 Spacer(Modifier.height(3.dp))
