@@ -7,6 +7,7 @@
 - I zaglavlja **Statistike** i **Plaće** sada omogućuju izravan odabir razdoblja/mjeseca, uz zadržane strelice za brzo kretanje.
 - Četiri glavne boje smjena čitljivije su u legendi Kalendara; na užim telefonima i s povećanim fontom prikazuju se u dva reda, bez rezanja naziva. Prazan prostor u mreži je smanjen, a gumb za dodatne oznake premješten je u zaglavlje kartice dana kako bi kartica i njezine akcije bile vidljivije.
 - Tri informacijske pločice odabranog dana zadržavaju referentni trostupčani raspored kad ima mjesta, ali se na manjim ekranima preslaguju u dva stupca plus bilješka pune širine.
+- KPI kartice Statistike imaju kompaktniji raspored ikone, naslova, sati i indikatora promjene kako se više podataka vidi iznad donje navigacije.
 - Donja navigacija više ne **smanjuje font na 9sp** kada je korisnik povećao sistemsku veličinu teksta. Oznake zadržavaju čitljivu veličinu, dopuštena su dva retka te veća visina dodirne površine.
 - U dijalogu za boje smjena povećane su tekstne oznake i dodirne površine; paleta se prilagođava širini s četiri ili pet boja u retku, a odabir svake vrste smjene čitljiv je za TalkBack.
 - Dodane instrumentacijske regresijske provjere prisutnosti odabira mjeseca i razdoblja na svim relevantnim ekranima.
