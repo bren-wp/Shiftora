@@ -1,6 +1,9 @@
 package com.brendigo.shiftora
 
 import androidx.compose.ui.test.onNodeWithText
+import androidx.core.view.WindowCompat
+import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsNotSelected
@@ -36,8 +39,18 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Mjesec").performClick()
         compose.onNodeWithText("Početna").performClick()
         compose.onNodeWithText("Danas je").assertExists()
+        compose.runOnIdle {
+            val w = compose.activity.window
+            assertTrue("Home status icons must be dark on the light header",
+                WindowCompat.getInsetsController(w, w.decorView).isAppearanceLightStatusBars)
+        }
         compose.onNodeWithText("Kalendar").performClick()
         compose.onNodeWithText("Mjesec").assertExists()
+        compose.runOnIdle {
+            val w = compose.activity.window
+            assertFalse("Calendar status icons must be light on the navy header",
+                WindowCompat.getInsetsController(w, w.decorView).isAppearanceLightStatusBars)
+        }
         compose.onNodeWithContentDescription("Odaberi datum u kalendaru").assertExists()
         val nextMonth = YearMonth.now().plusMonths(1).atDay(1).monthLabel()
         compose.onNodeWithContentDescription("Sljedeći mjesec").performClick()
