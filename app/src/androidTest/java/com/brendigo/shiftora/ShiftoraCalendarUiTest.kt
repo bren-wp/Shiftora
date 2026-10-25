@@ -74,8 +74,9 @@ class ShiftoraCalendarUiTest {
                     onSettings = {})
             }
         }
-        compose.onNodeWithText("Ostale oznake").performScrollTo().performClick()
-        compose.onNodeWithText("Sakrij oznake").assertExists()
+        compose.onNodeWithContentDescription("Ostale oznake")
+            .performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Sakrij oznake").assertExists()
         compose.onNodeWithContentDescription("Radnje za odabrani dan")
             .performScrollTo().performClick()
         // One action is in the date menu; the other is the date-card CTA.
