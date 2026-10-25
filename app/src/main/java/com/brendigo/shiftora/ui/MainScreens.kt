@@ -643,39 +643,67 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
             }
             item { ShiftDonutCard(totals) }
             item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatIndicatorCard(
-                        "Odrađeni sati", minutesLabel(totals.actualMinutes),
-                        Icons.Default.Schedule, Palette.BlueLight, Palette.Blue,
-                        totals.actualMinutes, previous.actualMinutes, Modifier.weight(1f),
-                        "Planirano: " + minutesLabel(totals.plannedMinutes)
-                    )
-                    StatIndicatorCard(
-                        "Prekovremeni", minutesLabel(totals.overtimeMinutes),
-                        Icons.Default.AddCircle, Palette.AmberLight, Palette.Amber,
-                        totals.overtimeMinutes, previous.overtimeMinutes, Modifier.weight(1f)
-                    )
-                }
+                ResponsiveStatPair(
+                    first = { m ->
+                        StatIndicatorCard(
+                            "Odrađeni sati", minutesLabel(totals.actualMinutes),
+                            Icons.Default.Schedule, Palette.BlueLight, Palette.Blue,
+                            totals.actualMinutes, previous.actualMinutes, m,
+                            "Planirano: " + minutesLabel(totals.plannedMinutes)
+                        )
+                    },
+                    second = { m ->
+                        StatIndicatorCard(
+                            "Prekovremeni", minutesLabel(totals.overtimeMinutes),
+                            Icons.Default.AddCircle, Palette.AmberLight, Palette.Amber,
+                            totals.overtimeMinutes, previous.overtimeMinutes, m
+                        )
+                    }
+                )
             }
             item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatIndicatorCard(
-                        "Noćni rad", minutesLabel(totals.nightMinutes),
-                        Icons.Default.NightsStay, Palette.PurpleLight, Palette.Purple,
-                        totals.nightMinutes, previous.nightMinutes, Modifier.weight(1f)
-                    )
-                    StatIndicatorCard(
-                        "Nedjelje / blagdani",
-                        minutesLabel(totals.specialMinutes),
-                        Icons.Default.Event, Palette.CoralLight, Palette.Coral,
-                        totals.specialMinutes, previous.specialMinutes, Modifier.weight(1f),
-                        "Ned: " + minutesLabel(totals.sundayMinutes) +
-                            " · Blag: " + minutesLabel(totals.holidayMinutes)
-                    )
-                }
+                ResponsiveStatPair(
+                    first = { m ->
+                        StatIndicatorCard(
+                            "Noćni rad", minutesLabel(totals.nightMinutes),
+                            Icons.Default.NightsStay, Palette.PurpleLight, Palette.Purple,
+                            totals.nightMinutes, previous.nightMinutes, m
+                        )
+                    },
+                    second = { m ->
+                        StatIndicatorCard(
+                            "Nedjelje / blagdani", minutesLabel(totals.specialMinutes),
+                            Icons.Default.Event, Palette.CoralLight, Palette.Coral,
+                            totals.specialMinutes, previous.specialMinutes, m,
+                            "Ned: " + minutesLabel(totals.sundayMinutes) +
+                                " · Blag: " + minutesLabel(totals.holidayMinutes)
+                        )
+                    }
+                )
             }
             item { SalaryStatsCard(totals, previous) }
             item { StatsExplanation(totals, settings) }
+        }
+    }
+}
+
+/** Keep the reference's two-column KPI grid until each card would be unreadable. */
+@Composable
+private fun ResponsiveStatPair(
+    first: @Composable (Modifier) -> Unit,
+    second: @Composable (Modifier) -> Unit
+) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        if (maxWidth < 330.dp) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                first(Modifier.fillMaxWidth())
+                second(Modifier.fillMaxWidth())
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                first(Modifier.weight(1f))
+                second(Modifier.weight(1f))
+            }
         }
     }
 }
