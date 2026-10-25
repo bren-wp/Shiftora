@@ -420,11 +420,19 @@ fun CalendarScreen(
                                             ShiftKind.NIGHT, ShiftKind.OFF, ShiftKind.DAY
                                         )
                                     ) {
-                                        Icon(shiftIcon(entries.first().kind),
-                                            contentDescription = null,
-                                            tint = if (chosen) Color.White
-                                                else shiftColor(entries.first().kind),
-                                            modifier = Modifier.size(16.dp))
+                                        val kind = entries.first().kind
+                                        if (!chosen && (kind == ShiftKind.MORNING ||
+                                                kind == ShiftKind.AFTERNOON)) {
+                                            // Reference month grid: compact colored dots for
+                                            // morning/afternoon, icons for night/free days.
+                                            Box(Modifier.size(8.dp).clip(CircleShape)
+                                                .background(shiftColor(kind)))
+                                        } else {
+                                            Icon(shiftIcon(kind),
+                                                contentDescription = null,
+                                                tint = if (chosen) Color.White else shiftColor(kind),
+                                                modifier = Modifier.size(16.dp))
+                                        }
                                     } else {
                                         Text(entries.first().kind.code,
                                             fontSize = 10.sp, lineHeight = 15.sp,
