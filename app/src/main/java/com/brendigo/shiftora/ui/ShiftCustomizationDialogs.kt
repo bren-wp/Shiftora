@@ -57,7 +57,7 @@ fun ShiftColorSettingsDialog(
         onDismissRequest = onDismiss,
         title = { Text("Boje i oznake smjena") },
         text = {
-            Column(Modifier.fillMaxWidth().heightIn(max = 460.dp)
+            Column(Modifier.fillMaxWidth().heightIn(max = adaptiveDialogBodyHeight(460.dp))
                 .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Odaberi oznaku. Boja se odmah primjenjuje na cijeli kalendar.",
