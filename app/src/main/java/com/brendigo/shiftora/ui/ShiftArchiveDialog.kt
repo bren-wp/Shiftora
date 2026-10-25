@@ -27,7 +27,7 @@ fun ShiftArchiveDialog(
         title = { Text("Arhiva rasporeda") },
         text = {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().heightIn(max = 480.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(max = adaptiveDialogBodyHeight(480.dp)),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = 8.dp)
             ) {
