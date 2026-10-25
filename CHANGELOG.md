@@ -1,5 +1,18 @@
 # Povijest izdanja
 
+## 0.9.7 — 25. 10. 2026. | Preciznija navigacija, tipografija i male rezolucije
+
+- **Kalendar ostaje početni ekran** nakon splash zaslona, a Početna zasebna kartica.
+- Naslov mjeseca u Kalendaru sada otvara stvarni Androidov odabir datuma. Odabirom datuma prikazuje se taj mjesec i odabrani dan, a detalji smjene postaju dostupni bez traženja kroz dugačak prikaz.
+- I zaglavlja **Statistike** i **Plaće** sada omogućuju izravan odabir razdoblja/mjeseca, uz zadržane strelice za brzo kretanje.
+- Četiri glavne boje smjena čitljivije su u legendi Kalendara; na užim telefonima i s povećanim fontom prikazuju se u dva reda, bez rezanja naziva.
+- Tri informacijske pločice odabranog dana zadržavaju referentni trostupčani raspored kad ima mjesta, ali se na manjim ekranima preslaguju u dva stupca plus bilješka pune širine.
+- Donja navigacija više ne **smanjuje font na 9sp** kada je korisnik povećao sistemsku veličinu teksta. Oznake zadržavaju čitljivu veličinu, dopuštena su dva retka te veća visina dodirne površine.
+- U dijalogu za boje smjena povećane su tekstne oznake i dodirne površine; paleta se prilagođava širini s četiri ili pet boja u retku, a odabir svake vrste smjene čitljiv je za TalkBack.
+- Dodane instrumentacijske regresijske provjere prisutnosti odabira mjeseca i razdoblja na svim relevantnim ekranima.
+
+**Napomena:** marketinški renderi služe kao vizualni cilj, no njihove razlike u uređaju, gustoći prikaza i primjerima podataka ne dopuštaju izjavu o strogoj pikselnoj 1:1 podudarnosti bez kontroliranog vizualnog diff testa. Lokalni rasporedi, izračuni, SQLite shema i sigurnosne kopije nisu mijenjani.
+
 ## 0.9.6 — 25. 10. 2026. | Kalendar kao početni ekran i završna dorada detalja
 
 - **Kalendar je novi početni zaslon** nakon Android splash animacije i dovršenog uvoda. Kartica Početna ostaje dostupna u donjoj navigaciji, a Android Natrag vraća na Kalendar.
