@@ -70,7 +70,9 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
             val snackbars = remember { SnackbarHostState() }
-            var tab by rememberSaveable { mutableIntStateOf(0) }
+            // Open directly into the functional calendar after the splash and
+            // completed onboarding. Home remains accessible as the first tab.
+            var tab by rememberSaveable { mutableIntStateOf(1) }
             var onboardingStep by rememberSaveable { mutableIntStateOf(0) }
             val screenStateHolder = rememberSaveableStateHolder()
             var editing by remember { mutableStateOf<Shift?>(null) }
@@ -175,8 +177,8 @@ class MainActivity : ComponentActivity() {
                     OnboardingScreen(onComplete = vm::finishOnboarding,
                         onStepChange = { onboardingStep = it })
                 } else {
-                    BackHandler(enabled = tab != 0 && editing == null && !rotationOpen && !salaryOpen && !colorsOpen && !archiveOpen && pendingRestore == null) {
-                        tab = 0
+                    BackHandler(enabled = tab != 1 && editing == null && !rotationOpen && !salaryOpen && !colorsOpen && !archiveOpen && pendingRestore == null) {
+                        tab = 1
                     }
                     val sections = listOf(
                         "Početna" to Icons.Default.Home,
