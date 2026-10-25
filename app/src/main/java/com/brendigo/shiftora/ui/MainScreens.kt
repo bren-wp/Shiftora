@@ -155,8 +155,17 @@ fun HomeScreen(
                                 else "ODABRANA SMJENA",
                                 color = Palette.Amber, fontWeight = FontWeight.Bold,
                                 fontSize = 10.sp, maxLines = 1)
-                            Text(todayShift?.kind?.label ?: "Dodaj smjenu",
-                                style = MaterialTheme.typography.titleLarge, maxLines = 1)
+                            Text(
+                                todayShift?.let {
+                                    if (it.kind in listOf(ShiftKind.MORNING,
+                                            ShiftKind.AFTERNOON, ShiftKind.NIGHT)) {
+                                        it.kind.label + " smjena"
+                                    } else it.kind.label
+                                } ?: "Dodaj smjenu",
+                                style = MaterialTheme.typography.titleLarge,
+                                maxLines = 2, lineHeight = 26.sp,
+                                overflow = TextOverflow.Ellipsis
+                            )
                             Text(
                                 if (todayShift == null)
                                     if (today == actualToday) "Nema unosa za danas"
