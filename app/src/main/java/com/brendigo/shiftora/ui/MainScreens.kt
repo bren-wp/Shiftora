@@ -253,6 +253,7 @@ fun HomeScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CalendarScreen(
     shifts: List<Shift>, salary: SalarySettings, monthlyFunds: Map<String, Int>,
