@@ -121,13 +121,15 @@ adb shell am force-stop "$package" || true
 adb shell am start -W -n "$package/.MainActivity"
 sleep 3
 assert_app_foreground
-assert_screen_text "Danas je"
-adb exec-out screencap -p > "shiftora-${device}-home.png"
-tap_label "Kalendar" || adb shell input tap $((width * 3 / 10)) "$nav_y"
-sleep 2
-assert_app_foreground
+# The calendar is the application root after splash and onboarding. Verify it
+# before interacting with tabs so a regression cannot hide in navigation.
 assert_screen_text "Mjesec"
 adb exec-out screencap -p > "shiftora-${device}-calendar.png"
+tap_label "Početna" || adb shell input tap $((width / 10)) "$nav_y"
+sleep 2
+assert_app_foreground
+assert_screen_text "Danas je"
+adb exec-out screencap -p > "shiftora-${device}-home.png"
 tap_label "Statistika" || adb shell input tap $((width / 2)) "$nav_y"
 sleep 2
 assert_app_foreground
