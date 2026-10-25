@@ -148,15 +148,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
             SideEffect {
-                // Android 16 edge-to-edge may render dark system glyphs even when the
-                // header below is navy. Use an explicitly light status surface
-                // in the light theme for readable system clock/battery icons.
-                val whiteStatus = !darkMode
-                val status = if (whiteStatus) android.graphics.Color.WHITE
-                    else android.graphics.Color.rgb(11, 31, 59)
-                window.statusBarColor = status
+                // Only the home screen has a light header. Calendar, statistics,
+                // salary and More use a navy header even when light theme is active.
+                // System clock and battery glyphs must follow the visible surface.
+                val lightStatusSurface = !darkMode && (onboarding || tab == 0)
+                window.statusBarColor = if (lightStatusSurface)
+                    android.graphics.Color.WHITE
+                else android.graphics.Color.rgb(11, 31, 59)
                 WindowCompat.getInsetsController(window, window.decorView).apply {
-                    isAppearanceLightStatusBars = whiteStatus
+                    isAppearanceLightStatusBars = lightStatusSurface
                     isAppearanceLightNavigationBars = !darkMode
                 }
             }
