@@ -24,6 +24,11 @@ class ShiftoraNavigationTest {
             compose.onNodeWithText("Preskoči").performClick()
         }
         compose.onNodeWithText("Početna").assertExists()
+        // Cold launch and completion of onboarding must land on the calendar,
+        // without requiring a bottom-navigation tap.
+        compose.onNodeWithText("Mjesec").assertExists()
+        compose.onNodeWithText("Početna").performClick()
+        compose.onNodeWithText("Danas je").assertExists()
         compose.onNodeWithText("Kalendar").performClick()
         compose.onNodeWithText("Mjesec").assertExists()
         val nextMonth = YearMonth.now().plusMonths(1).atDay(1).monthLabel()
