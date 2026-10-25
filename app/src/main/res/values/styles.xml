@@ -6,4 +6,9 @@
         <item name="android:navigationBarColor">#F8FAFC</item>
         <item name="android:windowActionModeOverlay">true</item>
     </style>
+    <style name="Theme.Shiftora.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0B1F3B</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_shiftora_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Shiftora</item>
+    </style>
 </resources>
