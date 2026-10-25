@@ -464,14 +464,15 @@ fun CalendarScreen(
                 }
             }
             Spacer(Modifier.height(spacing))
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            BoxWithConstraints(Modifier.weight(1f)) {
                 val mainKinds = listOf(
                     ShiftKind.MORNING to "Jutarnja",
                     ShiftKind.AFTERNOON to "Popodnevna",
                     ShiftKind.NIGHT to "Noćna",
                     ShiftKind.OFF to "Slobodno"
                 )
-                val columns = if (maxWidth < 355.dp ||
+                val columns = if (maxWidth < 310.dp ||
                     LocalDensity.current.fontScale > 1.25f) 2 else 4
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     mainKinds.chunked(columns).forEach { group ->
@@ -493,17 +494,15 @@ fun CalendarScreen(
                     }
                 }
             }
-            // Keep secondary statuses discoverable outside the date title row.
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(
-                    onClick = { showAllLegend = !showAllLegend },
-                    modifier = Modifier.heightIn(min = 42.dp)
-                ) {
-                    Text(if (showAllLegend) "Sakrij oznake" else "Ostale oznake",
-                        fontSize = 11.sp)
+                // The reference has a single legend line without a separate
+                // 42dp button row. This expandable caret keeps details in view.
+                IconButton(onClick = { showAllLegend = !showAllLegend },
+                    modifier = Modifier.size(38.dp)) {
                     Icon(if (showAllLegend) Icons.Default.ExpandLess
                         else Icons.Default.ExpandMore,
-                        contentDescription = null, modifier = Modifier.size(17.dp))
+                        contentDescription =
+                            if (showAllLegend) "Sakrij oznake" else "Ostale oznake",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             if (showAllLegend) {
@@ -695,7 +694,8 @@ private fun DetailTile(
     label: String, value: String, modifier: Modifier = Modifier,
     icon: ImageVector? = null
 ) {
-    Column(modifier.heightIn(min = 75.dp)
+    Column(modifier.heightIn(min = if (LocalDensity.current.fontScale > 1.3f)
+            75.dp else 64.dp)
         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .42f),
             RoundedCornerShape(12.dp)).padding(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically,
