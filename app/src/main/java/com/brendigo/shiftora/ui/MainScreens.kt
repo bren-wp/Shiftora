@@ -1,6 +1,8 @@
 package com.brendigo.shiftora.ui
 
 import androidx.compose.foundation.*
+import android.app.DatePickerDialog
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.*
@@ -57,9 +59,13 @@ fun HomeScreen(
             now = ZonedDateTime.now()
         }
     }
-    val today = now.toLocalDate()
-    val activeShift = remember(shifts, now) {
-        CurrentShiftIndicator.active(shifts, now.toInstant(), now.zone)
+    val actualToday = now.toLocalDate()
+    var homeDateText by rememberSaveable { mutableStateOf(actualToday.toString()) }
+    val today = LocalDate.parse(homeDateText)
+    val context = LocalContext.current
+    val activeShift = remember(shifts, now, today) {
+        if (today == actualToday) CurrentShiftIndicator.active(shifts, now.toInstant(), now.zone)
+        else null
     }
     val weekStart = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
     val weekTotal = remember(shifts, salary, weekStart) {
@@ -88,11 +94,38 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             item {
-                Spacer(Modifier.height(2.dp))
-                Text("Danas je", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp)
-                Text(today.dateLabel(), style = MaterialTheme.typography.headlineLarge)
-                Text(today.weekdayLabel().replaceFirstChar { it.uppercase(Locale("hr", "HR")) },
-                    color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 17.sp)
+                Spacer(Modifier.height(5.dp))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text(if (today == actualToday) "Danas je" else "Odabrani datum",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp)
+                        Text(today.dateLabel(), fontSize = 28.sp, lineHeight = 33.sp,
+                            fontWeight = FontWeight.ExtraBold, maxLines = 2)
+                        Text(today.weekdayLabel().replaceFirstChar {
+                            it.uppercase(Locale("hr", "HR"))
+                        }, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 17.sp)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            DatePickerDialog(context, { _, year, month, day ->
+                                homeDateText = LocalDate.of(year, month + 1, day).toString()
+                            }, today.year, today.monthValue - 1, today.dayOfMonth).show()
+                        },
+                        shape = RoundedCornerShape(18.dp),
+                        contentPadding = PaddingValues(horizontal = 9.dp),
+                        modifier = Modifier.heightIn(min = 48.dp)
+                    ) {
+                        Icon(Icons.Default.CalendarMonth, contentDescription = null,
+                            modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(5.dp))
+                        Text(if (today == actualToday) "Danas" else "Datum",
+                            maxLines = 1)
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null,
+                            modifier = Modifier.size(18.dp))
+                    }
+                }
             }
             item {
                 SurfaceCard(Modifier.fillMaxWidth().clickable {
@@ -114,7 +147,9 @@ fun HomeScreen(
                         Column(Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(if (activeShift != null) "TRENUTNA SMJENA" else "DANAŠNJA SMJENA",
+                                Text(if (activeShift != null) "TRENUTNA SMJENA"
+                                    else if (today == actualToday) "DANAŠNJA SMJENA"
+                                    else "ODABRANA SMJENA",
                                     color = Palette.Amber, fontWeight = FontWeight.Bold, fontSize = 10.sp)
                                 if (activeShift != null) {
                                     Text("● U tijeku", color = Color(0xFF087E52),
@@ -124,7 +159,9 @@ fun HomeScreen(
                             Text(todayShift?.kind?.label ?: "Dodaj smjenu",
                                 style = MaterialTheme.typography.titleLarge, maxLines = 1)
                             Text(
-                                if (todayShift == null) "Nema unosa za danas"
+                                if (todayShift == null)
+                                    if (today == actualToday) "Nema unosa za danas"
+                                    else "Nema unosa za odabrani datum"
                                 else if (todayShift.kind == ShiftKind.STANDBY)
                                     "Pripravnost ${clock(todayShift.startMinute)} – ${clock(todayShift.endMinute)}"
                                 else if (!todayShift.kind.isWork) todayShift.kind.label
