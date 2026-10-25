@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -188,8 +191,42 @@ fun BrandMark(modifier: Modifier = Modifier, darkSurface: Boolean = false) {
             contentDescription = null,
             // Keep the full lower S stroke and clock visible in the rounded box.
             // A larger zoom cropped the mark on small headers and onboarding.
-            modifier = Modifier.fillMaxSize().scale(1.20f)
+            modifier = Modifier.fillMaxSize().scale(1.35f)
         )
+    }
+}
+
+/** Shared Shiftora period switch, with minimum 52dp touch targets. */
+@Composable
+fun SegmentedPeriodTabs(
+    labels: List<String>,
+    selectedIndex: Int,
+    onSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        labels.forEachIndexed { index, label ->
+            val active = selectedIndex == index
+            Box(
+                Modifier.weight(1f).heightIn(min = 52.dp)
+                    .clip(RoundedCornerShape(17.dp))
+                    .background(if (active) Color(0xFFD3E5FF) else Color.Transparent)
+                    .semantics { selected = active }
+                    .clickable(role = Role.Tab) { onSelected(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(label, maxLines = 1,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+                    color = if (active) Palette.Blue
+                        else MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp)
+            }
+        }
     }
 }
 
@@ -200,11 +237,23 @@ fun BrandedHeader(
     dark: Boolean = false,
     showSettings: Boolean = true,
     showStatsDecor: Boolean = false,
+    showNotifications: Boolean = false,
     onSettings: () -> Unit = {}
 ) {
     val background = if (dark) Brush.linearGradient(listOf(Palette.Navy, Palette.DeepNavy))
     else Brush.linearGradient(listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background))
     val fg = if (dark) Color.White else MaterialTheme.colorScheme.onBackground
+    var notificationsOpen by remember { mutableStateOf(false) }
+    if (notificationsOpen) {
+        AlertDialog(
+            onDismissRequest = { notificationsOpen = false },
+            title = { Text("Obavijesti") },
+            text = { Text("Shiftora trenutačno ne šalje automatske obavijesti. Sve planirane smjene možeš pregledati u Kalendaru, i bez interneta.") },
+            confirmButton = {
+                TextButton(onClick = { notificationsOpen = false }) { Text("U redu") }
+            }
+        )
+    }
     Column(
         Modifier.fillMaxWidth().background(background)
             .padding(start = 17.dp, end = 17.dp, top = 13.dp,
@@ -216,6 +265,12 @@ fun BrandedHeader(
             Text("Shiftora", color = fg, fontWeight = FontWeight.ExtraBold,
                 fontSize = 27.sp, letterSpacing = (-0.65).sp)
             Spacer(Modifier.weight(1f))
+            if (showNotifications) {
+                IconButton(onClick = { notificationsOpen = true }) {
+                    Icon(Icons.Default.NotificationsNone,
+                        contentDescription = "Obavijesti", tint = fg)
+                }
+            }
             if (showSettings) {
                 IconButton(onClick = onSettings) {
                     Icon(Icons.Default.Settings, contentDescription = "Postavke", tint = fg)

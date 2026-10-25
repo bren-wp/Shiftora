@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.TrendingFlat
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -182,31 +184,62 @@ fun ShiftDonutCard(totals: WorkTotals) {
 
 @Composable
 fun SalaryStatsCard(totals: WorkTotals, previous: WorkTotals) {
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(23.dp))
-        .background(Palette.MintLight).padding(17.dp)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(Icons.Default.TrendingFlat, contentDescription = null,
-                tint = Color(0xFF008F7F), modifier = Modifier.size(27.dp))
-            Text("Procijenjena bruto plaća", color = Palette.Navy,
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(23.dp))
+            .background(Palette.MintLight).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+            Icon(Icons.Default.BarChart, contentDescription = null,
+                tint = Color(0xFF008F7F), modifier = Modifier.size(30.dp))
+            Text("Procijenjena plaća", color = Palette.Navy,
                 fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
                 modifier = Modifier.weight(1f))
-            Icon(Icons.Default.Info, contentDescription =
-                "Procjena bruto iznosa, ne neto plaća",
-                tint = Color(0xFF087C74), modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.Info,
+                contentDescription = "Iznos je informativna bruto procjena, bez neto izračuna",
+                tint = Color(0xFF087C74), modifier = Modifier.size(19.dp))
         }
-        Spacer(Modifier.height(9.dp))
-        Text(euros(totals.grossCents), color = Palette.Navy, fontSize = 34.sp,
-            lineHeight = 39.sp, fontWeight = FontWeight.ExtraBold,
-            maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Spacer(Modifier.height(7.dp))
-        TrendIndicator(totals.grossCents, previous.grossCents)
-        Spacer(Modifier.height(4.dp))
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val stacked = maxWidth < 288.dp || LocalDensity.current.fontScale > 1.3f
+            val amount: @Composable (Modifier) -> Unit = { modifier ->
+                Column(modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(euros(totals.grossCents), color = Palette.Navy,
+                        fontSize = if (stacked) 32.sp else 24.sp,
+                        lineHeight = 35.sp, fontWeight = FontWeight.ExtraBold,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    TrendIndicator(totals.grossCents, previous.grossCents)
+                }
+            }
+            val breakdown: @Composable (Modifier) -> Unit = { modifier ->
+                Column(modifier.clip(RoundedCornerShape(17.dp))
+                    .background(Color.White.copy(alpha = .70f))
+                    .padding(10.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text("Bruto (procjena)", color = Palette.Secondary, fontSize = 11.sp)
+                    Text(euros(totals.grossCents), color = Palette.Navy,
+                        fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    HorizontalDivider(color = Palette.Mint.copy(alpha = .22f))
+                    Text("Neto nije izračunat", color = Palette.Secondary,
+                        fontSize = 10.sp, lineHeight = 13.sp)
+                }
+            }
+            if (stacked) {
+                Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                    amount(Modifier.fillMaxWidth())
+                    breakdown(Modifier.fillMaxWidth())
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    amount(Modifier.weight(1.2f))
+                    breakdown(Modifier.weight(.9f))
+                }
+            }
+        }
         Text("Osnovica " + euros(totals.baseCents) +
-            "   •   Dodaci " + euros(totals.premiumCents),
-            color = Color(0xFF346C68), fontSize = 12.sp)
-        Text("Informativni bruto iznos · neto se ne izračunava.",
-            color = Color(0xFF346C68), fontSize = 11.sp)
+            "  ·  Dodaci " + euros(totals.premiumCents),
+            color = Color(0xFF346C68), fontSize = 11.sp, maxLines = 2)
     }
 }
 
@@ -215,14 +248,16 @@ fun StatsExplanation(totals: WorkTotals, settings: SalarySettings) {
     var expanded by remember { mutableStateOf(true) }
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(21.dp))
         .background(MaterialTheme.colorScheme.surface)
-        .clickable { expanded = !expanded }.padding(14.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        .padding(14.dp)) {
+        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+            .clickable { expanded = !expanded }.padding(vertical = 3.dp),
+            verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(34.dp).clip(CircleShape).background(Palette.AmberLight),
                 contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Info, contentDescription = null, tint = Palette.Amber)
+                Icon(Icons.Default.Lightbulb, contentDescription = null, tint = Palette.Amber)
             }
             Spacer(Modifier.width(8.dp))
-            Text("Kako se računaju sati i dodaci?", fontWeight = FontWeight.SemiBold,
+            Text("Kako se računa procijenjena plaća?", fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f), fontSize = 14.sp)
             Icon(if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                 contentDescription = if (expanded) "Sažmi" else "Proširi")
@@ -242,21 +277,30 @@ fun StatsExplanation(totals: WorkTotals, settings: SalarySettings) {
                 Triple("Nedjelje / blagdani", minutesLabel(totals.specialMinutes),
                     Palette.CoralLight)
             )
-            items.chunked(2).forEach { line ->
-                Row(Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                    line.forEach { (label, value, color) ->
-                        Column(Modifier.weight(1f)
-                            .clip(RoundedCornerShape(13.dp)).background(color)
-                            .padding(9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(value, fontWeight = FontWeight.Bold, fontSize = 14.sp,
-                                color = Palette.Navy, maxLines = 1)
-                            Text(label, fontSize = 10.sp, color = Palette.Secondary,
-                                maxLines = 2, lineHeight = 13.sp)
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val columns = if (maxWidth >= 295.dp &&
+                    LocalDensity.current.fontScale <= 1.3f) 4 else 2
+                Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                    items.chunked(columns).forEach { line ->
+                        Row(Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            line.forEach { (label, value, color) ->
+                                Column(Modifier.weight(1f)
+                                    .clip(RoundedCornerShape(13.dp)).background(color)
+                                    .padding(horizontal = 5.dp, vertical = 10.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(value, fontWeight = FontWeight.Bold,
+                                        fontSize = if (columns == 4) 12.sp else 14.sp,
+                                        color = Palette.Navy, maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis)
+                                    Text(label, fontSize = 10.sp, color = Palette.Secondary,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        maxLines = 2, lineHeight = 13.sp)
+                                }
+                            }
                         }
                     }
                 }
-                Spacer(Modifier.height(7.dp))
             }
             Text("Kategorije na grafikonu ne preklapaju se, ali dodaci mogu. Iznos nije službeni obračun plaće.",
                 fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)

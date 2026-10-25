@@ -157,7 +157,11 @@ fun HomeScreen(
                                     else "ODABRANA SMJENA",
                                     color = Palette.Amber, fontWeight = FontWeight.Bold, fontSize = 10.sp)
                                 if (activeShift != null) {
-                                    Text("● U tijeku", color = Color(0xFF087E52),
+                                    Text("● Još traje",
+                                        modifier = Modifier.clip(RoundedCornerShape(30.dp))
+                                            .background(Palette.MintLight)
+                                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                                        color = Color(0xFF087E52),
                                         fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
                                 }
                             }
@@ -296,7 +300,7 @@ fun CalendarScreen(
     val dayShifts = shiftsByDate[selected].orEmpty()
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        BrandedHeader(dark = true, onSettings = onSettings)
+        BrandedHeader(dark = true, showNotifications = true, onSettings = onSettings)
         BoxWithConstraints(Modifier.fillMaxSize().clip(
             RoundedCornerShape(topStart = 27.dp, topEnd = 27.dp)
         ).background(MaterialTheme.colorScheme.surface)) {
@@ -307,22 +311,11 @@ fun CalendarScreen(
         val spacing = if (compact) 5.dp else 8.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 19.dp)) {
-            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
-                .background(Palette.BlueLight).padding(3.dp)) {
-                listOf("Mjesec", "Tjedan").forEachIndexed { index, label ->
-                    val isSelected = weekOnly == (index == 1)
-                    Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
-                        .background(if (isSelected) Color(0xFFD4E5FF) else Color.Transparent)
-                        .heightIn(min = 48.dp)
-                        .semantics { this.selected = isSelected }
-                        .clickable(role = Role.Tab) { weekOnly = index == 1 }
-                        .padding(vertical = 8.dp),
-                        contentAlignment = Alignment.Center) {
-                        Text(label, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Palette.Blue else Palette.Navy)
-                    }
-                }
-            }
+            SegmentedPeriodTabs(
+                labels = listOf("Mjesec", "Tjedan"),
+                selectedIndex = if (weekOnly) 1 else 0,
+                onSelected = { weekOnly = it == 1 }
+            )
             Spacer(Modifier.height(spacing))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = {
@@ -556,7 +549,13 @@ fun CalendarScreen(
                             }
                             Text(if (!shift.kind.isWork) "Evidencija"
                                 else if (shift.actual) "Odrađeno" else "Planirano",
-                                color = if (shift.actual) Palette.Mint else Palette.Blue,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(100.dp))
+                                    .background(if (shift.actual) Palette.MintLight
+                                        else Palette.AmberLight)
+                                    .padding(horizontal = 9.dp, vertical = 6.dp),
+                                color = if (shift.actual) Color(0xFF087E52)
+                                    else Color(0xFFB96D00),
                                 fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
@@ -708,23 +707,11 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
-                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(17.dp))
-                    .background(Palette.BlueLight).padding(3.dp)) {
-                    listOf("Tjedan", "Mjesec", "Godina").forEachIndexed { index, title ->
-                        val selected = period == index
-                        Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
-                            .background(if (selected) Color(0xFFD0E2FF) else Color.Transparent)
-                            .heightIn(min = 48.dp)
-                            .semantics { this.selected = selected }
-                            .clickable(role = Role.Tab) { period = index }
-                            .padding(vertical = 9.dp),
-                            contentAlignment = Alignment.Center) {
-                            Text(title, color = if (selected) Palette.Blue else Palette.Navy,
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 14.sp)
-                        }
-                    }
-                }
+                SegmentedPeriodTabs(
+                    labels = listOf("Tjedan", "Mjesec", "Godina"),
+                    selectedIndex = period,
+                    onSelected = { period = it }
+                )
             }
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -877,14 +864,56 @@ fun SalaryScreen(
             }
             item {
                 SurfaceCard(Modifier.fillMaxWidth(), color = Palette.MintLight) {
-                    Icon(ShiftoraCoinsIcon, contentDescription = null,
-                        tint = Palette.Mint, modifier = Modifier.size(32.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(Modifier.size(54.dp)
+                            .clip(RoundedCornerShape(17.dp))
+                            .background(Color.White.copy(alpha = .55f)),
+                            contentAlignment = Alignment.Center) {
+                            Icon(ShiftoraCoinsIcon, contentDescription = null,
+                                tint = Color(0xFF008F75), modifier = Modifier.size(31.dp))
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text("Procijenjena bruto plaća",
+                                fontWeight = FontWeight.SemiBold, color = Palette.Navy,
+                                fontSize = 15.sp)
+                            Text("Za ${month.atDay(1).monthLabel()}",
+                                color = Palette.Secondary, fontSize = 12.sp)
+                        }
+                        Icon(Icons.Default.Info,
+                            contentDescription = "Informativna bruto procjena",
+                            tint = Color(0xFF008F75), modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(Modifier.height(15.dp))
+                    Text(euros(totals.grossCents),
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.ExtraBold, color = Palette.Navy,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Spacer(Modifier.height(12.dp))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement =
+                        Arrangement.spacedBy(9.dp)) {
+                        Column(Modifier.weight(1f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(Color.White.copy(alpha = .6f))
+                            .padding(10.dp)) {
+                            Text("Osnovica", color = Palette.Secondary, fontSize = 11.sp)
+                            Text(euros(totals.baseCents), color = Palette.Navy,
+                                fontWeight = FontWeight.Bold, maxLines = 1,
+                                overflow = TextOverflow.Ellipsis, fontSize = 14.sp)
+                        }
+                        Column(Modifier.weight(1f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(Color.White.copy(alpha = .6f))
+                            .padding(10.dp)) {
+                            Text("Dodaci", color = Palette.Secondary, fontSize = 11.sp)
+                            Text(euros(totals.premiumCents), color = Color(0xFF087D64),
+                                fontWeight = FontWeight.Bold, maxLines = 1,
+                                overflow = TextOverflow.Ellipsis, fontSize = 14.sp)
+                        }
+                    }
                     Spacer(Modifier.height(9.dp))
-                    Text("Procijenjena bruto plaća", fontWeight = FontWeight.SemiBold, color = Palette.Navy)
-                    Text(euros(totals.grossCents), style = MaterialTheme.typography.headlineLarge, color = Palette.Navy)
-                    Spacer(Modifier.height(4.dp))
-                    Text("Prema ${minutesLabel(totals.paidMinutes)} unesenog rada i postavkama dodataka.",
-                        fontSize = 12.sp, color = Palette.Secondary)
+                    Text("Temelji se na ${minutesLabel(totals.paidMinutes)} rada i postavkama dodataka. Neto se ne izračunava.",
+                        fontSize = 11.sp, color = Palette.Secondary, lineHeight = 16.sp)
                 }
             }
             item {
@@ -1053,7 +1082,13 @@ private fun ListAction(title: String, description: String, icon: androidx.compos
         .clickable(role = Role.Button, onClick = onClick)
         .padding(vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Box(Modifier.size(42.dp).clip(RoundedCornerShape(13.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp))
+        }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontWeight = FontWeight.SemiBold)
