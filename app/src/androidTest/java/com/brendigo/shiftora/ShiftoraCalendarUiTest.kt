@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.brendigo.shiftora.data.SalarySettings
 import com.brendigo.shiftora.data.Shift
@@ -62,4 +63,22 @@ class ShiftoraCalendarUiTest {
         val month = YearMonth.from(LocalDate.now().minusWeeks(6))
         compose.onNodeWithText(month.atDay(1).monthLabel()).assertExists()
     }
+
+    @Test fun selectedDayMenuExposesRealActionsAndLegendRemainsReachable() {
+        compose.setContent {
+            ShiftoraTheme(darkMode = false) {
+                CalendarScreen(emptyList(), SalarySettings(), emptyMap(),
+                    onAdd = {}, onEdit = {}, onFundSave = { _, _ -> },
+                    onSettings = {})
+            }
+        }
+        compose.onNodeWithText("Ostale oznake").performScrollTo().performClick()
+        compose.onNodeWithText("Sakrij oznake").assertExists()
+        compose.onNodeWithContentDescription("Radnje za odabrani dan")
+            .performScrollTo().performClick()
+        compose.onNodeWithText("Dodaj smjenu").assertExists()
+        compose.onNodeWithText("Povratak na danas").assertExists()
+        compose.onNodeWithText("Povratak na danas").performClick()
+    }
+
 }
