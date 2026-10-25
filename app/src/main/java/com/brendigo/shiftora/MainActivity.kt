@@ -163,8 +163,14 @@ class MainActivity : ComponentActivity() {
                 // System clock and battery glyphs must follow the visible surface.
                 val lightStatusSurface = !darkMode &&
                     (if (onboarding) onboardingStep != 0 else tab == 0)
+                // On edge-to-edge devices the status bar is transparent and
+                // reveals the decor background, not window.statusBarColor.
+                // Keep Home/tutorial dark glyphs legible on light backgrounds.
+                window.decorView.setBackgroundColor(if (lightStatusSurface)
+                    android.graphics.Color.rgb(248, 250, 252)
+                else android.graphics.Color.rgb(11, 31, 59))
                 window.statusBarColor = if (lightStatusSurface)
-                    android.graphics.Color.WHITE
+                    android.graphics.Color.rgb(248, 250, 252)
                 else android.graphics.Color.rgb(11, 31, 59)
                 WindowCompat.getInsetsController(window, window.decorView).apply {
                     isAppearanceLightStatusBars = lightStatusSurface
