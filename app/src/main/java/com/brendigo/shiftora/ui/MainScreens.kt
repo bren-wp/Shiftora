@@ -1,6 +1,8 @@
 package com.brendigo.shiftora.ui
 
 import androidx.compose.foundation.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import android.app.DatePickerDialog
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.selection.toggleable
@@ -20,6 +22,8 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -261,6 +265,14 @@ fun CalendarScreen(
     var weekOnly by rememberSaveable { mutableStateOf(false) }
     var showAllLegend by rememberSaveable { mutableStateOf(false) }
     var fundEditorOpen by remember { mutableStateOf(false) }
+    val detailRequester = remember { BringIntoViewRequester() }
+    var revealDetail by remember { mutableStateOf(false) }
+    LaunchedEffect(selectedText, revealDetail) {
+        if (revealDetail) {
+            detailRequester.bringIntoView()
+            revealDetail = false
+        }
+    }
     val fund = remember(shown, shifts, salary, monthlyFunds) {
         MonthlyFund.summary(shown, shifts, salary, monthlyFunds[shown.toString()])
     }
@@ -360,6 +372,9 @@ fun CalendarScreen(
                                 .clickable {
                                     selectedText = date.toString()
                                     shownText = YearMonth.from(date).toString()
+                                    // Show the action card without forcing users to hunt below
+                                    // a five/six-row month grid after selecting a day.
+                                    revealDetail = true
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -456,8 +471,14 @@ fun CalendarScreen(
                 Spacer(Modifier.height(spacing))
             }
             Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(21.dp))
+                Modifier.fillMaxWidth()
+                    .bringIntoViewRequester(detailRequester)
+                    .shadow(4.dp, RoundedCornerShape(21.dp),
+                        ambientColor = Palette.Navy.copy(alpha = .08f))
+                    .clip(RoundedCornerShape(21.dp))
                     .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = .6f),
+                        RoundedCornerShape(21.dp))
                     .padding(if (compact) 11.dp else 15.dp)
             ) {
                 Text(selected.dateLabel(), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
@@ -488,9 +509,12 @@ fun CalendarScreen(
                         Spacer(Modifier.height(7.dp))
                         if (shift.kind.isWork) {
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                DetailTile("Radno vrijeme", "${clock(shift.startMinute)}–${clock(shift.endMinute)}", Modifier.weight(1f))
-                                DetailTile("Pauza", "${shift.breakMinutes} min", Modifier.weight(1f))
-                                DetailTile("Bilješka", shift.note.ifBlank { "—" }, Modifier.weight(1f))
+                                DetailTile("Radno vrijeme", "${clock(shift.startMinute)}–${clock(shift.endMinute)}",
+                                    Modifier.weight(1f), Icons.Default.Schedule)
+                                DetailTile("Pauza", "${shift.breakMinutes} min",
+                                    Modifier.weight(1f), Icons.Default.Coffee)
+                                DetailTile("Bilješka", shift.note.ifBlank { "—" },
+                                    Modifier.weight(1f), Icons.Default.Description)
                             }
                         }
                         Spacer(Modifier.height(6.dp))
@@ -548,12 +572,23 @@ fun CalendarScreen(
 }
 
 @Composable
-private fun DetailTile(label: String, value: String, modifier: Modifier = Modifier) {
-    Column(modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .42f),
-        RoundedCornerShape(12.dp)).padding(9.dp)) {
-        Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+private fun DetailTile(
+    label: String, value: String, modifier: Modifier = Modifier,
+    icon: ImageVector? = null
+) {
+    Column(modifier.heightIn(min = 75.dp)
+        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .42f),
+            RoundedCornerShape(12.dp)).padding(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (icon != null) Icon(icon, contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
+            Text(label, fontSize = 10.sp, lineHeight = 12.sp, maxLines = 2,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
         Spacer(Modifier.height(5.dp))
-        Text(value, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(value, fontSize = 11.sp, fontWeight = FontWeight.Bold,
+            maxLines = 2, lineHeight = 14.sp, overflow = TextOverflow.Ellipsis)
     }
 }
 
