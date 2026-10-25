@@ -47,7 +47,7 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Kalendar").performClick()
         compose.onNodeWithText(nextMonth).assertExists()
         // Secondary statuses are collapsible to preserve space for the day card.
-        compose.onNodeWithText("Ostale oznake").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Ostale oznake").performScrollTo().performClick()
         compose.onNodeWithText("GO").assertExists()
         compose.onNodeWithText("BO").assertExists()
         compose.onNodeWithContentDescription("Uredi fond sati").performScrollTo().performClick()
