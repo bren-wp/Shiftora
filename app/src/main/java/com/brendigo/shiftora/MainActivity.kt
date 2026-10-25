@@ -31,6 +31,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brendigo.shiftora.data.Shift
@@ -47,6 +49,9 @@ import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // The system splash uses the actual Shiftora clock mark, then hands
+        // directly to the Calendar after onboarding has been completed.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.rgb(11, 31, 59)),
@@ -70,7 +75,9 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
             val snackbars = remember { SnackbarHostState() }
-            var tab by rememberSaveable { mutableIntStateOf(0) }
+            // Open directly into the functional calendar after the splash and
+            // completed onboarding. Home remains accessible as the first tab.
+            var tab by rememberSaveable { mutableIntStateOf(1) }
             var onboardingStep by rememberSaveable { mutableIntStateOf(0) }
             val screenStateHolder = rememberSaveableStateHolder()
             var editing by remember { mutableStateOf<Shift?>(null) }
@@ -175,8 +182,8 @@ class MainActivity : ComponentActivity() {
                     OnboardingScreen(onComplete = vm::finishOnboarding,
                         onStepChange = { onboardingStep = it })
                 } else {
-                    BackHandler(enabled = tab != 0 && editing == null && !rotationOpen && !salaryOpen && !colorsOpen && !archiveOpen && pendingRestore == null) {
-                        tab = 0
+                    BackHandler(enabled = tab != 1 && editing == null && !rotationOpen && !salaryOpen && !colorsOpen && !archiveOpen && pendingRestore == null) {
+                        tab = 1
                     }
                     val sections = listOf(
                         "Početna" to Icons.Default.Home,
@@ -224,7 +231,8 @@ class MainActivity : ComponentActivity() {
                                             tint = ink, modifier = Modifier.size(24.dp))
                                         Spacer(Modifier.height(4.dp))
                                         Text(option.first, maxLines = 1, color = ink,
-                                            fontSize = 11.sp, fontWeight = if (active)
+                                            fontSize = if (LocalDensity.current.fontScale > 1.3f) 9.sp else 11.sp,
+                                            fontWeight = if (active)
                                                 FontWeight.Bold else FontWeight.Medium)
                                     }
                                 }

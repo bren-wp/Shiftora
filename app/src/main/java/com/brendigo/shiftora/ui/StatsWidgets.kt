@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.TrendingFlat
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -160,7 +161,7 @@ fun ShiftDonutCard(totals: WorkTotals) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             // Preserve the reference's donut + legend layout on normal phones.
             // Stack only when text would otherwise collapse on narrow screens.
-            if (maxWidth < 310.dp) {
+            if (maxWidth < 310.dp || LocalDensity.current.fontScale > 1.3f) {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     chart()

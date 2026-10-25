@@ -86,3 +86,9 @@ korisnika, a ne preslikati izmišljene iznose s dizajnerskog mockupa.
 Ovo izdanje **ne** mijenja postojeću Androidovu lokalnu bazu, obračunske formule,
 radne podatke ili korisničke boje. AAB ostaje nepotpisan sve dok se ne upotrijebi
 vlasnikov produkcijski upload ključ.
+
+## Revizija 0.9.6 — Kalendar kao korijenski ekran
+
+Provjera navigacije: nakon splash zaslona i završenog onboardinga odabran je tab **Kalendar** (index 1). Android Natrag s drugih tabova vraća na Kalendar, ali Početna nije uklonjena. Provjera screenshot skripte počinje potvrdom oznake *Mjesec*, pa tek zatim otvara Početnu. Dnevna kartica ima vizualni okvir, jasnije ikone vremena/pauze/bilješke i automatsko pomicanje u vidljivi dio nakon korisnikova odabira. Dodano je responzivno ponašanje statistike i donje navigacije za Android font-scale veći od 130%.
+
+Nisu promijenjene poslovne funkcije, korisnička baza, migracije, potpisni ključevi niti formule. Prije tvrdnje o strogom 1:1 poklapanju potreban je stvarni pixel-diff usporedivih snimki (ista gustoća, rezolucija, podaci i veličina fonta).
