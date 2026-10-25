@@ -286,7 +286,7 @@ fun CalendarScreen(
             RoundedCornerShape(topStart = 27.dp, topEnd = 27.dp)
         ).background(MaterialTheme.colorScheme.surface)) {
         val compact = maxHeight < 715.dp
-        val dayHeight = if (compact) 47.dp else 54.dp
+        val dayHeight = if (compact) 50.dp else 56.dp
         val spacing = if (compact) 7.dp else 11.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 19.dp)) {
@@ -428,7 +428,7 @@ fun CalendarScreen(
             // line. Keep every special status discoverable without crowding the
             // selected-day detail below the month grid.
             TextButton(onClick = { showAllLegend = !showAllLegend },
-                modifier = Modifier.align(Alignment.End).heightIn(min = 40.dp),
+                modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp),
                 contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)) {
                 Text(if (showAllLegend) "Sakrij dodatne oznake" else "Ostale oznake",
                     fontSize = 11.sp)
@@ -497,7 +497,7 @@ fun CalendarScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically) {
                             OutlinedButton(onClick = { onEdit(shift) },
-                                modifier = Modifier.weight(1f).heightIn(min = 46.dp),
+                                modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                                 contentPadding = PaddingValues(horizontal = 6.dp),
                                 shape = RoundedCornerShape(13.dp)) {
                                 Icon(Icons.Default.Edit, contentDescription = null,
@@ -643,39 +643,67 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
             }
             item { ShiftDonutCard(totals) }
             item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatIndicatorCard(
-                        "Odrađeni sati", minutesLabel(totals.actualMinutes),
-                        Icons.Default.Schedule, Palette.BlueLight, Palette.Blue,
-                        totals.actualMinutes, previous.actualMinutes, Modifier.weight(1f),
-                        "Planirano: " + minutesLabel(totals.plannedMinutes)
-                    )
-                    StatIndicatorCard(
-                        "Prekovremeni", minutesLabel(totals.overtimeMinutes),
-                        Icons.Default.AddCircle, Palette.AmberLight, Palette.Amber,
-                        totals.overtimeMinutes, previous.overtimeMinutes, Modifier.weight(1f)
-                    )
-                }
+                ResponsiveStatPair(
+                    first = { m ->
+                        StatIndicatorCard(
+                            "Odrađeni sati", minutesLabel(totals.actualMinutes),
+                            Icons.Default.Schedule, Palette.BlueLight, Palette.Blue,
+                            totals.actualMinutes, previous.actualMinutes, m,
+                            "Planirano: " + minutesLabel(totals.plannedMinutes)
+                        )
+                    },
+                    second = { m ->
+                        StatIndicatorCard(
+                            "Prekovremeni", minutesLabel(totals.overtimeMinutes),
+                            Icons.Default.AddCircle, Palette.AmberLight, Palette.Amber,
+                            totals.overtimeMinutes, previous.overtimeMinutes, m
+                        )
+                    }
+                )
             }
             item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatIndicatorCard(
-                        "Noćni rad", minutesLabel(totals.nightMinutes),
-                        Icons.Default.NightsStay, Palette.PurpleLight, Palette.Purple,
-                        totals.nightMinutes, previous.nightMinutes, Modifier.weight(1f)
-                    )
-                    StatIndicatorCard(
-                        "Nedjelje / blagdani",
-                        minutesLabel(totals.specialMinutes),
-                        Icons.Default.Event, Palette.CoralLight, Palette.Coral,
-                        totals.specialMinutes, previous.specialMinutes, Modifier.weight(1f),
-                        "Ned: " + minutesLabel(totals.sundayMinutes) +
-                            " · Blag: " + minutesLabel(totals.holidayMinutes)
-                    )
-                }
+                ResponsiveStatPair(
+                    first = { m ->
+                        StatIndicatorCard(
+                            "Noćni rad", minutesLabel(totals.nightMinutes),
+                            Icons.Default.NightsStay, Palette.PurpleLight, Palette.Purple,
+                            totals.nightMinutes, previous.nightMinutes, m
+                        )
+                    },
+                    second = { m ->
+                        StatIndicatorCard(
+                            "Nedjelje / blagdani", minutesLabel(totals.specialMinutes),
+                            Icons.Default.Event, Palette.CoralLight, Palette.Coral,
+                            totals.specialMinutes, previous.specialMinutes, m,
+                            "Ned: " + minutesLabel(totals.sundayMinutes) +
+                                " · Blag: " + minutesLabel(totals.holidayMinutes)
+                        )
+                    }
+                )
             }
             item { SalaryStatsCard(totals, previous) }
             item { StatsExplanation(totals, settings) }
+        }
+    }
+}
+
+/** Keep the reference's two-column KPI grid until each card would be unreadable. */
+@Composable
+private fun ResponsiveStatPair(
+    first: @Composable (Modifier) -> Unit,
+    second: @Composable (Modifier) -> Unit
+) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        if (maxWidth < 330.dp) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                first(Modifier.fillMaxWidth())
+                second(Modifier.fillMaxWidth())
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                first(Modifier.weight(1f))
+                second(Modifier.weight(1f))
+            }
         }
     }
 }

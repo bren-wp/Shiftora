@@ -5,6 +5,11 @@ package="com.brendigo.shiftora"
 apk="app/build/outputs/apk/debug/app-debug.apk"
 test -s "$apk"
 adb install -r "$apk"
+# Never erase personal data on a developer's attached device. CI explicitly
+# opts into resetting its disposable emulator for reproducible first-run shots.
+if [[ "${SHIFTORA_CAPTURE_FRESH_STATE:-0}" == "1" ]]; then
+  adb shell pm clear "$package" >/dev/null
+fi
 adb shell am force-stop "$package" || true
 adb shell am start -W -n "$package/.MainActivity"
 sleep 4
@@ -74,7 +79,24 @@ PY
     exit 1
   fi
 }
-if tap_label "Preskoči"; then
+if [[ "${SHIFTORA_CAPTURE_FRESH_STATE:-0}" == "1" ]]; then
+  # Capture all four onboarding pages on the fresh CI emulator.
+  assert_screen_text "Dobro došao u Shiftoru!"
+  tap_label "Započni"
+  sleep 1
+  assert_screen_text "Planiraj smjene"
+  adb exec-out screencap -p > "shiftora-${device}-onboarding-plan.png"
+  tap_label "Dalje"
+  sleep 1
+  assert_screen_text "Prati svoje sate"
+  adb exec-out screencap -p > "shiftora-${device}-onboarding-hours.png"
+  tap_label "Dalje"
+  sleep 1
+  assert_screen_text "Procijeni plaću"
+  adb exec-out screencap -p > "shiftora-${device}-onboarding-salary.png"
+  tap_label "Započni"
+  sleep 3
+elif tap_label "Preskoči"; then
   sleep 3
 fi
 # The Gradle connectedAndroidTest task uninstalls its test runner APK on

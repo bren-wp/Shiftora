@@ -1,5 +1,18 @@
 # Povijest izdanja
 
+## 0.9.5 — 25. 10. 2026. | UI/UX preciznost, responzivnost i prvi dojam
+
+- Androidova statusna traka prati stvarni izgled aktivnog zaslona: tamna zaglavlja kalendara, statistike, plaće i postavki koriste svijetle ikone, a svijetla početna tamne.
+- Novi nativni **Shiftora welcome** u tamnim plavo-zelenim tonovima, s povećanim logotipom, sloganom i jasnim gumbom `Započni`. Tri postojeća funkcionalna koraka uvoda ostaju sačuvana. Fotografija planina iz marketinške vizualizacije nije zamijenjena neovlaštenom ili generiranom slikom.
+- Onboarding automatski prilagođava Android statusne ikone ovisno o tamnoj dobrodošlici ili svijetlim edukativnim ekranima.
+- Statistički KPI parovi i kružni graf s legendom prelaze u vertikalni raspored na vrlo uskim zaslonima, bez gubitka natpisa, sati i postotaka; na uobičajenim zaslonima ostaju usporedni kao u referenci.
+- Prekidači u uređivaču smjena sada su klikabilni po cijelom retku s 56dp dodirnom površinom i semantikom za čitače zaslona.
+- Minimalna visina kalendarskih pločica i sekundarnih akcija povećana je radi pouzdanijeg odabira.
+- Dodani UI testovi za cijeli tok dobrodošlice i prolazak kroz sva tri koraka.
+- Snimanje zaslona u GitHub CI-u pokriva tamnu dobrodošlicu i sve tri stranice uvoda; resetiranje je izričito ograničeno na privremeni emulator i nije zadano u lokalnoj skripti.
+
+**Granica provjere:** izvođenje stvarne aplikacije i instrumentalni testovi mogu potvrditi rad i regresije, ali ne i matematički potpunu 1:1 pikselnu podudarnost s marketinškim prikazima različite rezolucije. SQLite baza, korisnički rasporedi, privatnost i mehanizam sigurnosnih kopija nisu mijenjani.
+
 ## 0.9.4 — 25. 10. 2026. | Dodatna vizualna preciznost i stvarna screenshot QA
 
 - Ispravljen hrvatski **genitiv mjeseca** u punom datumu: npr. `24. listopada 2026.`, uz očuvanje nominativa zaglavlja `Listopad 2026.`.

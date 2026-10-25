@@ -71,3 +71,18 @@ i screenshot provjera s praznim kalendarom i nulama u statistikama.
 Automatski CI i screenshot provjere nisu zamjena za mjerljivu vizualnu usporedbu
 istih uređaja i stanja. Stvarna aplikacija treba zadržati stvarne podatke
 korisnika, a ne preslikati izmišljene iznose s dizajnerskog mockupa.
+
+## Revizija 0.9.5 — dovršavanje sistemskog UI-a i manjih zaslona
+
+| Područje | Intervencija | Što ostaje otvoreno |
+| --- | --- | --- |
+| Sustavna statusna traka | Boja statusnih ikona ovisi o stvarnom svijetlom/tamnom zaglavlju, a ne samo o globalnoj temi | OEM interpretacija Android 16 edge-to-edge načina |
+| Početna dobrodošlica | Zaseban tamni Compose welcome + 3 edukativna koraka; svi gumbi dostupni, bez interneta ili novih dopuštenja | Izvorna panoramska fotografija marketinške reference nije dio aplikacijskih resursa |
+| Statistika | Dvije KPI kartice ostaju usporedne na širim ekranima, a na uskim se slažu okomito; kružni graf prelazi iz reda u stupac kad nema prostora za čitljive oznake | Provjera pri 200% veličini fonta na fizičkom uređaju |
+| Uređivač | Puni red prekidača je semantički Switch i minimalno 56dp visok | TalkBack izgovor na stvarnom uređaju |
+| Kalendar | Veće pločice dana i tipke za dodatne oznake / uređivanje | Usklađivanje s renderiranim mockupom zahtijeva jednako stanje i fizičku veličinu |
+| QA početnih ekrana | GitHub AVD može resetirati samo vlastite podatke i snimiti dobrodošlicu te sva 3 koraka; lokalna skripta ne briše podatke bez opt-in varijable | Vizualni ručni pregled svih rezultata |
+
+Ovo izdanje **ne** mijenja postojeću Androidovu lokalnu bazu, obračunske formule,
+radne podatke ili korisničke boje. AAB ostaje nepotpisan sve dok se ne upotrijebi
+vlasnikov produkcijski upload ključ.
