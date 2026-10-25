@@ -160,12 +160,13 @@ class MainActivity : ComponentActivity() {
                         }
                 }
             }
+            // Read observable UI state *during composition*, not inside
+            // SideEffect, so changing tabs invalidates this effect and updates
+            // status-bar icon contrast. This fixes white icons on light Home.
+            val lightStatusSurface = !darkMode &&
+                (if (onboarding) onboardingStep != 0 else tab == 0)
             SideEffect {
-                // Only the home screen has a light header. Calendar, statistics,
-                // salary and More use a navy header even when light theme is active.
-                // System clock and battery glyphs must follow the visible surface.
-                val lightStatusSurface = !darkMode &&
-                    (if (onboarding) onboardingStep != 0 else tab == 0)
+                // System clock and battery glyphs follow the visible surface.
                 // On edge-to-edge devices the status bar is transparent and
                 // reveals the decor background, not window.statusBarColor.
                 // Keep Home/tutorial dark glyphs legible on light backgrounds.
@@ -220,11 +221,9 @@ class MainActivity : ComponentActivity() {
             ShiftoraTheme(darkMode, shiftColors) {
                 // Paint under the transparent edge-to-edge status bar. Updating
                 // statusBarColor alone leaves navy behind light Home/tutorials.
-                val lightSystemSurface = !darkMode &&
-                    (if (onboarding) onboardingStep != 0 else tab == 0)
                 Box(
                     Modifier.fillMaxSize().background(
-                        if (lightSystemSurface) Palette.Bg else Palette.Navy
+                        if (lightStatusSurface) Palette.Bg else Palette.Navy
                     )
                 ) {
                 if (onboarding) {
