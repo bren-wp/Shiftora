@@ -314,7 +314,7 @@ fun CalendarScreen(
                     Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
                         .background(if (isSelected) Color(0xFFD4E5FF) else Color.Transparent)
                         .heightIn(min = 48.dp)
-                        .semantics { selected = isSelected }
+                        .semantics { this.selected = isSelected }
                         .clickable(role = Role.Tab) { weekOnly = index == 1 }
                         .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center) {
