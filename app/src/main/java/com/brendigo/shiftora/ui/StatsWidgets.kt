@@ -201,11 +201,11 @@ fun SalaryStatsCard(totals: WorkTotals, previous: WorkTotals) {
                 tint = Color(0xFF087C74), modifier = Modifier.size(19.dp))
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val stacked = maxWidth < 320.dp || LocalDensity.current.fontScale > 1.3f
+            val stacked = maxWidth < 288.dp || LocalDensity.current.fontScale > 1.3f
             val amount: @Composable (Modifier) -> Unit = { modifier ->
                 Column(modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     Text(euros(totals.grossCents), color = Palette.Navy,
-                        fontSize = if (stacked) 32.sp else 27.sp,
+                        fontSize = if (stacked) 32.sp else 24.sp,
                         lineHeight = 35.sp, fontWeight = FontWeight.ExtraBold,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                     TrendIndicator(totals.grossCents, previous.grossCents)
@@ -278,7 +278,7 @@ fun StatsExplanation(totals: WorkTotals, settings: SalarySettings) {
                     Palette.CoralLight)
             )
             BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val columns = if (maxWidth >= 325.dp &&
+                val columns = if (maxWidth >= 295.dp &&
                     LocalDensity.current.fontScale <= 1.3f) 4 else 2
                 Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     items.chunked(columns).forEach { line ->
