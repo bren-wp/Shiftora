@@ -16,6 +16,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -80,11 +83,45 @@ fun shiftBg(kind: ShiftKind): Color {
     }
 }
 
+/**
+ * Palm silhouette for free days. Material's BeachAccess is an umbrella, not the
+ * palm tree used by Shiftora's reference calendar and onboarding.
+ * Keeping this as an ImageVector lets every existing Icon honor theme tint.
+ */
+private val ShiftoraPalm: ImageVector by lazy {
+    ImageVector.Builder(
+        name = "ShiftoraPalm", defaultWidth = 24.dp, defaultHeight = 24.dp,
+        viewportWidth = 24f, viewportHeight = 24f
+    ).apply {
+        path(fill = SolidColor(Color.Black)) {
+            moveTo(11.5f, 8.5f)
+            lineTo(13f, 8.5f)
+            cubicTo(12.3f, 13.3f, 13.3f, 17.9f, 15.2f, 21f)
+            lineTo(8.8f, 21f)
+            cubicTo(10.6f, 17.6f, 11.8f, 13.2f, 11.5f, 8.5f)
+            close()
+        }
+        path(stroke = SolidColor(Color.Black), strokeLineWidth = 2.3f,
+            strokeLineCap = StrokeCap.Round) {
+            moveTo(12f, 8.5f)
+            cubicTo(9.1f, 3.6f, 5f, 3.7f, 2.7f, 8.1f)
+            moveTo(12f, 8.5f)
+            cubicTo(14.4f, 3.5f, 19.2f, 4f, 21.3f, 8f)
+            moveTo(12f, 8.5f)
+            cubicTo(7.8f, 7.1f, 5.1f, 9.1f, 4.6f, 12.2f)
+            moveTo(12f, 8.5f)
+            cubicTo(16.7f, 7.4f, 19f, 9.4f, 19.6f, 12.2f)
+            moveTo(12f, 8.5f)
+            cubicTo(11.3f, 4.8f, 12.2f, 2.8f, 15.2f, 2f)
+        }
+    }.build()
+}
+
 fun shiftIcon(kind: ShiftKind): ImageVector = when (kind) {
     ShiftKind.MORNING -> Icons.Default.WbSunny
     ShiftKind.AFTERNOON -> Icons.Default.WbTwilight
     ShiftKind.NIGHT -> Icons.Default.NightsStay
-    ShiftKind.OFF -> Icons.Default.BeachAccess
+    ShiftKind.OFF -> ShiftoraPalm
     ShiftKind.CUSTOM -> Icons.Default.Schedule
     ShiftKind.DAY -> Icons.Default.WbSunny
     ShiftKind.STANDBY -> Icons.Default.NotificationsActive
