@@ -110,51 +110,67 @@ fun ShiftDonutCard(totals: WorkTotals) {
         Triple("Noćni rad", totals.chartNightMinutes, Palette.Purple),
         Triple("Nedjelje / blagdani", totals.chartSpecialMinutes, Palette.Coral)
     )
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(23.dp))
-            .background(MaterialTheme.colorScheme.surface).padding(14.dp)
-    ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(Modifier.size(129.dp), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.fillMaxSize().padding(9.dp)) {
-                    val width = 19.dp.toPx()
-                    if (total <= 0L) {
-                        drawArc(Palette.BlueLight, -90f, 360f,
-                            useCenter = false, style = Stroke(width, cap = StrokeCap.Butt))
-                    } else {
-                        var offset = -90f
-                        sections.forEach { (_, minutes, color) ->
-                            if (minutes > 0L) {
-                                val arc = minutes.toFloat() / total.toFloat() * 360f
-                                drawArc(color, offset, arc, useCenter = false,
-                                    style = Stroke(width, cap = StrokeCap.Butt))
-                                offset += arc
-                            }
+    val chart: @Composable () -> Unit = {
+        Box(Modifier.size(129.dp), contentAlignment = Alignment.Center) {
+            Canvas(Modifier.fillMaxSize().padding(9.dp)) {
+                val stroke = Stroke(width = 19.dp.toPx(), cap = StrokeCap.Butt)
+                if (total <= 0L) {
+                    drawArc(Palette.BlueLight, -90f, 360f, useCenter = false, style = stroke)
+                } else {
+                    var offset = -90f
+                    sections.forEach { (_, minutes, color) ->
+                        if (minutes > 0L) {
+                            val sweep = (minutes.toFloat() / total.toFloat()) * 360f
+                            drawArc(color, offset, sweep, useCenter = false, style = stroke)
+                            offset += sweep
                         }
                     }
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(minutesLabel(total), color = MaterialTheme.colorScheme.onSurface, fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold, maxLines = 1)
-                    Text("Ukupno", color = Palette.Secondary, fontSize = 12.sp)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(minutesLabel(total), color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 28.sp, fontWeight = FontWeight.Bold,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("Ukupno", color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp)
+            }
+        }
+    }
+    val legend: @Composable (Modifier) -> Unit = { modifier ->
+        Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            sections.forEach { (name, amount, color) ->
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Box(Modifier.size(10.dp).clip(CircleShape).background(color))
+                    Text(name, color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 11.sp, maxLines = 2, lineHeight = 14.sp,
+                        overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                    Text(minutesLabel(amount), color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                    Text(if (total == 0L) "0%" else
+                        ((amount * 100.0 / total).roundToInt()).toString() + "%",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 10.sp, maxLines = 1)
                 }
             }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                sections.forEach { (name, amount, color) ->
-                    Row(verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Box(Modifier.size(10.dp).clip(CircleShape).background(color))
-                        Text(name, color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 11.sp, maxLines = 1,
-                            overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                        Text(minutesLabel(amount), color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
-                        Text(if (total == 0L) "0%" else
-                            ((amount * 100.0 / total).roundToInt()).toString() + "%",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 10.sp, maxLines = 1)
-                    }
+        }
+    }
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(23.dp))
+        .background(MaterialTheme.colorScheme.surface).padding(14.dp)) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            // Preserve the reference's donut + legend layout on normal phones.
+            // Stack only when text would otherwise collapse on narrow screens.
+            if (maxWidth < 310.dp) {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    chart()
+                    legend(Modifier.fillMaxWidth())
+                }
+            } else {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    chart()
+                    legend(Modifier.weight(1f))
                 }
             }
         }
