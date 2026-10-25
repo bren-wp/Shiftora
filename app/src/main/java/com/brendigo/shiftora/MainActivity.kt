@@ -186,8 +186,11 @@ class MainActivity : ComponentActivity() {
                         "Više" to Icons.Default.MoreHoriz
                     )
                     Scaffold(
-                        containerColor = if (!darkMode)
-                            MaterialTheme.colorScheme.background else Palette.Navy,
+                        // Android 15/16 enforce edge-to-edge, so statusBarColor
+                        // alone cannot paint behind system icons. The Scaffold
+                        // background must match the visible tab header.
+                        containerColor = if (darkMode || tab != 0)
+                            Palette.Navy else MaterialTheme.colorScheme.background,
                         snackbarHost = { SnackbarHost(snackbars) },
                         bottomBar = {
                             Row(
