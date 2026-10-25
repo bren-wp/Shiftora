@@ -23,6 +23,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.geometry.Offset
@@ -616,49 +618,108 @@ fun OnboardingScreen(onComplete: () -> Unit, onStepChange: (Int) -> Unit = {}) {
     }
 }
 
-/** Dark welcome page is rendered in native Compose, not a static marketing screenshot. */
+/** A native scenic welcome treatment without network assets or permissions. */
 @Composable
 private fun ShiftoraWelcomeScreen(onStart: () -> Unit, onSkip: () -> Unit) {
     val compact = LocalConfiguration.current.screenHeightDp < 680
-    Column(
-        Modifier.fillMaxSize()
-            .background(Brush.verticalGradient(listOf(
-                Palette.DeepNavy, Palette.Navy, Color(0xFF06294C), Palette.DeepNavy
+    Box(Modifier.fillMaxSize()
+        .background(Brush.verticalGradient(listOf(
+            Color(0xFF172845), Color(0xFF0D2847),
+            Palette.Navy, Palette.DeepNavy
+        )))) {
+        // Atmospheric mountain-and-road backdrop. It uses device-scaled vectors,
+        // remains offline and keeps text legible; it is not a stock/photo asset.
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val horizon = Path().apply {
+                moveTo(0f, h * .38f)
+                lineTo(w * .12f, h * .31f)
+                lineTo(w * .26f, h * .35f)
+                lineTo(w * .43f, h * .24f)
+                lineTo(w * .52f, h * .31f)
+                lineTo(w * .65f, h * .27f)
+                lineTo(w * .83f, h * .35f)
+                lineTo(w, h * .29f)
+                lineTo(w, h * .65f)
+                lineTo(0f, h * .65f)
+                close()
+            }
+            drawPath(horizon, Color(0xFF1A3150).copy(alpha = .85f))
+            val ridge = Path().apply {
+                moveTo(0f, h * .48f)
+                lineTo(w * .16f, h * .40f)
+                lineTo(w * .38f, h * .45f)
+                lineTo(w * .61f, h * .37f)
+                lineTo(w * .78f, h * .43f)
+                lineTo(w, h * .38f)
+                lineTo(w, h * .80f)
+                lineTo(0f, h * .80f)
+                close()
+            }
+            drawPath(ridge, Color(0xFF071D37).copy(alpha = .77f))
+            val road = Path().apply {
+                moveTo(w * .80f, h * .40f)
+                cubicTo(w * .70f, h * .50f, w * .95f, h * .51f, w * .74f, h * .59f)
+                cubicTo(w * .50f, h * .66f, w * .87f, h * .67f, w * .65f, h * .83f)
+            }
+            drawPath(road, Color(0xFFCC875D).copy(alpha = .35f),
+                style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round))
+            drawPath(road, Color(0xFFFFC98B).copy(alpha = .75f),
+                style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round))
+            drawRect(Brush.verticalGradient(listOf(
+                Color(0xFF04152B).copy(alpha = .12f),
+                Color(0xFF04152B).copy(alpha = .35f),
+                Color(0xFF04152B).copy(alpha = .96f)
             )))
-            .statusBarsPadding().navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 26.dp, vertical = if (compact) 12.dp else 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Spacer(Modifier.weight(1f))
-            TextButton(onClick = onSkip, modifier = Modifier.heightIn(min = 48.dp)) {
-                Text("Preskoči", color = Color(0xFFC9DAF5))
+        }
+        Column(
+            Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 26.dp, vertical = if (compact) 10.dp else 18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Spacer(Modifier.weight(1f))
+                TextButton(onClick = onSkip, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text("Preskoči", color = Color(0xFFD2E4FB))
+                }
+            }
+            Spacer(Modifier.height(if (compact) 14.dp else 30.dp))
+            Text("Tvoj rad.\nTvoja pravila.",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.End,
+                color = Color(0xFFE7E5EF), fontWeight = FontWeight.Medium,
+                fontSize = 19.sp, lineHeight = 23.sp)
+            Spacer(Modifier.height(if (compact) 16.dp else 32.dp))
+            BrandMark(Modifier.size(if (compact) 139.dp else 170.dp))
+            Spacer(Modifier.height(8.dp))
+            Text("Shiftora", color = Color.White, fontWeight = FontWeight.ExtraBold,
+                fontSize = if (compact) 45.sp else 52.sp, lineHeight = 58.sp)
+            Text("Moje smjene. Moji sati.",
+                color = Color(0xFFD8E6F7), fontSize = 16.sp)
+            Spacer(Modifier.height(if (compact) 37.dp else 72.dp))
+            Text("Dobro došao u Shiftoru!", color = Color.White,
+                fontSize = 25.sp, lineHeight = 31.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(12.dp))
+            Text("Planiraj smjene, prati radne sate i procijeni bruto plaću. " +
+                "Sve na jednom mjestu, jednostavno i bez registracije.",
+                color = Color(0xFFD0DCF0), fontSize = 15.sp, lineHeight = 23.sp,
+                textAlign = TextAlign.Center)
+            Spacer(Modifier.height(20.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                repeat(3) { i ->
+                    Box(Modifier.size(9.dp).clip(RoundedCornerShape(20.dp))
+                        .background(if (i == 0) Palette.Blue else Color(0xFF6C81A4)))
+                }
+            }
+            Spacer(Modifier.height(20.dp))
+            BlueAction("Započni", onStart, Modifier.fillMaxWidth(),
+                Icons.Default.ArrowForward)
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = onSkip) {
+                Text("Preskoči uvod", color = Color(0xFF82B1FF))
             }
         }
-        Spacer(Modifier.height(if (compact) 36.dp else 76.dp))
-        Text("Tvoj rad. Tvoja pravila.",
-            color = Color(0xFFB8D2F4), fontWeight = FontWeight.Medium, fontSize = 18.sp)
-        Spacer(Modifier.height(if (compact) 22.dp else 44.dp))
-        BrandMark(Modifier.size(if (compact) 128.dp else 168.dp), darkSurface = true)
-        Spacer(Modifier.height(12.dp))
-        Text("Shiftora", color = Color.White, fontWeight = FontWeight.ExtraBold,
-            fontSize = if (compact) 45.sp else 52.sp, lineHeight = 58.sp)
-        Text("Moje smjene. Moji sati.", color = Color(0xFFD8E6F7), fontSize = 16.sp)
-        Spacer(Modifier.height(if (compact) 45.dp else 82.dp))
-        Text("Dobro došao u Shiftoru!", color = Color.White,
-            fontSize = 25.sp, lineHeight = 31.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(12.dp))
-        Text("Planiraj smjene, prati radne sate i procijeni bruto plaću. " +
-            "Sve na jednom mjestu, jednostavno i bez registracije.",
-            color = Color(0xFFD0DCF0), fontSize = 15.sp,
-            lineHeight = 23.sp,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-        Spacer(Modifier.height(26.dp))
-        BlueAction("Započni", onStart, Modifier.fillMaxWidth(), Icons.Default.ArrowForward)
-        Spacer(Modifier.height(12.dp))
-        Text("Radi bez interneta · tvoji podaci ostaju na uređaju",
-            color = Color(0xFF9BB4D8), fontSize = 12.sp,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
