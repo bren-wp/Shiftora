@@ -1,5 +1,16 @@
 # Povijest izdanja
 
+## 0.9.8 — 25. 10. 2026. | Korekcije ikonografije, pristupačnosti i manjih zaslona
+
+- **Ikone bliže referencama:** novi nativni vektor palme za slobodne dane, obojene točke za jutarnje i popodnevne smjene u mjesečnoj mreži, složene kovanice u navigaciji Plaće te stupčani grafikon na kartici procjene. Na odabranom danu i dalje je istaknuta čitljiva ikona.
+- **Shiftora S + sat:** dodani su diskretni svjetlosni naglasci i kontrastan rub sata u postojećem foreground vektoru za launcher, splash i zaglavlje. Sačuvane su adaptive i monochrome maske.
+- **TalkBack:** preklopnici Mjesec/Tjedan u Kalendaru i Tjedan/Mjesec/Godina u Statistici izlažu ispravno stanje odabira.
+- **Dijalozi:** urednik smjena, rotacijski raspored, postavke satnice, odabir boja, fond sati i arhiva sada ograničavaju visinu sadržaja prema fizičkoj visini uređaja te zadržavaju skrolanje i gumbe.
+- **Provjere:** proširen test odabira kartica; dodan Compose UI test za prikaz Kalendara i Statistike na širini 320dp s 150 % veličinom fonta.
+- Dokumentiran pregled stvarnih snimki ekrana Android API 30/36 i preostalih razlika prema dostavljenim referencama u `docs/PIXEL_AUDIT_2026-10-25.md`.
+
+**Napomena:** ovo je razvojno izdanje, a ne potvrda stroge pikselne 1:1 podudarnosti. Izvorna fotografija s onboarding marketinškog prikaza nije dodana bez izvornog materijala. Neto plaća se ne izmišlja: aplikacija prikazuje informativnu bruto procjenu. SQLite shema, postojeći rasporedi, arhiva, postavke i formule nisu mijenjani. Debug APK nije namijenjen nadogradnji produkcijske instalacije s drugačijim potpisom, a nepotpisani AAB nije valjan za izravnu objavu u Play Console.
+
 ## 0.9.7 — 25. 10. 2026. | Preciznija navigacija, tipografija i male rezolucije
 
 - **Kalendar ostaje početni ekran** nakon splash zaslona, a Početna zasebna kartica.
@@ -11,7 +22,6 @@
 - Donja navigacija više ne **smanjuje font na 9sp** kada je korisnik povećao sistemsku veličinu teksta. Oznake zadržavaju čitljivu veličinu, dopuštena su dva retka te veća visina dodirne površine.
 - U dijalogu za boje smjena povećane su tekstne oznake i dodirne površine; paleta se prilagođava širini s četiri ili pet boja u retku, a odabir svake vrste smjene čitljiv je za TalkBack.
 - Dodane instrumentacijske regresijske provjere prisutnosti odabira mjeseca i razdoblja na svim relevantnim ekranima.
-- Preklopnici **Mjesec/Tjedan** u Kalendaru i **Tjedan/Mjesec/Godina** u Statistici sada izlažu oznaku odabranog stanja pristupačnosti (TalkBack). Prošireni instrumentacijski testovi provjeravaju promjenu odabira nakon svakog pritiska.
 
 **Napomena:** marketinški renderi služe kao vizualni cilj, no njihove razlike u uređaju, gustoći prikaza i primjerima podataka ne dopuštaju izjavu o strogoj pikselnoj 1:1 podudarnosti bez kontroliranog vizualnog diff testa. Lokalni rasporedi, izračuni, SQLite shema i sigurnosne kopije nisu mijenjani.
 
