@@ -188,7 +188,7 @@ fun HomeScreen(
             }
             item {
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    if (maxWidth < 340.dp) {
+                    if (maxWidth < 340.dp || LocalDensity.current.fontScale > 1.3f) {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             HomeWeeklyOverview(weekTotal.paidMinutes, dailyTotals, maxDayMinutes,
                                 Modifier.fillMaxWidth()) { onTab(2) }
@@ -209,7 +209,7 @@ fun HomeScreen(
             item {
                 SectionTitle("Brze akcije")
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    if (maxWidth < 355.dp) {
+                    if (maxWidth < 355.dp || LocalDensity.current.fontScale > 1.25f) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             HomeQuickAction("Dodaj smjenu", Icons.Default.Add, Palette.Blue,
                                 Color.White, Modifier.fillMaxWidth()) { onAdd(today) }
