@@ -647,6 +647,7 @@ private fun DetailTile(
 
 @Composable
 fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () -> Unit) {
+    val context = LocalContext.current
     var shownText by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
     val shown = YearMonth.parse(shownText)
     var period by rememberSaveable { mutableIntStateOf(1) }
@@ -718,9 +719,24 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                         2 -> shown.year.toString()
                         else -> shown.atDay(1).monthLabel()
                     }
-                    Text(name, modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium, maxLines = 1,
-                        overflow = TextOverflow.Ellipsis)
+                    TextButton(onClick = {
+                        val initial = if (period == 0) weekAnchor else shown.atDay(1)
+                        DatePickerDialog(context, { _, year, month, day ->
+                            val date = LocalDate.of(year, month + 1, day)
+                            shownText = YearMonth.from(date).toString()
+                            weekAnchorText = date.with(
+                                TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)
+                            ).toString()
+                        }, initial.year, initial.monthValue - 1, initial.dayOfMonth).show()
+                    }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp)) {
+                        Text(name, color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Icon(Icons.Default.ArrowDropDown,
+                            contentDescription = "Odaberi razdoblje statistike",
+                            modifier = Modifier.size(19.dp))
+                    }
                     IconButton(onClick = {
                         if (period == 0) weekAnchorText = weekAnchor.plusWeeks(1).toString()
                         else shownText = shown.plusMonths(if (period == 2) 12 else 1).toString()
@@ -801,6 +817,7 @@ fun SalaryScreen(
     shifts: List<Shift>, settings: SalarySettings,
     onEditSalary: () -> Unit, onSettings: () -> Unit
 ) {
+    val context = LocalContext.current
     var monthText by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
     val month = YearMonth.parse(monthText)
     val totals = remember(shifts, settings, month) {
@@ -819,8 +836,20 @@ fun SalaryScreen(
                     IconButton({ monthText = month.minusMonths(1).toString() }) {
                         Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodni mjesec")
                     }
-                    Text(month.atDay(1).monthLabel(), Modifier.weight(1f),
-                        textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
+                    TextButton(onClick = {
+                        DatePickerDialog(context, { _, year, selectedMonth, _ ->
+                            monthText = YearMonth.of(year, selectedMonth + 1).toString()
+                        }, month.year, month.monthValue - 1, 1).show()
+                    }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp)) {
+                        Text(month.atDay(1).monthLabel(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Icon(Icons.Default.ArrowDropDown,
+                            contentDescription = "Odaberi mjesec obračuna",
+                            modifier = Modifier.size(19.dp))
+                    }
                     IconButton({ monthText = month.plusMonths(1).toString() }) {
                         Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeći mjesec")
                     }
