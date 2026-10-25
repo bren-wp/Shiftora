@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -82,22 +83,27 @@ fun StatIndicatorCard(
     // Match the reference's compact two-column KPI cards. Allow
     // two-line titles without forcing the second row below the fold.
     Column(modifier.clip(RoundedCornerShape(21.dp)).background(surface)
-        .padding(horizontal = 11.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        .padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(icon, contentDescription = null, tint = tint,
-                modifier = Modifier.size(25.dp))
+                modifier = Modifier.size(27.dp))
             Column(Modifier.weight(1f)) {
                 Text(title, color = Palette.Ink,
-                    fontSize = 12.sp, lineHeight = 15.sp,
+                    fontSize = 13.sp, lineHeight = 17.sp,
                     fontWeight = FontWeight.SemiBold, maxLines = 2)
-                Text(value, color = Palette.Ink, fontSize = 22.sp,
+                Text(value, color = Palette.Ink, fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis, lineHeight = 26.sp)
+                    overflow = TextOverflow.Ellipsis, lineHeight = 28.sp)
             }
         }
         TrendIndicator(currentMinutes, previousMinutes)
+        if (previousMinutes > 0L) {
+            Text("u odnosu na prošlo razdoblje", color = Palette.Secondary,
+                fontSize = 10.sp, maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+        }
         if (extra != null) {
             Text(extra, color = Palette.Secondary, fontSize = 10.sp,
                 lineHeight = 12.sp, maxLines = 1,
@@ -160,7 +166,10 @@ fun ShiftDonutCard(totals: WorkTotals) {
             }
         }
     }
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(23.dp))
+    Column(Modifier.fillMaxWidth()
+        .shadow(3.dp, RoundedCornerShape(23.dp),
+            ambientColor = Palette.Navy.copy(alpha = .06f))
+        .clip(RoundedCornerShape(23.dp))
         .background(MaterialTheme.colorScheme.surface).padding(14.dp)) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             // Preserve the reference's donut + legend layout on normal phones.
