@@ -1,5 +1,17 @@
 # Povijest izdanja
 
+## 0.9.9 — 25. 10. 2026. | Vizualna dorada po referencama
+
+- **Jedinstveni preklopnici razdoblja:** Kalendar (Mjesec/Tjedan) i Statistika (Tjedan/Mjesec/Godina) koriste jednu Compose komponentu s dosljednim 52dp dodirnim područjem, bojama i TalkBack stanjem odabira.
+- **Zaglavlja, ikone i značke:** veći Shiftora S+satić u zaglavlju, povećan S unutar adaptive i monochrome ikona, pristupačan gumb Obavijesti na Kalendaru (jasno naznačeno da automatske obavijesti još nisu dostupne), istaknute zaobljene oznake planirane/odrađene smjene te „Još traje” kada je smjena stvarno aktivna.
+- **Statistika:** vizualno bogatija mint kartica procjene bruto plaće s odvojenom osnovicom i jasnim upozorenjem da neto nije izračunat; bolje strukturirane i responzivne kartice objašnjenja na 2/4 stupca.
+- **Plaća i Više:** preoblikovana kartica procijenjene bruto zarade, jasnije istaknuti osnovica/dodaci te konzistentne obojene podloge ikona postavki.
+- **Onboarding:** nativno nacrtani planinski obris i cesta na uvodnom zaslonu, veći logo, tri indikatora napretka, naglašene ilustracije i blago nagnute kartice te ovalne akcije strelice za korake 1 i 2. Uvod ostaje dostupan offline i bez registracije.
+- **Sustavne trake:** usklađena pozadina edge-to-edge statusnog područja sa svijetlim ili tamnim zaglavljem radi čitljivosti.
+- **Testna stabilnost:** onboarding UI test prilagođen semantičkom nazivu akcije strelice; svi postojeći Android CI i emulatorski testovi trebaju proći prije spajanja.
+
+**Granice:** fotorealistična planinska pozadina iz marketinške reference nije priložena kao zaseban izvorni resurs pa je dodana nativna vektorska interpretacija, ne identična fotografija. Izgled na različitim gustoćama i veličinama fonta može se razlikovati od rendera; ovo nije certifikat 1:1 pikselske podudarnosti. Izračuni, SQLite baza, arhiva, postavke i sigurnosne kopije nisu mijenjani. Nepotpisani AAB nije spreman za objavu na Google Playu.
+
 ## 0.9.8 — 25. 10. 2026. | Korekcije ikonografije, pristupačnosti i manjih zaslona
 
 - **Ikone bliže referencama:** novi nativni vektor palme za slobodne dane, obojene točke za jutarnje i popodnevne smjene u mjesečnoj mreži, složene kovanice u navigaciji Plaće te stupčani grafikon na kartici procjene. Na odabranom danu i dalje je istaknuta čitljiva ikona.
