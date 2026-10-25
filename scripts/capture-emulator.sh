@@ -77,6 +77,12 @@ PY
 if tap_label "Preskoči"; then
   sleep 3
 fi
+# The Gradle connectedAndroidTest task uninstalls its test runner APK on
+# completion. Re-install *only* the instrumentation APK before invoking the
+# screenshot-only fixture; the regular production APK is already installed.
+test_apk="app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+test -s "$test_apk"
+adb install -r "$test_apk"
 # CI-only fixture: use a real test runner, never debug menu hooks or data
 # included in production. Without it the screenshots contain only empty
 # calendar cells and zero-value salary/statistics, masking real UI overflows.
