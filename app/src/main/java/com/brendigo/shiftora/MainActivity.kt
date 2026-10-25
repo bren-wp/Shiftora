@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val snackbars = remember { SnackbarHostState() }
             var tab by rememberSaveable { mutableIntStateOf(0) }
+            var onboardingStep by rememberSaveable { mutableIntStateOf(0) }
             val screenStateHolder = rememberSaveableStateHolder()
             var editing by remember { mutableStateOf<Shift?>(null) }
             var rotationOpen by remember { mutableStateOf(false) }
@@ -151,7 +152,8 @@ class MainActivity : ComponentActivity() {
                 // Only the home screen has a light header. Calendar, statistics,
                 // salary and More use a navy header even when light theme is active.
                 // System clock and battery glyphs must follow the visible surface.
-                val lightStatusSurface = !darkMode && (onboarding || tab == 0)
+                val lightStatusSurface = !darkMode &&
+                    (if (onboarding) onboardingStep != 0 else tab == 0)
                 window.statusBarColor = if (lightStatusSurface)
                     android.graphics.Color.WHITE
                 else android.graphics.Color.rgb(11, 31, 59)
@@ -170,7 +172,8 @@ class MainActivity : ComponentActivity() {
 
             ShiftoraTheme(darkMode, shiftColors) {
                 if (onboarding) {
-                    OnboardingScreen(onComplete = vm::finishOnboarding)
+                    OnboardingScreen(onComplete = vm::finishOnboarding,
+                        onStepChange = { onboardingStep = it })
                 } else {
                     BackHandler(enabled = tab != 0 && editing == null && !rotationOpen && !salaryOpen && !colorsOpen && !archiveOpen && pendingRestore == null) {
                         tab = 0
