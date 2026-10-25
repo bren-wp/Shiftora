@@ -880,7 +880,7 @@ fun SalaryScreen(
                             Text("Za ${month.atDay(1).monthLabel()}",
                                 color = Palette.Secondary, fontSize = 12.sp)
                         }
-                        Icon(Icons.Default.InfoOutline,
+                        Icon(Icons.Default.Info,
                             contentDescription = "Informativna bruto procjena",
                             tint = Color(0xFF008F75), modifier = Modifier.size(20.dp))
                     }
