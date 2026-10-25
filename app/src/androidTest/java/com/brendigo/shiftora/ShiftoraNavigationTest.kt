@@ -7,8 +7,6 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.brendigo.shiftora.data.ShiftKind
-import com.brendigo.shiftora.data.ShiftStore
 import java.time.YearMonth
 import com.brendigo.shiftora.ui.monthLabel
 import org.junit.Rule
@@ -59,17 +57,5 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Arhiva rasporeda").performScrollTo().performClick()
         compose.onNodeWithText("Zatvori").assertExists()
         compose.onNodeWithText("Zatvori").performClick()
-        // Emulator-only sample data used by screenshot QA. Never included in production.
-        val store = ShiftStore(compose.activity.applicationContext)
-        try {
-            val thisMonth = YearMonth.now()
-            store.addRotation(
-                thisMonth.atDay(1),
-                listOf(ShiftKind.MORNING, ShiftKind.AFTERNOON, ShiftKind.NIGHT, ShiftKind.OFF),
-                thisMonth.lengthOfMonth()
-            )
-        } finally {
-            store.close()
-        }
     }
 }
