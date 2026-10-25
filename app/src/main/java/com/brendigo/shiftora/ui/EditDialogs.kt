@@ -523,7 +523,7 @@ fun OnboardingScreen(onComplete: () -> Unit, onStepChange: (Int) -> Unit = {}) {
                     }
                     else -> Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.AccountBalanceWallet, contentDescription = null,
+                            Icon(Icons.Default.BarChart, contentDescription = null,
                                 tint = Palette.Mint)
                             Spacer(Modifier.width(8.dp))
                             Text("Procjena bruto plaće", fontWeight = FontWeight.Bold,
