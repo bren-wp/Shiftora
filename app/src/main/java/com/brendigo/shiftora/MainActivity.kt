@@ -31,6 +31,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -230,7 +231,8 @@ class MainActivity : ComponentActivity() {
                                             tint = ink, modifier = Modifier.size(24.dp))
                                         Spacer(Modifier.height(4.dp))
                                         Text(option.first, maxLines = 1, color = ink,
-                                            fontSize = 11.sp, fontWeight = if (active)
+                                            fontSize = if (LocalDensity.current.fontScale > 1.3f) 9.sp else 11.sp,
+                                            fontWeight = if (active)
                                                 FontWeight.Bold else FontWeight.Medium)
                                     }
                                 }
