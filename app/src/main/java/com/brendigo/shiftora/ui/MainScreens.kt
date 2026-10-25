@@ -222,6 +222,7 @@ fun CalendarScreen(
     val shown = YearMonth.parse(shownText)
     val selected = LocalDate.parse(selectedText)
     var weekOnly by rememberSaveable { mutableStateOf(false) }
+    var showAllLegend by rememberSaveable { mutableStateOf(false) }
     var fundEditorOpen by remember { mutableStateOf(false) }
     val fund = remember(shown, shifts, salary, monthlyFunds) {
         MonthlyFund.summary(shown, shifts, salary, monthlyFunds[shown.toString()])
@@ -386,24 +387,37 @@ fun CalendarScreen(
                     }
                 }
             }
-            Spacer(Modifier.height(5.dp))
-            Column(Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                ShiftKind.calendarOrder.chunked(5).forEach { kinds ->
-                    Row(Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                        kinds.forEach { kind ->
-                            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                                Box(Modifier.size(8.dp).clip(CircleShape).background(shiftColor(kind)))
-                                Text(kind.code, fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // The supplied calendar reference shows the four main colors on one
+            // line. Keep every special status discoverable without crowding the
+            // selected-day detail below the month grid.
+            TextButton(onClick = { showAllLegend = !showAllLegend },
+                modifier = Modifier.align(Alignment.End).heightIn(min = 40.dp),
+                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)) {
+                Text(if (showAllLegend) "Sakrij dodatne oznake" else "Ostale oznake",
+                    fontSize = 11.sp)
+                Icon(if (showAllLegend) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null, modifier = Modifier.size(18.dp))
+            }
+            if (showAllLegend) {
+                Column(Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                    ShiftKind.calendarOrder.chunked(5).forEach { kinds ->
+                        Row(Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            kinds.forEach { kind ->
+                                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                    Box(Modifier.size(8.dp).clip(CircleShape).background(shiftColor(kind)))
+                                    Text(kind.code, fontSize = 10.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
                             }
                         }
                     }
                 }
+                Spacer(Modifier.height(spacing))
             }
-            Spacer(Modifier.height(spacing))
             Column(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(21.dp))
                     .background(MaterialTheme.colorScheme.surface)
