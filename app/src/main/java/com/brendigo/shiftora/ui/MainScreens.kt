@@ -300,9 +300,11 @@ fun CalendarScreen(
         BoxWithConstraints(Modifier.fillMaxSize().clip(
             RoundedCornerShape(topStart = 27.dp, topEnd = 27.dp)
         ).background(MaterialTheme.colorScheme.surface)) {
-        val compact = maxHeight < 715.dp
-        val dayHeight = if (compact) 50.dp else 56.dp
-        val spacing = if (compact) 7.dp else 11.dp
+        val compact = maxHeight < 760.dp
+        // Fit the selected-day card on a standard-height phone while preserving
+        // a usable ~48dp day target and the full 7-column month grid.
+        val dayHeight = if (compact) 48.dp else 52.dp
+        val spacing = if (compact) 5.dp else 8.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 19.dp)) {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
@@ -381,7 +383,7 @@ fun CalendarScreen(
                         val details = if (entries.isEmpty()) "Nema smjene"
                             else entries.joinToString(", ") { "${it.kind.code}: ${it.kind.label}" }
                         Box(
-                            Modifier.weight(1f).padding(2.dp).height(dayHeight)
+                            Modifier.weight(1f).padding(1.dp).height(dayHeight)
                                 .clip(RoundedCornerShape(11.dp))
                                 .background(tileColor)
                                 .then(if (today && !chosen)
@@ -474,15 +476,7 @@ fun CalendarScreen(
             // The supplied calendar reference shows the four main colors on one
             // line. Keep every special status discoverable without crowding the
             // selected-day detail below the month grid.
-            TextButton(onClick = { showAllLegend = !showAllLegend },
-                modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp),
-                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)) {
-                Text(if (showAllLegend) "Sakrij dodatne oznake" else "Ostale oznake",
-                    fontSize = 11.sp)
-                Icon(if (showAllLegend) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null, modifier = Modifier.size(18.dp))
-            }
-            if (showAllLegend) {
+             if (showAllLegend) {
                 Column(Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     ShiftKind.calendarOrder.chunked(5).forEach { kinds ->
@@ -513,8 +507,24 @@ fun CalendarScreen(
                         RoundedCornerShape(21.dp))
                     .padding(if (compact) 11.dp else 15.dp)
             ) {
-                Text(selected.dateLabel(), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-                Spacer(Modifier.height(6.dp))
+                Row(Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(selected.dateLabel(), Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 13.sp, maxLines = 2)
+                    TextButton(
+                        onClick = { showAllLegend = !showAllLegend },
+                        modifier = Modifier.heightIn(min = 48.dp),
+                        contentPadding = PaddingValues(horizontal = 3.dp)
+                    ) {
+                        Text(if (showAllLegend) "Sakrij oznake" else "Ostale oznake",
+                            fontSize = 11.sp)
+                        Icon(if (showAllLegend) Icons.Default.ExpandLess
+                            else Icons.Default.ExpandMore,
+                            contentDescription = null, modifier = Modifier.size(17.dp))
+                    }
+                }
+                Spacer(Modifier.height(3.dp))
                 if (dayShifts.isEmpty()) {
                     Text("Za ovaj dan nema spremljene smjene.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
