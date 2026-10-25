@@ -188,7 +188,7 @@ fun HomeScreen(
             }
             item {
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    if (maxWidth < 340.dp) {
+                    if (maxWidth < 340.dp || LocalDensity.current.fontScale > 1.3f) {
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             HomeWeeklyOverview(weekTotal.paidMinutes, dailyTotals, maxDayMinutes,
                                 Modifier.fillMaxWidth()) { onTab(2) }
@@ -209,7 +209,7 @@ fun HomeScreen(
             item {
                 SectionTitle("Brze akcije")
                 BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    if (maxWidth < 355.dp) {
+                    if (maxWidth < 355.dp || LocalDensity.current.fontScale > 1.25f) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             HomeQuickAction("Dodaj smjenu", Icons.Default.Add, Palette.Blue,
                                 Color.White, Modifier.fillMaxWidth()) { onAdd(today) }
@@ -264,6 +264,7 @@ fun CalendarScreen(
     var selectedText by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
     val shown = YearMonth.parse(shownText)
     val selected = LocalDate.parse(selectedText)
+    val context = LocalContext.current
     var weekOnly by rememberSaveable { mutableStateOf(false) }
     var showAllLegend by rememberSaveable { mutableStateOf(false) }
     var fundEditorOpen by remember { mutableStateOf(false) }
@@ -299,9 +300,11 @@ fun CalendarScreen(
         BoxWithConstraints(Modifier.fillMaxSize().clip(
             RoundedCornerShape(topStart = 27.dp, topEnd = 27.dp)
         ).background(MaterialTheme.colorScheme.surface)) {
-        val compact = maxHeight < 715.dp
-        val dayHeight = if (compact) 50.dp else 56.dp
-        val spacing = if (compact) 7.dp else 11.dp
+        val compact = maxHeight < 760.dp
+        // Fit the selected-day card on a standard-height phone while preserving
+        // a usable ~48dp day target and the full 7-column month grid.
+        val dayHeight = if (compact) 48.dp else 52.dp
+        val spacing = if (compact) 5.dp else 8.dp
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 19.dp)) {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
@@ -327,8 +330,27 @@ fun CalendarScreen(
                     shownText = YearMonth.from(target).toString()
                 }) { Icon(Icons.Default.ChevronLeft, contentDescription =
                     if (weekOnly) "Prethodni tjedan" else "Prethodni mjesec") }
-                Text(shown.atDay(1).monthLabel(), style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                TextButton(
+                    onClick = {
+                        DatePickerDialog(context, { _, year, month, day ->
+                            val chosen = LocalDate.of(year, month + 1, day)
+                            shownText = YearMonth.from(chosen).toString()
+                            selectedText = chosen.toString()
+                            revealDetail = true
+                        }, selected.year, selected.monthValue - 1,
+                            selected.dayOfMonth).show()
+                    },
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    contentPadding = PaddingValues(horizontal = 2.dp)
+                ) {
+                    Text(shown.atDay(1).monthLabel(), color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 20.sp, fontWeight = FontWeight.Bold, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis)
+                    Icon(Icons.Default.ArrowDropDown,
+                        contentDescription = "Odaberi datum u kalendaru",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(20.dp))
+                }
                 IconButton(onClick = {
                     val target = if (weekOnly) selected.plusWeeks(1) else shown.plusMonths(1).atDay(1)
                     selectedText = target.toString()
@@ -361,7 +383,7 @@ fun CalendarScreen(
                         val details = if (entries.isEmpty()) "Nema smjene"
                             else entries.joinToString(", ") { "${it.kind.code}: ${it.kind.label}" }
                         Box(
-                            Modifier.weight(1f).padding(2.dp).height(dayHeight)
+                            Modifier.weight(1f).padding(1.dp).height(dayHeight)
                                 .clip(RoundedCornerShape(11.dp))
                                 .background(tileColor)
                                 .then(if (today && !chosen)
@@ -422,37 +444,39 @@ fun CalendarScreen(
                 }
             }
             Spacer(Modifier.height(spacing))
-            Row(Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                listOf(
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val mainKinds = listOf(
                     ShiftKind.MORNING to "Jutarnja",
                     ShiftKind.AFTERNOON to "Popodnevna",
                     ShiftKind.NIGHT to "Noćna",
                     ShiftKind.OFF to "Slobodno"
-                ).forEach { (kind, name) ->
-                    Row(verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Box(Modifier.size(9.dp).clip(CircleShape)
-                            .background(shiftColor(kind)))
-                        Text(name, fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1)
+                )
+                val columns = if (maxWidth < 355.dp ||
+                    LocalDensity.current.fontScale > 1.25f) 2 else 4
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    mainKinds.chunked(columns).forEach { group ->
+                        Row(Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                            group.forEach { (kind, name) ->
+                                Row(Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                    Box(Modifier.size(10.dp).clip(CircleShape)
+                                        .background(shiftColor(kind)))
+                                    Text(name, fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis)
+                                }
+                            }
+                        }
                     }
                 }
             }
             // The supplied calendar reference shows the four main colors on one
             // line. Keep every special status discoverable without crowding the
             // selected-day detail below the month grid.
-            TextButton(onClick = { showAllLegend = !showAllLegend },
-                modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp),
-                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)) {
-                Text(if (showAllLegend) "Sakrij dodatne oznake" else "Ostale oznake",
-                    fontSize = 11.sp)
-                Icon(if (showAllLegend) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null, modifier = Modifier.size(18.dp))
-            }
-            if (showAllLegend) {
+             if (showAllLegend) {
                 Column(Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     ShiftKind.calendarOrder.chunked(5).forEach { kinds ->
@@ -483,8 +507,24 @@ fun CalendarScreen(
                         RoundedCornerShape(21.dp))
                     .padding(if (compact) 11.dp else 15.dp)
             ) {
-                Text(selected.dateLabel(), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-                Spacer(Modifier.height(6.dp))
+                Row(Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(selected.dateLabel(), Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 13.sp, maxLines = 2)
+                    TextButton(
+                        onClick = { showAllLegend = !showAllLegend },
+                        modifier = Modifier.heightIn(min = 48.dp),
+                        contentPadding = PaddingValues(horizontal = 3.dp)
+                    ) {
+                        Text(if (showAllLegend) "Sakrij oznake" else "Ostale oznake",
+                            fontSize = 11.sp)
+                        Icon(if (showAllLegend) Icons.Default.ExpandLess
+                            else Icons.Default.ExpandMore,
+                            contentDescription = null, modifier = Modifier.size(17.dp))
+                    }
+                }
+                Spacer(Modifier.height(3.dp))
                 if (dayShifts.isEmpty()) {
                     Text("Za ovaj dan nema spremljene smjene.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
@@ -505,18 +545,39 @@ fun CalendarScreen(
                                     else "${clock(shift.startMinute)} – ${clock(shift.endMinute)} • ${minutesLabel(WorkCalculator.durationMinutes(shift))}",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, maxLines = 1)
                             }
-                            Text(if (!shift.kind.isWork) "Evidencija" else if (shift.actual) "Odrađeno" else "Planirano",
-                                color = if (shift.actual) Palette.Mint else Palette.Blue, fontSize = 11.sp)
+                            Text(if (!shift.kind.isWork) "Evidencija"
+                                else if (shift.actual) "Odrađeno" else "Planirano",
+                                color = if (shift.actual) Palette.Mint else Palette.Blue,
+                                fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         Spacer(Modifier.height(7.dp))
                         if (shift.kind.isWork) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                DetailTile("Radno vrijeme", "${clock(shift.startMinute)}–${clock(shift.endMinute)}",
-                                    Modifier.weight(1f), Icons.Default.Schedule)
-                                DetailTile("Pauza", "${shift.breakMinutes} min",
-                                    Modifier.weight(1f), Icons.Default.Coffee)
-                                DetailTile("Bilješka", shift.note.ifBlank { "—" },
-                                    Modifier.weight(1f), Icons.Default.Description)
+                            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                                if (maxWidth < 340.dp ||
+                                    LocalDensity.current.fontScale > 1.3f) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            DetailTile("Radno vrijeme",
+                                                "${clock(shift.startMinute)}–${clock(shift.endMinute)}",
+                                                Modifier.weight(1f), Icons.Default.Schedule)
+                                            DetailTile("Pauza", "${shift.breakMinutes} min",
+                                                Modifier.weight(1f), Icons.Default.Coffee)
+                                        }
+                                        DetailTile("Bilješka", shift.note.ifBlank { "—" },
+                                            Modifier.fillMaxWidth(), Icons.Default.Description)
+                                    }
+                                } else {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        DetailTile("Radno vrijeme",
+                                            "${clock(shift.startMinute)}–${clock(shift.endMinute)}",
+                                            Modifier.weight(1f), Icons.Default.Schedule)
+                                        DetailTile("Pauza", "${shift.breakMinutes} min",
+                                            Modifier.weight(1f), Icons.Default.Coffee)
+                                        DetailTile("Bilješka", shift.note.ifBlank { "—" },
+                                            Modifier.weight(1f), Icons.Default.Description)
+                                    }
+                                }
                             }
                         }
                         Spacer(Modifier.height(6.dp))
@@ -596,6 +657,7 @@ private fun DetailTile(
 
 @Composable
 fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () -> Unit) {
+    val context = LocalContext.current
     var shownText by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
     val shown = YearMonth.parse(shownText)
     var period by rememberSaveable { mutableIntStateOf(1) }
@@ -667,9 +729,24 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                         2 -> shown.year.toString()
                         else -> shown.atDay(1).monthLabel()
                     }
-                    Text(name, modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium, maxLines = 1,
-                        overflow = TextOverflow.Ellipsis)
+                    TextButton(onClick = {
+                        val initial = if (period == 0) weekAnchor else shown.atDay(1)
+                        DatePickerDialog(context, { _, year, month, day ->
+                            val date = LocalDate.of(year, month + 1, day)
+                            shownText = YearMonth.from(date).toString()
+                            weekAnchorText = date.with(
+                                TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)
+                            ).toString()
+                        }, initial.year, initial.monthValue - 1, initial.dayOfMonth).show()
+                    }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp)) {
+                        Text(name, color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Icon(Icons.Default.ArrowDropDown,
+                            contentDescription = "Odaberi razdoblje statistike",
+                            modifier = Modifier.size(19.dp))
+                    }
                     IconButton(onClick = {
                         if (period == 0) weekAnchorText = weekAnchor.plusWeeks(1).toString()
                         else shownText = shown.plusMonths(if (period == 2) 12 else 1).toString()
@@ -750,6 +827,7 @@ fun SalaryScreen(
     shifts: List<Shift>, settings: SalarySettings,
     onEditSalary: () -> Unit, onSettings: () -> Unit
 ) {
+    val context = LocalContext.current
     var monthText by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
     val month = YearMonth.parse(monthText)
     val totals = remember(shifts, settings, month) {
@@ -768,8 +846,20 @@ fun SalaryScreen(
                     IconButton({ monthText = month.minusMonths(1).toString() }) {
                         Icon(Icons.Default.ChevronLeft, contentDescription = "Prethodni mjesec")
                     }
-                    Text(month.atDay(1).monthLabel(), Modifier.weight(1f),
-                        textAlign = TextAlign.Center, style = MaterialTheme.typography.titleMedium)
+                    TextButton(onClick = {
+                        DatePickerDialog(context, { _, year, selectedMonth, _ ->
+                            monthText = YearMonth.of(year, selectedMonth + 1).toString()
+                        }, month.year, month.monthValue - 1, 1).show()
+                    }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        contentPadding = PaddingValues(horizontal = 2.dp)) {
+                        Text(month.atDay(1).monthLabel(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Icon(Icons.Default.ArrowDropDown,
+                            contentDescription = "Odaberi mjesec obračuna",
+                            modifier = Modifier.size(19.dp))
+                    }
                     IconButton({ monthText = month.plusMonths(1).toString() }) {
                         Icon(Icons.Default.ChevronRight, contentDescription = "Sljedeći mjesec")
                     }

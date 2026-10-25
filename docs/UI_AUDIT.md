@@ -92,3 +92,15 @@ vlasnikov produkcijski upload ključ.
 Provjera navigacije: nakon splash zaslona i završenog onboardinga odabran je tab **Kalendar** (index 1). Android Natrag s drugih tabova vraća na Kalendar, ali Početna nije uklonjena. Provjera screenshot skripte počinje potvrdom oznake *Mjesec*, pa tek zatim otvara Početnu. Dnevna kartica ima vizualni okvir, jasnije ikone vremena/pauze/bilješke i automatsko pomicanje u vidljivi dio nakon korisnikova odabira. Dodano je responzivno ponašanje statistike i donje navigacije za Android font-scale veći od 130%.
 
 Nisu promijenjene poslovne funkcije, korisnička baza, migracije, potpisni ključevi niti formule. Prije tvrdnje o strogom 1:1 poklapanju potreban je stvarni pixel-diff usporedivih snimki (ista gustoća, rezolucija, podaci i veličina fonta).
+
+## Revizija 0.9.7 — pregled kontrole razmaka, selektora i dostupnosti
+
+| Prikaz | Dodatna promjena | Test / vizualna granica |
+| --- | --- | --- |
+| Kalendar | Izravan klik na naslov mjeseca otvara DatePicker, naslovi i strelice imaju dovoljno prostora; legenda automatski bira četiri ili dva stupca; kartica smjene bira tri ili dva+jedan stupac | UI test potvrđuje prisutnost kontrole datuma; ručno provjeriti duge bilješke i TalkBack na stvarnom uređaju |
+| Statistika | Gumb naziva razdoblja otvara odabir datuma; tjedan se normalizira na ponedjeljak, mjesec/godina prema izabranom datumu | UI test traži izravan odabir razdoblja; statistika ostaje izračunata iz stvarnih smjena |
+| Plaća | Gumb naziva mjeseca otvara odabir mjeseca bez upisivanja izmišljenih iznosa | UI test provjerava postojanje gumba; obračunske formule se ne mijenjaju |
+| Donja navigacija | Nema prisilnog smanjenja teksta na 9sp za povećane sistemske fontove; do dva retka i viša dodirna zona | Kompromis s marketinškom referencom je namjeran radi pristupačnosti |
+| Boje smjena | Veće oznake, semantika izabrane vrste i 4/5 boja u retku na ovisnosti o širini | Kontrola 320dp / velika tipografija kroz emulator i stvarni uređaj |
+
+Ova iteracija nije uklanjala stara izdanja niti mijenjala identitet aplikacije, potpisni ključ ili korisničke podatke. Referentne slike za strogi pixel-diff zahtijevaju istu rezoluciju, gustoću, font-scale i stanje aplikacije kao emulatorske snimke.

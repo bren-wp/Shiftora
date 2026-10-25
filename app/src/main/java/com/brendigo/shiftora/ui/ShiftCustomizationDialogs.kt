@@ -12,6 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
@@ -70,6 +72,11 @@ fun ShiftColorSettingsDialog(
                                     .clip(RoundedCornerShape(13.dp))
                                     .background(if (active) MaterialTheme.colorScheme.primaryContainer
                                         else MaterialTheme.colorScheme.surfaceVariant)
+                                    .heightIn(min = 56.dp)
+                                    .semantics {
+                                        contentDescription = "${kind.label}, oznaka ${kind.code}"
+                                        this.selected = active
+                                    }
                                     .clickable { selected = kind }
                                     .padding(horizontal = 9.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -78,7 +85,8 @@ fun ShiftColorSettingsDialog(
                                 Spacer(Modifier.width(7.dp))
                                 Text(kind.code, fontWeight = FontWeight.Bold)
                                 Spacer(Modifier.width(5.dp))
-                                Text(kind.label, fontSize = 10.sp, maxLines = 1)
+                                Text(kind.label, fontSize = 12.sp, maxLines = 2,
+                                    lineHeight = 14.sp)
                             }
                         }
                         if (kinds.size == 1) Spacer(Modifier.weight(1f))
@@ -86,9 +94,14 @@ fun ShiftColorSettingsDialog(
                 }
                 Text("Nova boja za ${selected.code} — ${selected.label}",
                     fontWeight = FontWeight.SemiBold)
-                swatches.chunked(5).forEach { group ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        group.forEach { value ->
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val swatchColumns = if (maxWidth < 270.dp ||
+                        LocalDensity.current.fontScale > 1.3f) 4 else 5
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        swatches.chunked(swatchColumns).forEach { group ->
+                            Row(Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly) {
+                                group.forEach { value ->
                             Box(Modifier.size(48.dp).clip(CircleShape)
                                 .background(Color(value))
                                 .border(3.dp,
@@ -108,6 +121,8 @@ fun ShiftColorSettingsDialog(
                                         modifier = Modifier.size(22.dp))
                                 }
                             }
+                                }
+                            }
                         }
                     }
                 }
@@ -118,7 +133,7 @@ fun ShiftColorSettingsDialog(
                     singleLine = true, modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
                     supportingText = {
-                        Text("Možeš unijeti bilo koju šestereroznamenkastu RGB boju.")
+                        Text("Možeš unijeti bilo koju šesteroznamenkastu RGB boju.")
                     }
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -77,26 +77,28 @@ fun StatIndicatorCard(
     modifier: Modifier = Modifier,
     extra: String? = null
 ) {
+    // Match the reference's compact two-column KPI cards. Allow
+    // two-line titles without forcing the second row below the fold.
     Column(modifier.clip(RoundedCornerShape(21.dp)).background(surface)
-        .padding(horizontal = 12.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        .padding(horizontal = 11.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(icon, contentDescription = null, tint = tint,
-                modifier = Modifier.size(29.dp))
+                modifier = Modifier.size(25.dp))
             Column(Modifier.weight(1f)) {
                 Text(title, color = Palette.Ink,
-                    fontSize = 13.sp, lineHeight = 16.sp,
+                    fontSize = 12.sp, lineHeight = 15.sp,
                     fontWeight = FontWeight.SemiBold, maxLines = 2)
-                Text(value, color = Palette.Ink, fontSize = 24.sp,
+                Text(value, color = Palette.Ink, fontSize = 22.sp,
                     fontWeight = FontWeight.ExtraBold, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis, lineHeight = 28.sp)
+                    overflow = TextOverflow.Ellipsis, lineHeight = 26.sp)
             }
         }
         TrendIndicator(currentMinutes, previousMinutes)
         if (extra != null) {
             Text(extra, color = Palette.Secondary, fontSize = 10.sp,
-                lineHeight = 13.sp, maxLines = 2,
+                lineHeight = 12.sp, maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
         }
     }

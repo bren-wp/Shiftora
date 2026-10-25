@@ -103,7 +103,9 @@ fun BrandMark(modifier: Modifier = Modifier, darkSurface: Boolean = false) {
         Image(
             painter = painterResource(R.drawable.ic_shiftora_foreground),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize().scale(1.46f)
+            // Keep the full lower S stroke and clock visible in the rounded box.
+            // A larger zoom cropped the mark on small headers and onboarding.
+            modifier = Modifier.fillMaxSize().scale(1.20f)
         )
     }
 }

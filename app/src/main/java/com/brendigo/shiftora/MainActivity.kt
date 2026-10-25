@@ -24,6 +24,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -213,7 +215,9 @@ class MainActivity : ComponentActivity() {
                                     val ink = if (active) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.onSurfaceVariant
                                     Column(
-                                        Modifier.weight(1f).heightIn(min = 65.dp)
+                                        Modifier.weight(1f).heightIn(
+                                            min = if (LocalDensity.current.fontScale > 1.3f)
+                                                80.dp else 65.dp)
                                             .clip(RoundedCornerShape(16.dp))
                                             .background(if (active)
                                                 MaterialTheme.colorScheme.primaryContainer
@@ -230,8 +234,10 @@ class MainActivity : ComponentActivity() {
                                         Icon(option.second, contentDescription = null,
                                             tint = ink, modifier = Modifier.size(24.dp))
                                         Spacer(Modifier.height(4.dp))
-                                        Text(option.first, maxLines = 1, color = ink,
-                                            fontSize = if (LocalDensity.current.fontScale > 1.3f) 9.sp else 11.sp,
+                                        Text(option.first, maxLines = 2, color = ink,
+                                            fontSize = 11.sp, lineHeight = 13.sp,
+                                            textAlign = TextAlign.Center,
+                                            overflow = TextOverflow.Ellipsis,
                                             fontWeight = if (active)
                                                 FontWeight.Bold else FontWeight.Medium)
                                     }
