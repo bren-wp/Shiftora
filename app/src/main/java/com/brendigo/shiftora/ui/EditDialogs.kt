@@ -22,6 +22,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -451,9 +457,13 @@ fun OnboardingScreen(onComplete: () -> Unit, onStepChange: (Int) -> Unit = {}) {
         Box(Modifier.fillMaxWidth().height(if (compact) 215.dp else 290.dp),
             contentAlignment = Alignment.Center) {
             Box(Modifier.size(if (compact) 195.dp else 255.dp)
-                .background(Palette.BlueLight, RoundedCornerShape(60.dp)))
+                .background(Brush.linearGradient(listOf(
+                    Palette.MintLight, Palette.BlueLight,
+                    Color(0xFFD9E9FF))), RoundedCornerShape(65.dp)))
             Box(Modifier.fillMaxWidth(.9f)
                 .height(if (compact) 189.dp else 238.dp)
+                .rotate(if (page == 0) -3f else if (page == 1) 2f else -2f)
+                .shadow(12.dp, RoundedCornerShape(27.dp))
                 .background(Color.White, RoundedCornerShape(27.dp))
                 .padding(15.dp)) {
                 when (page) {
@@ -545,34 +555,64 @@ fun OnboardingScreen(onComplete: () -> Unit, onStepChange: (Int) -> Unit = {}) {
                     }
                 }
             }
+            Box(Modifier.align(Alignment.TopEnd)
+                .padding(end = 7.dp, top = 1.dp)
+                .size(if (compact) 51.dp else 62.dp)
+                .shadow(9.dp, RoundedCornerShape(17.dp))
+                .background(Palette.Blue, RoundedCornerShape(17.dp)),
+                contentAlignment = Alignment.Center) {
+                Icon(when (page) {
+                    0 -> Icons.Default.CalendarMonth
+                    1 -> Icons.Default.Schedule
+                    else -> Icons.Default.TrendingUp
+                }, contentDescription = null, tint = Color.White,
+                    modifier = Modifier.size(if (compact) 29.dp else 35.dp))
+            }
         }
         Spacer(Modifier.height(if (compact) 16.dp else 28.dp))
         Text(titles[page], color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(10.dp))
         Text(descriptions[page],
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            textAlign = TextAlign.Start,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(if (compact) 20.dp else 36.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            repeat(3) { i ->
-                Box(Modifier.size(if (page == i) 18.dp else 8.dp, 8.dp)
-                    .background(if (page == i) Palette.Blue else Color(0xFFCBD5E1),
-                        RoundedCornerShape(8.dp)))
+        if (page < 2) {
+            Row(Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    repeat(3) { i ->
+                        Box(Modifier.size(9.dp).clip(RoundedCornerShape(8.dp))
+                            .background(if (page == i) Palette.Blue else Color(0xFFCBD5E1)))
+                    }
+                }
+                IconButton(onClick = { step++ },
+                    modifier = Modifier.size(56.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Palette.BlueLight)) {
+                    Icon(Icons.Default.ArrowForward, contentDescription = "Dalje",
+                        tint = Palette.Navy, modifier = Modifier.size(25.dp))
+                }
             }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically) {
+                repeat(3) { i ->
+                    Box(Modifier.padding(horizontal = 4.dp).size(9.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (page == i) Palette.Blue else Color(0xFFCBD5E1)))
+                }
+            }
+            Spacer(Modifier.height(18.dp))
+            BlueAction("Započni", onComplete,
+                Modifier.fillMaxWidth(), Icons.Default.ArrowForward)
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = onComplete) { Text("Preskoči uvod") }
         }
-        Spacer(Modifier.height(20.dp))
-        BlueAction(if (step == 3) "Započni" else "Dalje",
-            { if (step == 3) onComplete() else step++ },
-            Modifier.fillMaxWidth(), Icons.Default.ArrowForward)
-        Spacer(Modifier.height(12.dp))
-        Text("Bez prijave i interneta · tvoji podaci ostaju na uređaju",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
 
