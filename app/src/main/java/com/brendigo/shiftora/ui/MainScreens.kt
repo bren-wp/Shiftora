@@ -314,6 +314,7 @@ fun CalendarScreen(
                     Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
                         .background(if (isSelected) Color(0xFFD4E5FF) else Color.Transparent)
                         .heightIn(min = 48.dp)
+                        .semantics { selected = isSelected }
                         .clickable(role = Role.Tab) { weekOnly = index == 1 }
                         .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center) {
@@ -706,6 +707,7 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                         Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
                             .background(if (selected) Color(0xFFD0E2FF) else Color.Transparent)
                             .heightIn(min = 48.dp)
+                            .semantics { this.selected = selected }
                             .clickable(role = Role.Tab) { period = index }
                             .padding(vertical = 9.dp),
                             contentAlignment = Alignment.Center) {
