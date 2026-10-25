@@ -197,6 +197,15 @@ class MainActivity : ComponentActivity() {
             }
 
             ShiftoraTheme(darkMode, shiftColors) {
+                // Paint under the transparent edge-to-edge status bar. Updating
+                // statusBarColor alone leaves navy behind light Home/tutorials.
+                val lightSystemSurface = !darkMode &&
+                    (if (onboarding) onboardingStep != 0 else tab == 0)
+                Box(
+                    Modifier.fillMaxSize().background(
+                        if (lightSystemSurface) Palette.Bg else Palette.Navy
+                    )
+                ) {
                 if (onboarding) {
                     OnboardingScreen(onComplete = vm::finishOnboarding,
                         onStepChange = { onboardingStep = it })
@@ -356,6 +365,7 @@ class MainActivity : ComponentActivity() {
                         onSave = vm::updateSalary
                     )
                 }
+                } // Edge-to-edge surface behind status bar
             }
         }
     }
