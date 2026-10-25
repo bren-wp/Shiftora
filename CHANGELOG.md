@@ -11,6 +11,7 @@
 - Donja navigacija više ne **smanjuje font na 9sp** kada je korisnik povećao sistemsku veličinu teksta. Oznake zadržavaju čitljivu veličinu, dopuštena su dva retka te veća visina dodirne površine.
 - U dijalogu za boje smjena povećane su tekstne oznake i dodirne površine; paleta se prilagođava širini s četiri ili pet boja u retku, a odabir svake vrste smjene čitljiv je za TalkBack.
 - Dodane instrumentacijske regresijske provjere prisutnosti odabira mjeseca i razdoblja na svim relevantnim ekranima.
+- Preklopnici **Mjesec/Tjedan** u Kalendaru i **Tjedan/Mjesec/Godina** u Statistici sada izlažu oznaku odabranog stanja pristupačnosti (TalkBack). Prošireni instrumentacijski testovi provjeravaju promjenu odabira nakon svakog pritiska.
 
 **Napomena:** marketinški renderi služe kao vizualni cilj, no njihove razlike u uređaju, gustoći prikaza i primjerima podataka ne dopuštaju izjavu o strogoj pikselnoj 1:1 podudarnosti bez kontroliranog vizualnog diff testa. Lokalni rasporedi, izračuni, SQLite shema i sigurnosne kopije nisu mijenjani.
 
