@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -413,8 +414,14 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
 }
 
 @Composable
-fun OnboardingScreen(onComplete: () -> Unit) {
+fun OnboardingScreen(onComplete: () -> Unit, onStepChange: (Int) -> Unit = {}) {
     var step by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(step) { onStepChange(step) }
+    if (step == 0) {
+        ShiftoraWelcomeScreen(onStart = { step = 1 }, onSkip = onComplete)
+        return
+    }
+    val page = step - 1
     val compact = LocalConfiguration.current.screenHeightDp < 680
     val titles = listOf("Planiraj smjene", "Prati svoje sate", "Procijeni plaću")
     val descriptions = listOf(
@@ -449,7 +456,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                 .height(if (compact) 189.dp else 238.dp)
                 .background(Color.White, RoundedCornerShape(27.dp))
                 .padding(15.dp)) {
-                when (step) {
+                when (page) {
                     0 -> Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.CalendarMonth, contentDescription = null,
@@ -540,10 +547,10 @@ fun OnboardingScreen(onComplete: () -> Unit) {
             }
         }
         Spacer(Modifier.height(if (compact) 16.dp else 28.dp))
-        Text(titles[step], color = MaterialTheme.colorScheme.onBackground,
+        Text(titles[page], color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
         Spacer(Modifier.height(10.dp))
-        Text(descriptions[step],
+        Text(descriptions[page],
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
@@ -552,19 +559,66 @@ fun OnboardingScreen(onComplete: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically) {
             repeat(3) { i ->
-                Box(Modifier.size(if (step == i) 18.dp else 8.dp, 8.dp)
-                    .background(if (step == i) Palette.Blue else Color(0xFFCBD5E1),
+                Box(Modifier.size(if (page == i) 18.dp else 8.dp, 8.dp)
+                    .background(if (page == i) Palette.Blue else Color(0xFFCBD5E1),
                         RoundedCornerShape(8.dp)))
             }
         }
         Spacer(Modifier.height(20.dp))
-        BlueAction(if (step == 2) "Započni" else "Dalje",
-            { if (step == 2) onComplete() else step++ },
+        BlueAction(if (step == 3) "Započni" else "Dalje",
+            { if (step == 3) onComplete() else step++ },
             Modifier.fillMaxWidth(), Icons.Default.ArrowForward)
         Spacer(Modifier.height(12.dp))
         Text("Bez prijave i interneta · tvoji podaci ostaju na uređaju",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+    }
+}
+
+/** Dark welcome page is rendered in native Compose, not a static marketing screenshot. */
+@Composable
+private fun ShiftoraWelcomeScreen(onStart: () -> Unit, onSkip: () -> Unit) {
+    val compact = LocalConfiguration.current.screenHeightDp < 680
+    Column(
+        Modifier.fillMaxSize()
+            .background(Brush.verticalGradient(listOf(
+                Palette.DeepNavy, Palette.Navy, Color(0xFF06294C), Palette.DeepNavy
+            )))
+            .statusBarsPadding().navigationBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 26.dp, vertical = if (compact) 12.dp else 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            TextButton(onClick = onSkip, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text("Preskoči", color = Color(0xFFC9DAF5))
+            }
+        }
+        Spacer(Modifier.height(if (compact) 36.dp else 76.dp))
+        Text("Tvoj rad. Tvoja pravila.",
+            color = Color(0xFFB8D2F4), fontWeight = FontWeight.Medium, fontSize = 18.sp)
+        Spacer(Modifier.height(if (compact) 22.dp else 44.dp))
+        BrandMark(Modifier.size(if (compact) 128.dp else 168.dp), darkSurface = true)
+        Spacer(Modifier.height(12.dp))
+        Text("Shiftora", color = Color.White, fontWeight = FontWeight.ExtraBold,
+            fontSize = if (compact) 45.sp else 52.sp, lineHeight = 58.sp)
+        Text("Moje smjene. Moji sati.", color = Color(0xFFD8E6F7), fontSize = 16.sp)
+        Spacer(Modifier.height(if (compact) 45.dp else 82.dp))
+        Text("Dobro došao u Shiftoru!", color = Color.White,
+            fontSize = 25.sp, lineHeight = 31.sp, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(12.dp))
+        Text("Planiraj smjene, prati radne sate i procijeni bruto plaću. " +
+            "Sve na jednom mjestu, jednostavno i bez registracije.",
+            color = Color(0xFFD0DCF0), fontSize = 15.sp,
+            lineHeight = 23.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Spacer(Modifier.height(26.dp))
+        BlueAction("Započni", onStart, Modifier.fillMaxWidth(), Icons.Default.ArrowForward)
+        Spacer(Modifier.height(12.dp))
+        Text("Radi bez interneta · tvoji podaci ostaju na uređaju",
+            color = Color(0xFF9BB4D8), fontSize = 12.sp,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }
