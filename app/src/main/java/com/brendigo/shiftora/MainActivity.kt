@@ -191,7 +191,7 @@ class MainActivity : ComponentActivity() {
                         "Početna" to Icons.Default.Home,
                         "Kalendar" to Icons.Default.CalendarMonth,
                         "Statistika" to Icons.Default.BarChart,
-                        "Plaća" to Icons.Default.AccountBalanceWallet,
+                        "Plaća" to ShiftoraCoinsIcon,
                         "Više" to Icons.Default.MoreHoriz
                     )
                     Scaffold(

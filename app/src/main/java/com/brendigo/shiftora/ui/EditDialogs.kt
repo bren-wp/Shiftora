@@ -83,7 +83,7 @@ fun ShiftEditorDialog(
         shape = RoundedCornerShape(25.dp),
         title = { Text(if (entry.id == 0L) "Dodaj smjenu" else "Uredi smjenu") },
         text = {
-            Column(Modifier.fillMaxWidth().heightIn(max = 510.dp).verticalScroll(rememberScrollState()),
+            Column(Modifier.fillMaxWidth().heightIn(max = adaptiveDialogBodyHeight(510.dp)).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Vrsta smjene", fontWeight = FontWeight.SemiBold)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
@@ -246,7 +246,7 @@ fun RotationDialog(onDismiss: () -> Unit, onGenerate: (LocalDate, List<ShiftKind
         onDismissRequest = onDismiss,
         title = { Text("Automatski raspored") },
         text = {
-            Column(Modifier.fillMaxWidth().heightIn(max = 480.dp).verticalScroll(rememberScrollState()),
+            Column(Modifier.fillMaxWidth().heightIn(max = adaptiveDialogBodyHeight(480.dp)).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Odaberi ciklus koji se ponavlja. Postojeći dani neće biti prebrisani.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
@@ -364,7 +364,7 @@ fun SalarySettingsDialog(current: SalarySettings, onDismiss: () -> Unit, onSave:
         onDismissRequest = onDismiss,
         title = { Text("Postavke plaće") },
         text = {
-            Column(Modifier.fillMaxWidth().heightIn(max = 450.dp).verticalScroll(rememberScrollState()),
+            Column(Modifier.fillMaxWidth().heightIn(max = adaptiveDialogBodyHeight(450.dp)).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Unesi svoju ugovorenu bruto satnicu i postotke dodataka. Početne vrijednosti samo su primjeri.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -523,7 +523,7 @@ fun OnboardingScreen(onComplete: () -> Unit, onStepChange: (Int) -> Unit = {}) {
                     }
                     else -> Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.AccountBalanceWallet, contentDescription = null,
+                            Icon(Icons.Default.BarChart, contentDescription = null,
                                 tint = Palette.Mint)
                             Spacer(Modifier.width(8.dp))
                             Text("Procjena bruto plaće", fontWeight = FontWeight.Bold,

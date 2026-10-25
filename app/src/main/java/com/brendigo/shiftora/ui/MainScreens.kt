@@ -314,6 +314,7 @@ fun CalendarScreen(
                     Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
                         .background(if (isSelected) Color(0xFFD4E5FF) else Color.Transparent)
                         .heightIn(min = 48.dp)
+                        .semantics { this.selected = isSelected }
                         .clickable(role = Role.Tab) { weekOnly = index == 1 }
                         .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center) {
@@ -419,11 +420,19 @@ fun CalendarScreen(
                                             ShiftKind.NIGHT, ShiftKind.OFF, ShiftKind.DAY
                                         )
                                     ) {
-                                        Icon(shiftIcon(entries.first().kind),
-                                            contentDescription = null,
-                                            tint = if (chosen) Color.White
-                                                else shiftColor(entries.first().kind),
-                                            modifier = Modifier.size(16.dp))
+                                        val kind = entries.first().kind
+                                        if (!chosen && (kind == ShiftKind.MORNING ||
+                                                kind == ShiftKind.AFTERNOON)) {
+                                            // Reference month grid: compact colored dots for
+                                            // morning/afternoon, icons for night/free days.
+                                            Box(Modifier.size(8.dp).clip(CircleShape)
+                                                .background(shiftColor(kind)))
+                                        } else {
+                                            Icon(shiftIcon(kind),
+                                                contentDescription = null,
+                                                tint = if (chosen) Color.White else shiftColor(kind),
+                                                modifier = Modifier.size(16.dp))
+                                        }
                                     } else {
                                         Text(entries.first().kind.code,
                                             fontSize = 10.sp, lineHeight = 15.sp,
@@ -706,6 +715,7 @@ fun StatsScreen(shifts: List<Shift>, settings: SalarySettings, onSettings: () ->
                         Box(Modifier.weight(1f).clip(RoundedCornerShape(15.dp))
                             .background(if (selected) Color(0xFFD0E2FF) else Color.Transparent)
                             .heightIn(min = 48.dp)
+                            .semantics { this.selected = selected }
                             .clickable(role = Role.Tab) { period = index }
                             .padding(vertical = 9.dp),
                             contentAlignment = Alignment.Center) {
@@ -867,7 +877,7 @@ fun SalaryScreen(
             }
             item {
                 SurfaceCard(Modifier.fillMaxWidth(), color = Palette.MintLight) {
-                    Icon(Icons.Default.AccountBalanceWallet, contentDescription = null,
+                    Icon(ShiftoraCoinsIcon, contentDescription = null,
                         tint = Palette.Mint, modifier = Modifier.size(32.dp))
                     Spacer(Modifier.height(9.dp))
                     Text("Procijenjena bruto plaća", fontWeight = FontWeight.SemiBold, color = Palette.Navy)
@@ -1101,7 +1111,7 @@ private fun HomeSalaryOverview(
         Text("Procjena bruto plaće", color = Palette.Ink,
             fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(8.dp))
-        Icon(Icons.Default.AccountBalanceWallet, contentDescription = null,
+        Icon(Icons.Default.BarChart, contentDescription = null,
             tint = Palette.Mint, modifier = Modifier.size(24.dp))
         Text(euros(grossCents), fontWeight = FontWeight.Bold, color = Palette.Ink,
             fontSize = 23.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)

@@ -57,7 +57,7 @@ fun ShiftColorSettingsDialog(
         onDismissRequest = onDismiss,
         title = { Text("Boje i oznake smjena") },
         text = {
-            Column(Modifier.fillMaxWidth().heightIn(max = 460.dp)
+            Column(Modifier.fillMaxWidth().heightIn(max = adaptiveDialogBodyHeight(460.dp))
                 .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Odaberi oznaku. Boja se odmah primjenjuje na cijeli kalendar.",
@@ -174,7 +174,12 @@ fun MonthlyFundEditor(
         onDismissRequest = onDismiss,
         title = { Text("Fond sati — ${month.atDay(1).monthLabel()}") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
+            Column(
+                Modifier.fillMaxWidth()
+                    .heightIn(max = adaptiveDialogBodyHeight(400.dp))
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(11.dp)
+            ) {
                 Text("Standardni fond: ${standard / 60} h. Računa se 8 sati po radnom danu, " +
                     "bez vikenda i hrvatskih blagdana. Fond po ugovoru može biti drukčiji.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
