@@ -26,6 +26,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.sp
 import com.brendigo.shiftora.R
 import com.brendigo.shiftora.data.Shift
@@ -34,6 +36,16 @@ import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+
+/**
+ * Bound dialog content to the usable phone height. On short devices and at
+ * large font scales, fields remain scrollable above the action buttons.
+ */
+@Composable
+fun adaptiveDialogBodyHeight(maxHeight: Dp): Dp {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    return minOf(maxHeight, screenHeight * 0.55f)
+}
 
 private val hr = Locale("hr", "HR")
 fun LocalDate.dateLabel(): String = format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", hr))
