@@ -83,9 +83,9 @@ fi
 fixture_log="$(adb shell am instrument -w \
   -e class "$package.ScreenshotFixtureTest#seedScreenshotMonth" \
   -e shiftoraScreenshotFixture true \
-  "$package.test/androidx.test.runner.AndroidJUnitRunner" | tr -d '\\r')"
-printf '%s\\n' "$fixture_log"
-if ! printf '%s\\n' "$fixture_log" | grep -q 'OK (1 test)'; then
+  "$package.test/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r')"
+printf '%s\n' "$fixture_log"
+if ! printf '%s\n' "$fixture_log" | grep -q 'OK (1 test)'; then
   echo "Failed to seed representative screenshot data" >&2
   exit 1
 fi
