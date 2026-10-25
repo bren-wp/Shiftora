@@ -1,5 +1,16 @@
 # Povijest izdanja
 
+## 0.9.4 — 25. 10. 2026. | Dodatna vizualna preciznost i stvarna screenshot QA
+
+- Ispravljen hrvatski **genitiv mjeseca** u punom datumu: npr. `24. listopada 2026.`, uz očuvanje nominativa zaglavlja `Listopad 2026.`.
+- Povećan je S+satić znak u zajedničkim zaglavljima bez povećavanja sigurnosne zone Androidove ikone aplikacije.
+- **Početna:** funkcionalan gumb za izbor datuma, pregled prošle/buduće smjene te posebno označavanje smjene koja se trenutno stvarno odvija. Sažeci i brze akcije sada koriste odabrani datum.
+- **Kalendar:** glavne četiri boje/legende imaju prioritet kao na referenci; dodatne vrste smjena mogu se proširiti. Manje je nepotrebnog zauzimanja prostora prije detalja odabranog dana.
+- **QA:** uklonjen je automatski upis demonstracijskih smjena iz običnog navigacijskog testa. Nove screenshot snimke eksplicitno pozivaju izolirani instrumentacijski fixture koji popunjava mjesec *isključivo na testnom emulatoru*. U produkciji nema testnih podataka.
+- Dodani su regresijski testovi hrvatskih datuma, kalendarske legende i očuvanja korisničke baze.
+
+**Granice:** Dizajnerski mockupovi nisu izravne snimke istih uređaja, razdoblja i podataka. CI provjerava izvedbu i snimke, ali sam po sebi ne dokazuje pikselnu 1:1 podudarnost. SQLite shema, postojeći rasporedi, povijest, sigurnosne kopije i paket nisu mijenjani.
+
 ## 0.9.3 — 25. 10. 2026. | Vizualno usklađivanje s referentnim zaslonima
 
 - Redizajnirani su zajednički elementi: Shiftora znak, zaglavlja, zaobljene bijele površine ispod tamnih zaglavlja, kartice, natpisi i plavi/menta tonovi.
