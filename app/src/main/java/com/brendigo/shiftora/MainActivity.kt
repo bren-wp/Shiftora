@@ -1,6 +1,9 @@
 package com.brendigo.shiftora
 
 import android.os.Bundle
+import android.os.Build
+import android.view.View
+import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
@@ -186,6 +189,24 @@ class MainActivity : ComponentActivity() {
                 WindowCompat.getInsetsController(window, window.decorView).apply {
                     isAppearanceLightStatusBars = lightStatusSurface
                     isAppearanceLightNavigationBars = !darkMode
+                }
+                // Explicit platform flags are kept in sync with the Compose
+                // background. On some API 30/36 emulator configurations the
+                // edge-to-edge helper alone retained white icons over Home.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    window.insetsController?.setSystemBarsAppearance(
+                        if (lightStatusSurface)
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS else 0,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    val currentFlags = window.decorView.systemUiVisibility
+                    @Suppress("DEPRECATION")
+                    window.decorView.systemUiVisibility =
+                        if (lightStatusSurface)
+                            currentFlags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        else currentFlags and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
                 }
             }
             LaunchedEffect(message) {
