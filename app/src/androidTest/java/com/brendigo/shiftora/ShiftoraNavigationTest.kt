@@ -2,6 +2,8 @@ package com.brendigo.shiftora
 
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -26,7 +28,12 @@ class ShiftoraNavigationTest {
         compose.onNodeWithText("Početna").assertExists()
         // Cold launch and completion of onboarding must land on the calendar,
         // without requiring a bottom-navigation tap.
-        compose.onNodeWithText("Mjesec").assertExists()
+        compose.onNodeWithText("Mjesec").assertIsSelected()
+        compose.onNodeWithText("Tjedan").assertIsNotSelected()
+        compose.onNodeWithText("Tjedan").performClick()
+        compose.onNodeWithText("Tjedan").assertIsSelected()
+        compose.onNodeWithText("Mjesec").assertIsNotSelected()
+        compose.onNodeWithText("Mjesec").performClick()
         compose.onNodeWithText("Početna").performClick()
         compose.onNodeWithText("Danas je").assertExists()
         compose.onNodeWithText("Kalendar").performClick()
@@ -51,9 +58,13 @@ class ShiftoraNavigationTest {
         compose.onNodeWithContentDescription("Odaberi razdoblje statistike").assertExists()
         compose.onNodeWithText("Redovni sati").assertExists()
         compose.onNodeWithText("Odrađeni sati").assertExists()
+        compose.onNodeWithText("Mjesec").assertIsSelected()
         compose.onNodeWithText("Godina").performClick()
+        compose.onNodeWithText("Godina").assertIsSelected()
         compose.onNodeWithText("Tjedan").performClick()
+        compose.onNodeWithText("Tjedan").assertIsSelected()
         compose.onNodeWithText("Mjesec").performClick()
+        compose.onNodeWithText("Mjesec").assertIsSelected()
         compose.onNodeWithText("Plaća").performClick()
         compose.onNodeWithText("Pregled radnih sati i dodataka.").assertExists()
         compose.onNodeWithContentDescription("Odaberi mjesec obračuna").assertExists()
