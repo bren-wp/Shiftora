@@ -1,5 +1,16 @@
 # Povijest izdanja
 
+## 0.9.6 — 25. 10. 2026. | Kalendar kao početni ekran i završna dorada detalja
+
+- **Kalendar je novi početni zaslon** nakon Android splash animacije i dovršenog uvoda. Kartica Početna ostaje dostupna u donjoj navigaciji, a Android Natrag vraća na Kalendar.
+- Uveden je AndroidX **SplashScreen** s tamnoplavom Shiftora pozadinom i postojećim S+satić logotipom za dosljedan prvi dojam na različitim Android verzijama.
+- Pri odabiru datuma u mjesečnoj/tjednoj mreži aplikacija automatski pomiče detalje odabranog dana u vidljivo područje, uz očuvanje položaja i podataka kalendara.
+- Kartica dana ima jasan obrub i suptilnu sjenu; blokovi radnog vremena, pauze i bilješke sadrže odgovarajuće ikone te podržavaju dulji tekst.
+- Statistika i kružni graf prilagođavaju se ne samo uskoj širini već i povećanim sistemskim fontovima, a natpisi donje navigacije ostaju čitljiviji.
+- UI/regresijski test i skripta za stvarne emulator snimke provjeravaju da se aplikacija **otvara na Kalendaru**, a Početna je i dalje funkcionalna. AAB i APK artefakti izrađuju se automatski.
+
+**Važno:** Dizajnerske marketinške reference služe za vizualno usklađivanje. Potpuno izmjerena pikselna jednakost nije potvrđena jer reference nisu izravne snimke istog uređaja sa istim stanjem i gustoćom. Korisnički rasporedi i SQLite shema ostaju netaknuti; preview AAB nije produkcijski potpisan.
+
 ## 0.9.5 — 25. 10. 2026. | UI/UX preciznost, responzivnost i prvi dojam
 
 - Androidova statusna traka prati stvarni izgled aktivnog zaslona: tamna zaglavlja kalendara, statistike, plaće i postavki koriste svijetle ikone, a svijetla početna tamne.
