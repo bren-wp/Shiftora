@@ -77,7 +77,7 @@ jobs:
           disable-animations: true
           script: |
             ./gradlew --no-daemon :app:connectedDebugAndroidTest
-            bash scripts/capture-emulator.sh ${{ matrix.profile }}
+            SHIFTORA_CAPTURE_FRESH_STATE=1 bash scripts/capture-emulator.sh ${{ matrix.profile }}
       - name: Attach emulator screenshot
         if: always()
         uses: actions/upload-artifact@v4
