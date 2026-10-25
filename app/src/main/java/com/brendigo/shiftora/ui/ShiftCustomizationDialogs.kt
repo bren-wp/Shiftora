@@ -174,7 +174,12 @@ fun MonthlyFundEditor(
         onDismissRequest = onDismiss,
         title = { Text("Fond sati — ${month.atDay(1).monthLabel()}") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(11.dp)) {
+            Column(
+                Modifier.fillMaxWidth()
+                    .heightIn(max = adaptiveDialogBodyHeight(400.dp))
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(11.dp)
+            ) {
                 Text("Standardni fond: ${standard / 60} h. Računa se 8 sati po radnom danu, " +
                     "bez vikenda i hrvatskih blagdana. Fond po ugovoru može biti drukčiji.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
