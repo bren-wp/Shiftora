@@ -5,6 +5,7 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import android.app.DatePickerDialog
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.*
@@ -729,7 +730,7 @@ private fun ResponsiveStatPair(
     second: @Composable (Modifier) -> Unit
 ) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        if (maxWidth < 330.dp) {
+        if (maxWidth < 330.dp || LocalDensity.current.fontScale > 1.3f) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 first(Modifier.fillMaxWidth())
                 second(Modifier.fillMaxWidth())
