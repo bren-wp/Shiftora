@@ -877,7 +877,7 @@ fun SalaryScreen(
             }
             item {
                 SurfaceCard(Modifier.fillMaxWidth(), color = Palette.MintLight) {
-                    Icon(Icons.Default.AccountBalanceWallet, contentDescription = null,
+                    Icon(ShiftoraCoinsIcon, contentDescription = null,
                         tint = Palette.Mint, modifier = Modifier.size(32.dp))
                     Spacer(Modifier.height(9.dp))
                     Text("Procijenjena bruto plaća", fontWeight = FontWeight.SemiBold, color = Palette.Navy)
@@ -1111,7 +1111,7 @@ private fun HomeSalaryOverview(
         Text("Procjena bruto plaće", color = Palette.Ink,
             fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(8.dp))
-        Icon(Icons.Default.AccountBalanceWallet, contentDescription = null,
+        Icon(Icons.Default.BarChart, contentDescription = null,
             tint = Palette.Mint, modifier = Modifier.size(24.dp))
         Text(euros(grossCents), fontWeight = FontWeight.Bold, color = Palette.Ink,
             fontSize = 23.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
