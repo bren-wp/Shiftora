@@ -150,21 +150,11 @@ fun HomeScreen(
                             )
                         }
                         Column(Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(if (activeShift != null) "TRENUTNA SMJENA"
-                                    else if (today == actualToday) "DANAŠNJA SMJENA"
-                                    else "ODABRANA SMJENA",
-                                    color = Palette.Amber, fontWeight = FontWeight.Bold, fontSize = 10.sp)
-                                if (activeShift != null) {
-                                    Text("● Još traje",
-                                        modifier = Modifier.clip(RoundedCornerShape(30.dp))
-                                            .background(Palette.MintLight)
-                                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                                        color = Color(0xFF087E52),
-                                        fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-                                }
-                            }
+                            Text(if (activeShift != null) "TRENUTNA SMJENA"
+                                else if (today == actualToday) "DANAŠNJA SMJENA"
+                                else "ODABRANA SMJENA",
+                                color = Palette.Amber, fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp, maxLines = 1)
                             Text(todayShift?.kind?.label ?: "Dodaj smjenu",
                                 style = MaterialTheme.typography.titleLarge, maxLines = 1)
                             Text(
@@ -177,16 +167,34 @@ fun HomeScreen(
                                 else "${clock(todayShift.startMinute)} – ${clock(todayShift.endMinute)}",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
                             )
-                            if (activeShift != null) {
-                                Text("Preostalo " + minutesLabel(activeShift.remainingMinutes),
-                                    color = Color(0xFF087E52), fontSize = 11.sp, maxLines = 1)
-                            }
                         }
                         if (todayShift != null && todayShift.kind.isWork) {
-                            Text(minutesLabel(WorkCalculator.durationMinutes(todayShift)),
-                                fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                            Column(
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                if (activeShift != null) {
+                                    Text("● Još traje",
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(30.dp))
+                                            .background(Palette.MintLight)
+                                            .padding(horizontal = 8.dp, vertical = 5.dp),
+                                        color = Color(0xFF087E52),
+                                        fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1)
+                                }
+                                Text(minutesLabel(WorkCalculator.durationMinutes(todayShift)),
+                                    fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+                                if (activeShift != null) {
+                                    Text("Preostalo " +
+                                        minutesLabel(activeShift.remainingMinutes),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 10.sp, maxLines = 1)
+                                }
+                            }
                         }
-                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Palette.Secondary)
+                        Icon(Icons.Default.ChevronRight, contentDescription = null,
+                            tint = Palette.Secondary, modifier = Modifier.size(20.dp))
                     }
                 }
             }
