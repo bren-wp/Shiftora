@@ -864,14 +864,56 @@ fun SalaryScreen(
             }
             item {
                 SurfaceCard(Modifier.fillMaxWidth(), color = Palette.MintLight) {
-                    Icon(ShiftoraCoinsIcon, contentDescription = null,
-                        tint = Palette.Mint, modifier = Modifier.size(32.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(Modifier.size(54.dp)
+                            .clip(RoundedCornerShape(17.dp))
+                            .background(Color.White.copy(alpha = .55f)),
+                            contentAlignment = Alignment.Center) {
+                            Icon(ShiftoraCoinsIcon, contentDescription = null,
+                                tint = Color(0xFF008F75), modifier = Modifier.size(31.dp))
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Text("Procijenjena bruto plaća",
+                                fontWeight = FontWeight.SemiBold, color = Palette.Navy,
+                                fontSize = 15.sp)
+                            Text("Za ${month.atDay(1).monthLabel()}",
+                                color = Palette.Secondary, fontSize = 12.sp)
+                        }
+                        Icon(Icons.Default.InfoOutline,
+                            contentDescription = "Informativna bruto procjena",
+                            tint = Color(0xFF008F75), modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(Modifier.height(15.dp))
+                    Text(euros(totals.grossCents),
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.ExtraBold, color = Palette.Navy,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Spacer(Modifier.height(12.dp))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement =
+                        Arrangement.spacedBy(9.dp)) {
+                        Column(Modifier.weight(1f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(Color.White.copy(alpha = .6f))
+                            .padding(10.dp)) {
+                            Text("Osnovica", color = Palette.Secondary, fontSize = 11.sp)
+                            Text(euros(totals.baseCents), color = Palette.Navy,
+                                fontWeight = FontWeight.Bold, maxLines = 1,
+                                overflow = TextOverflow.Ellipsis, fontSize = 14.sp)
+                        }
+                        Column(Modifier.weight(1f)
+                            .clip(RoundedCornerShape(15.dp))
+                            .background(Color.White.copy(alpha = .6f))
+                            .padding(10.dp)) {
+                            Text("Dodaci", color = Palette.Secondary, fontSize = 11.sp)
+                            Text(euros(totals.premiumCents), color = Color(0xFF087D64),
+                                fontWeight = FontWeight.Bold, maxLines = 1,
+                                overflow = TextOverflow.Ellipsis, fontSize = 14.sp)
+                        }
+                    }
                     Spacer(Modifier.height(9.dp))
-                    Text("Procijenjena bruto plaća", fontWeight = FontWeight.SemiBold, color = Palette.Navy)
-                    Text(euros(totals.grossCents), style = MaterialTheme.typography.headlineLarge, color = Palette.Navy)
-                    Spacer(Modifier.height(4.dp))
-                    Text("Prema ${minutesLabel(totals.paidMinutes)} unesenog rada i postavkama dodataka.",
-                        fontSize = 12.sp, color = Palette.Secondary)
+                    Text("Temelji se na ${minutesLabel(totals.paidMinutes)} rada i postavkama dodataka. Neto se ne izračunava.",
+                        fontSize = 11.sp, color = Palette.Secondary, lineHeight = 16.sp)
                 }
             }
             item {
@@ -1040,7 +1082,13 @@ private fun ListAction(title: String, description: String, icon: androidx.compos
         .clickable(role = Role.Button, onClick = onClick)
         .padding(vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Box(Modifier.size(42.dp).clip(RoundedCornerShape(13.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center) {
+            Icon(icon, contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp))
+        }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(title, fontWeight = FontWeight.SemiBold)
