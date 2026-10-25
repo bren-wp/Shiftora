@@ -77,6 +77,27 @@ PY
 if tap_label "Preskoči"; then
   sleep 3
 fi
+# The Gradle connectedAndroidTest task uninstalls its test runner APK on
+# completion. Re-install *only* the instrumentation APK before invoking the
+# screenshot-only fixture; the regular production APK is already installed.
+test_apk="app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+test -s "$test_apk"
+adb install -r "$test_apk"
+# CI-only fixture: use a real test runner, never debug menu hooks or data
+# included in production. Without it the screenshots contain only empty
+# calendar cells and zero-value salary/statistics, masking real UI overflows.
+fixture_log="$(adb shell am instrument -w \
+  -e class "$package.ScreenshotFixtureTest#seedScreenshotMonth" \
+  -e shiftoraScreenshotFixture true \
+  "$package.test/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r')"
+printf '%s\n' "$fixture_log"
+if ! printf '%s\n' "$fixture_log" | grep -q 'OK (1 test)'; then
+  echo "Failed to seed representative screenshot data" >&2
+  exit 1
+fi
+adb shell am force-stop "$package" || true
+adb shell am start -W -n "$package/.MainActivity"
+sleep 3
 assert_app_foreground
 assert_screen_text "Danas je"
 adb exec-out screencap -p > "shiftora-${device}-home.png"

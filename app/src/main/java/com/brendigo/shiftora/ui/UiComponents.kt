@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
@@ -32,7 +33,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 private val hr = Locale("hr", "HR")
-fun LocalDate.dateLabel(): String = format(DateTimeFormatter.ofPattern("d. LLLL yyyy.", hr))
+fun LocalDate.dateLabel(): String = format(DateTimeFormatter.ofPattern("d. MMMM yyyy.", hr))
 fun LocalDate.weekdayLabel(): String = format(DateTimeFormatter.ofPattern("EEEE", hr))
 fun LocalDate.monthLabel(): String = format(DateTimeFormatter.ofPattern("LLLL yyyy.", hr)).replaceFirstChar { it.uppercase(hr) }
 fun minutesLabel(value: Long): String = if (value % 60L == 0L) "${value / 60}h" else "${value / 60}h ${value % 60}min"
@@ -102,7 +103,7 @@ fun BrandMark(modifier: Modifier = Modifier, darkSurface: Boolean = false) {
         Image(
             painter = painterResource(R.drawable.ic_shiftora_foreground),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().scale(1.46f)
         )
     }
 }
@@ -125,10 +126,10 @@ fun BrandedHeader(
                 bottom = if (title == null) 12.dp else if (dark) 25.dp else 14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            BrandMark(Modifier.size(45.dp), darkSurface = dark)
+            BrandMark(Modifier.size(49.dp), darkSurface = dark)
             Spacer(Modifier.width(8.dp))
             Text("Shiftora", color = fg, fontWeight = FontWeight.ExtraBold,
-                fontSize = 26.sp, letterSpacing = (-0.65).sp)
+                fontSize = 27.sp, letterSpacing = (-0.65).sp)
             Spacer(Modifier.weight(1f))
             if (showSettings) {
                 IconButton(onClick = onSettings) {

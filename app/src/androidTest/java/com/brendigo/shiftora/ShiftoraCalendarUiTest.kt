@@ -12,6 +12,7 @@ import com.brendigo.shiftora.ui.CalendarScreen
 import com.brendigo.shiftora.ui.ShiftoraTheme
 import com.brendigo.shiftora.ui.dateLabel
 import com.brendigo.shiftora.ui.monthLabel
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,6 +23,12 @@ import java.time.YearMonth
 @RunWith(AndroidJUnit4::class)
 class ShiftoraCalendarUiTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun datesUseCroatianGrammaticalMonthCase() {
+        val october = LocalDate.of(2026, 10, 24)
+        assertEquals("24. listopada 2026.", october.dateLabel())
+        assertEquals("Listopad 2026.", october.monthLabel())
+    }
 
     @Test fun sameDayWorkAndStandbyAreBothRepresentedAndAccessible() {
         val date = YearMonth.now().atDay(15)

@@ -42,3 +42,32 @@ certifikat podudarnosti.
 
 Izrada potpisanog produkcijskog AAB-a ostaje zaseban proces s vlasnikovim
 izdavačkim ključem. GitHub debug APK ne smije biti zamjena za potpisanu nadogradnju.
+
+## Revizija 0.9.4 — stvarne snimke i usporedba s pet korisničkih referenci
+
+Pregledane su stvarne emulatorske slike prethodne verzije (`home`, `calendar`,
+`statistics`, `salary`, `more`, `onboarding`) na Pixel 4 (1080 × 2280)
+u odnosu na pet dizajnerskih referenci. Uočeni su premali znak zaglavlja,
+nepravilni gramatički oblik datuma, dodatna visina višeredne legende
+i screenshot provjera s praznim kalendarom i nulama u statistikama.
+
+- **Zajednički znak:** istaknuti puni vektor S+satić u zaglavljima; launcher
+  safe-zone i monochrome ikonice nisu mijenjane.
+- **Početna:** gumb s kalendarom odabire datum i mijenja odgovarajući
+  prikaz smjene, tjedni zbroj, procjenu plaće i budući popis. Za prethodni
+  datum oznaka nije lažno „trenutna” smjena.
+- **Kalendar:** četiri glavne legende odgovaraju referenci, ostalih šest
+  statusa ostaje dostupno pomoću gumba „Ostale oznake”. Time dnevna kartica
+  dobiva više prostora bez gubitka GO/BO/SD/PD/PR/X statusa.
+- **Statistika/plaća:** ostaju stvarni zbrojevi; mockup vrijednosti i izmišljeni
+  neto iznos nisu uvedeni.
+- **Onboarding i Više:** zadržane su postojeće nativne komponente i
+  responzivne kontrole, uključujući korisničke sigurnosne kopije i privatnost.
+- **Testna baza:** raniji navigacijski UI test imao je upis ciklusa u zadanu
+  bazu. Izoliran je u zaseban instrumentacijski fixture, aktivan samo preko
+  izričitog parametra u skripti za snimanje testnog emulatora. Time obični
+  test navigacije više ne upisuje demonstracijske rasporede.
+
+Automatski CI i screenshot provjere nisu zamjena za mjerljivu vizualnu usporedbu
+istih uređaja i stanja. Stvarna aplikacija treba zadržati stvarne podatke
+korisnika, a ne preslikati izmišljene iznose s dizajnerskog mockupa.
