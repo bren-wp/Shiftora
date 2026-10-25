@@ -129,6 +129,40 @@ private val ShiftoraPalm: ImageVector by lazy {
     }.build()
 }
 
+/**
+ * Outlined coin stacks used in bottom navigation instead of a wallet icon.
+ * Vector paths remain legible in selected, unselected and large-font states.
+ */
+val ShiftoraCoinsIcon: ImageVector by lazy {
+    ImageVector.Builder(
+        name = "ShiftoraCoins", defaultWidth = 24.dp, defaultHeight = 24.dp,
+        viewportWidth = 24f, viewportHeight = 24f
+    ).apply {
+        path(stroke = SolidColor(Color.Black), strokeLineWidth = 1.8f,
+            strokeLineCap = StrokeCap.Round) {
+            moveTo(2.7f, 5.5f)
+            cubicTo(2.7f, 2.4f, 14.7f, 2.4f, 14.7f, 5.5f)
+            cubicTo(14.7f, 8.6f, 2.7f, 8.6f, 2.7f, 5.5f)
+            moveTo(2.7f, 5.5f)
+            lineTo(2.7f, 14.7f)
+            cubicTo(2.7f, 17.1f, 7.4f, 18f, 10.6f, 17f)
+            moveTo(2.7f, 9.2f)
+            cubicTo(4f, 11.4f, 8.7f, 11.9f, 11.8f, 10.8f)
+            moveTo(2.7f, 12.9f)
+            cubicTo(3.6f, 14.8f, 7.4f, 15.5f, 10f, 15f)
+            moveTo(10.5f, 12.5f)
+            cubicTo(10.5f, 9.4f, 21.3f, 9.4f, 21.3f, 12.5f)
+            cubicTo(21.3f, 15.6f, 10.5f, 15.6f, 10.5f, 12.5f)
+            moveTo(10.5f, 12.5f)
+            lineTo(10.5f, 19.5f)
+            cubicTo(10.5f, 22.6f, 21.3f, 22.6f, 21.3f, 19.5f)
+            lineTo(21.3f, 12.5f)
+            moveTo(10.5f, 16f)
+            cubicTo(11.7f, 18f, 19.9f, 18f, 21.3f, 16f)
+        }
+    }.build()
+}
+
 fun shiftIcon(kind: ShiftKind): ImageVector = when (kind) {
     ShiftKind.MORNING -> Icons.Default.WbSunny
     ShiftKind.AFTERNOON -> Icons.Default.WbTwilight
