@@ -1,5 +1,17 @@
 # Povijest izdanja
 
+## 0.9.10 — 26. 10. 2026. | Usklađivanje kompozicije sa slikovnim referencama
+
+- **Svijetla statusna traka:** pozadina glavne Compose hijerarhije sada se iscrtava i ispod prozirne Android statusne trake. Početna i svijetli tutorial imaju svijetlu podlogu, dok Kalendar, Statistika, Plaća, Više i welcome ostaju tamni. Nastavljena podrška za API 30 i 36.
+- **Početna:** aktivna smjena koristi zaseban desni stupac sa značkom „Još traje”, odrađenim trajanjem i preostalim vremenom, prema referenci; naslov smjene uključuje puni naziv „Jutarnja/Popodnevna/Noćna smjena” i smije zauzeti dva retka.
+- **Kalendar:** uredniji razmaci između sedam stupaca, dan i datum iznad detalja, zasebna akcija s tri točke za dodavanje smjene i povratak na današnji datum; proširene oznake ostaju zasebno dostupne. Dodan instrumentacijski test obje akcije i proširenja legende.
+- **Statistika:** nativno nacrtana rastuća plavo-zelena ilustracija u zaglavlju, mekša dubina kartice grafikona te bolje proporcije KPI oznaka, brojki i usporedbe s prošlim razdobljem.
+- **Zajedničke kartice:** standardiziran radius od 24dp, padding od 16dp i diskretna sjena radi vizualne konzistentnosti.
+- **Onboarding:** naslov, opis i kontrola koraka pomaknuti su prema donjoj trećini ekrana (kao na dostavljenom mockupu); cijeli sadržaj ostaje skrolabilan na malim zaslonima.
+- **Kontrola kvalitete:** obvezni Gradle unit/lint/build i emulatorski Android UI testovi na API 30 i API 36 prije spajanja i izdavanja. SQLite, postojeći raspored, arhiva, obračun, korisničke postavke i backup formati nisu mijenjani.
+
+**Vizualna ograničenja:** reference su marketinški renderi s okvirom uređaja, fiksnim ožujkom 2025. i ilustrativnim iznosima, a aplikacija prikazuje stvarni datum i korisničke podatke. Nedostaje zaseban izvorni fotografski asset planinske ceste iz welcome reference pa ostaje nativna ilustracija. Ovaj prolaz poboljšava UI/UX, ali ne potvrđuje matematičku pixel-perfect 1:1 podudarnost na svim Android uređajima.
+
 ## 0.9.9 — 25. 10. 2026. | Vizualna dorada po referencama
 
 - **Jedinstveni preklopnici razdoblja:** Kalendar (Mjesec/Tjedan) i Statistika (Tjedan/Mjesec/Godina) koriste jednu Compose komponentu s dosljednim 52dp dodirnim područjem, bojama i TalkBack stanjem odabira.
