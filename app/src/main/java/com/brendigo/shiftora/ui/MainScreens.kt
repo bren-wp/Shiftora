@@ -150,23 +150,22 @@ fun HomeScreen(
                             )
                         }
                         Column(Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Text(if (activeShift != null) "TRENUTNA SMJENA"
-                                    else if (today == actualToday) "DANAŠNJA SMJENA"
-                                    else "ODABRANA SMJENA",
-                                    color = Palette.Amber, fontWeight = FontWeight.Bold, fontSize = 10.sp)
-                                if (activeShift != null) {
-                                    Text("● Još traje",
-                                        modifier = Modifier.clip(RoundedCornerShape(30.dp))
-                                            .background(Palette.MintLight)
-                                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                                        color = Color(0xFF087E52),
-                                        fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
-                                }
-                            }
-                            Text(todayShift?.kind?.label ?: "Dodaj smjenu",
-                                style = MaterialTheme.typography.titleLarge, maxLines = 1)
+                            Text(if (activeShift != null) "TRENUTNA SMJENA"
+                                else if (today == actualToday) "DANAŠNJA SMJENA"
+                                else "ODABRANA SMJENA",
+                                color = Palette.Amber, fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp, maxLines = 1)
+                            Text(
+                                todayShift?.let {
+                                    if (it.kind in listOf(ShiftKind.MORNING,
+                                            ShiftKind.AFTERNOON, ShiftKind.NIGHT)) {
+                                        it.kind.label + " smjena"
+                                    } else it.kind.label
+                                } ?: "Dodaj smjenu",
+                                style = MaterialTheme.typography.titleLarge,
+                                maxLines = 2, lineHeight = 26.sp,
+                                overflow = TextOverflow.Ellipsis
+                            )
                             Text(
                                 if (todayShift == null)
                                     if (today == actualToday) "Nema unosa za danas"
@@ -177,16 +176,34 @@ fun HomeScreen(
                                 else "${clock(todayShift.startMinute)} – ${clock(todayShift.endMinute)}",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp
                             )
-                            if (activeShift != null) {
-                                Text("Preostalo " + minutesLabel(activeShift.remainingMinutes),
-                                    color = Color(0xFF087E52), fontSize = 11.sp, maxLines = 1)
-                            }
                         }
                         if (todayShift != null && todayShift.kind.isWork) {
-                            Text(minutesLabel(WorkCalculator.durationMinutes(todayShift)),
-                                fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                            Column(
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                if (activeShift != null) {
+                                    Text("● Još traje",
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(30.dp))
+                                            .background(Palette.MintLight)
+                                            .padding(horizontal = 8.dp, vertical = 5.dp),
+                                        color = Color(0xFF087E52),
+                                        fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1)
+                                }
+                                Text(minutesLabel(WorkCalculator.durationMinutes(todayShift)),
+                                    fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+                                if (activeShift != null) {
+                                    Text("Preostalo " +
+                                        minutesLabel(activeShift.remainingMinutes),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 10.sp, maxLines = 1)
+                                }
+                            }
                         }
-                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Palette.Secondary)
+                        Icon(Icons.Default.ChevronRight, contentDescription = null,
+                            tint = Palette.Secondary, modifier = Modifier.size(20.dp))
                     }
                 }
             }
@@ -271,6 +288,7 @@ fun CalendarScreen(
     val context = LocalContext.current
     var weekOnly by rememberSaveable { mutableStateOf(false) }
     var showAllLegend by rememberSaveable { mutableStateOf(false) }
+    var dayMenuOpen by remember { mutableStateOf(false) }
     var fundEditorOpen by remember { mutableStateOf(false) }
     val detailRequester = remember { BringIntoViewRequester() }
     var revealDetail by remember { mutableStateOf(false) }
@@ -377,7 +395,7 @@ fun CalendarScreen(
                         val details = if (entries.isEmpty()) "Nema smjene"
                             else entries.joinToString(", ") { "${it.kind.code}: ${it.kind.label}" }
                         Box(
-                            Modifier.weight(1f).padding(1.dp).height(dayHeight)
+                            Modifier.weight(1f).padding(horizontal = 2.dp, vertical = 2.dp).height(dayHeight)
                                 .clip(RoundedCornerShape(11.dp))
                                 .background(tileColor)
                                 .then(if (today && !chosen)
@@ -446,14 +464,15 @@ fun CalendarScreen(
                 }
             }
             Spacer(Modifier.height(spacing))
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            BoxWithConstraints(Modifier.weight(1f)) {
                 val mainKinds = listOf(
                     ShiftKind.MORNING to "Jutarnja",
                     ShiftKind.AFTERNOON to "Popodnevna",
                     ShiftKind.NIGHT to "Noćna",
                     ShiftKind.OFF to "Slobodno"
                 )
-                val columns = if (maxWidth < 355.dp ||
+                val columns = if (maxWidth < 310.dp ||
                     LocalDensity.current.fontScale > 1.25f) 2 else 4
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     mainKinds.chunked(columns).forEach { group ->
@@ -475,10 +494,18 @@ fun CalendarScreen(
                     }
                 }
             }
-            // The supplied calendar reference shows the four main colors on one
-            // line. Keep every special status discoverable without crowding the
-            // selected-day detail below the month grid.
-             if (showAllLegend) {
+                // The reference has a single legend line without a separate
+                // 42dp button row. This expandable caret keeps details in view.
+                IconButton(onClick = { showAllLegend = !showAllLegend },
+                    modifier = Modifier.size(38.dp)) {
+                    Icon(if (showAllLegend) Icons.Default.ExpandLess
+                        else Icons.Default.ExpandMore,
+                        contentDescription =
+                            if (showAllLegend) "Sakrij oznake" else "Ostale oznake",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            if (showAllLegend) {
                 Column(Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     ShiftKind.calendarOrder.chunked(5).forEach { kinds ->
@@ -511,19 +538,39 @@ fun CalendarScreen(
             ) {
                 Row(Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text(selected.dateLabel(), Modifier.weight(1f),
+                    Text(
+                        selected.weekdayLabel().replaceFirstChar {
+                            it.uppercase(Locale("hr", "HR"))
+                        } + ", " + selected.dateLabel(),
+                        Modifier.weight(1f),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp, maxLines = 2)
-                    TextButton(
-                        onClick = { showAllLegend = !showAllLegend },
-                        modifier = Modifier.heightIn(min = 48.dp),
-                        contentPadding = PaddingValues(horizontal = 3.dp)
-                    ) {
-                        Text(if (showAllLegend) "Sakrij oznake" else "Ostale oznake",
-                            fontSize = 11.sp)
-                        Icon(if (showAllLegend) Icons.Default.ExpandLess
-                            else Icons.Default.ExpandMore,
-                            contentDescription = null, modifier = Modifier.size(17.dp))
+                        fontSize = 13.sp, lineHeight = 18.sp, maxLines = 2
+                    )
+                    Box {
+                        IconButton(onClick = { dayMenuOpen = true }) {
+                            Icon(Icons.Default.MoreVert,
+                                contentDescription = "Radnje za odabrani dan")
+                        }
+                        DropdownMenu(expanded = dayMenuOpen,
+                            onDismissRequest = { dayMenuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Dodaj smjenu") },
+                                leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                                onClick = {
+                                    dayMenuOpen = false
+                                    onAdd(selected)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Povratak na danas") },
+                                leadingIcon = { Icon(Icons.Default.Today, contentDescription = null) },
+                                onClick = {
+                                    dayMenuOpen = false
+                                    selectedText = LocalDate.now().toString()
+                                    shownText = YearMonth.now().toString()
+                                }
+                            )
+                        }
                     }
                 }
                 Spacer(Modifier.height(3.dp))
@@ -647,7 +694,8 @@ private fun DetailTile(
     label: String, value: String, modifier: Modifier = Modifier,
     icon: ImageVector? = null
 ) {
-    Column(modifier.heightIn(min = 75.dp)
+    Column(modifier.heightIn(min = if (LocalDensity.current.fontScale > 1.3f)
+            75.dp else 64.dp)
         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .42f),
             RoundedCornerShape(12.dp)).padding(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically,

@@ -16,6 +16,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.path
@@ -291,17 +294,46 @@ fun BrandedHeader(
                     }
                 }
                 if (showStatsDecor) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.TrendingUp, contentDescription = null,
-                            tint = Color(0xFF32D5BD), modifier = Modifier.size(27.dp))
-                        Spacer(Modifier.height(5.dp))
-                        Row(verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            listOf(13, 20, 27, 35).forEach { h ->
-                                Box(Modifier.width(10.dp).height(h.dp)
-                                    .background(Palette.Blue, RoundedCornerShape(
-                                        topStart = 3.dp, topEnd = 3.dp)))
+                    // Compact native vector chart matching the reference hero:
+                    // ascending blue bars plus a continuous mint trend line.
+                    Box(Modifier.size(width = 82.dp, height = 67.dp)) {
+                        Row(
+                            Modifier.align(Alignment.BottomCenter),
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            listOf(19, 26, 34, 43).forEach { height ->
+                                Box(
+                                    Modifier.width(13.dp).height(height.dp)
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(Palette.Blue, Palette.Blue.copy(alpha = .18f))
+                                            ),
+                                            RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
+                                        )
+                                )
                             }
+                        }
+                        Canvas(Modifier.fillMaxSize()) {
+                            val path = Path().apply {
+                                moveTo(size.width * .06f, size.height * .47f)
+                                lineTo(size.width * .28f, size.height * .33f)
+                                lineTo(size.width * .47f, size.height * .35f)
+                                lineTo(size.width * .69f, size.height * .22f)
+                                lineTo(size.width * .94f, size.height * .06f)
+                            }
+                            val mint = Color(0xFF25D4B0)
+                            drawPath(path, mint,
+                                style = Stroke(width = 3.dp.toPx(),
+                                    cap = StrokeCap.Round, join = androidx.compose.ui.graphics.StrokeJoin.Round))
+                            drawLine(mint,
+                                Offset(size.width * .81f, size.height * .065f),
+                                Offset(size.width * .94f, size.height * .06f),
+                                strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                            drawLine(mint,
+                                Offset(size.width * .94f, size.height * .06f),
+                                Offset(size.width * .91f, size.height * .21f),
+                                strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
                         }
                     }
                 }
@@ -318,9 +350,9 @@ fun SurfaceCard(
 ) {
     Column(
         modifier = modifier
-            .shadow(5.dp, RoundedCornerShape(21.dp), ambientColor = Palette.Navy.copy(alpha = .09f))
-            .background(color, RoundedCornerShape(21.dp))
-            .padding(14.dp),
+            .shadow(4.dp, RoundedCornerShape(24.dp), ambientColor = Palette.Navy.copy(alpha = .08f))
+            .background(color, RoundedCornerShape(24.dp))
+            .padding(16.dp),
         content = content
     )
 }

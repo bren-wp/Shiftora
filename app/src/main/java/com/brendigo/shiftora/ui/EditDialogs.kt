@@ -571,7 +571,9 @@ fun OnboardingScreen(onComplete: () -> Unit, onStepChange: (Int) -> Unit = {}) {
                     modifier = Modifier.size(if (compact) 29.dp else 35.dp))
             }
         }
-        Spacer(Modifier.height(if (compact) 16.dp else 28.dp))
+        // Reference places the tutorial copy in the lower half of the screen.
+        // Preserve scrollability on short phones and at increased font sizes.
+        Spacer(Modifier.height(if (compact) 86.dp else 104.dp))
         Text(titles[page], color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.ExtraBold)
@@ -581,7 +583,7 @@ fun OnboardingScreen(onComplete: () -> Unit, onStepChange: (Int) -> Unit = {}) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodyLarge)
-        Spacer(Modifier.height(if (compact) 20.dp else 36.dp))
+        Spacer(Modifier.height(if (compact) 37.dp else 52.dp))
         if (page < 2) {
             Row(Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -692,7 +694,8 @@ private fun ShiftoraWelcomeScreen(onStart: () -> Unit, onSkip: () -> Unit) {
                 color = Color(0xFFE7E5EF), fontWeight = FontWeight.Medium,
                 fontSize = 19.sp, lineHeight = 23.sp)
             Spacer(Modifier.height(if (compact) 16.dp else 32.dp))
-            BrandMark(Modifier.size(if (compact) 139.dp else 170.dp))
+            BrandMark(Modifier.size(if (compact) 139.dp else 170.dp),
+                darkSurface = true)
             Spacer(Modifier.height(8.dp))
             Text("Shiftora", color = Color.White, fontWeight = FontWeight.ExtraBold,
                 fontSize = if (compact) 45.sp else 52.sp, lineHeight = 58.sp)

@@ -1,6 +1,9 @@
 package com.brendigo.shiftora
 
 import android.os.Bundle
+import android.os.Build
+import android.view.View
+import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
@@ -157,12 +160,13 @@ class MainActivity : ComponentActivity() {
                         }
                 }
             }
+            // Read observable UI state *during composition*, not inside
+            // SideEffect, so changing tabs invalidates this effect and updates
+            // status-bar icon contrast. This fixes white icons on light Home.
+            val lightStatusSurface = !darkMode &&
+                (if (onboarding) onboardingStep != 0 else tab == 0)
             SideEffect {
-                // Only the home screen has a light header. Calendar, statistics,
-                // salary and More use a navy header even when light theme is active.
-                // System clock and battery glyphs must follow the visible surface.
-                val lightStatusSurface = !darkMode &&
-                    (if (onboarding) onboardingStep != 0 else tab == 0)
+                // System clock and battery glyphs follow the visible surface.
                 // On edge-to-edge devices the status bar is transparent and
                 // reveals the decor background, not window.statusBarColor.
                 // Keep Home/tutorial dark glyphs legible on light backgrounds.
@@ -187,6 +191,24 @@ class MainActivity : ComponentActivity() {
                     isAppearanceLightStatusBars = lightStatusSurface
                     isAppearanceLightNavigationBars = !darkMode
                 }
+                // Explicit platform flags are kept in sync with the Compose
+                // background. On some API 30/36 emulator configurations the
+                // edge-to-edge helper alone retained white icons over Home.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    window.insetsController?.setSystemBarsAppearance(
+                        if (lightStatusSurface)
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS else 0,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    val currentFlags = window.decorView.systemUiVisibility
+                    @Suppress("DEPRECATION")
+                    window.decorView.systemUiVisibility =
+                        if (lightStatusSurface)
+                            currentFlags or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        else currentFlags and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
+                }
             }
             LaunchedEffect(message) {
                 if (message != null) {
@@ -197,6 +219,13 @@ class MainActivity : ComponentActivity() {
             }
 
             ShiftoraTheme(darkMode, shiftColors) {
+                // Paint under the transparent edge-to-edge status bar. Updating
+                // statusBarColor alone leaves navy behind light Home/tutorials.
+                Box(
+                    Modifier.fillMaxSize().background(
+                        if (lightStatusSurface) Palette.Bg else Palette.Navy
+                    )
+                ) {
                 if (onboarding) {
                     OnboardingScreen(onComplete = vm::finishOnboarding,
                         onStepChange = { onboardingStep = it })
@@ -356,6 +385,7 @@ class MainActivity : ComponentActivity() {
                         onSave = vm::updateSalary
                     )
                 }
+                } // Edge-to-edge surface behind status bar
             }
         }
     }

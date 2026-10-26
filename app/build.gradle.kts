@@ -19,8 +19,8 @@ android {
         applicationId = "com.brendigo.shiftora"
         minSdk = 26
         targetSdk = 36
-        versionCode = 20
-        versionName = "0.9.9"
+        versionCode = 21
+        versionName = "0.9.10"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
